@@ -908,9 +908,6 @@ paired_tows_7mi_192hr %>%
 
 
 
-# Checking github repo 
-hfuhbajbghlakjth
-
 
 
 # Joins that didnt work 
