@@ -342,7 +342,7 @@ paired_tows_1mi_24hr <- nefsc_slim %>%
   filter(time_dif > -24 & time_dif < 24)
 
 
-#confiming that I have 6 matches 
+#confirming that I have 6 matches 
 paired_tows_1mi_24hr %>%
   count(cruise_station_ID)
 paired_tows_1mi_24hr %>%
