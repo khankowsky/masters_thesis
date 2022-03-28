@@ -134,6 +134,8 @@ observer_trawl <- observer %>%
       #050 - Trawl, Otter, Bottom, Fish
       #057 - Trawl, Otter, Bottom, Haddock Separator
       #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  mutate(trip_haul_ID = paste(TRIPID,HAULNUM, sep = '_')) %>%
+  relocate(trip_haul_ID) %>%
   filter(YEARHBEG  >= 2009) %>%
   mutate(survey_comercial_ID = 3)
 
@@ -187,7 +189,7 @@ sf_trawl_slim <- sf_trawl %>%
 #selecting just the variables of interest for each dataset 
 ob_trawl_slim <- observer_trawl %>%
   mutate(START_TOW_DATE = make_date(YEARHBEG, MONTHHBEG, DAYHBEG)) %>%
-  select(c("START_TOW_DATE", "AREA", "NEGEAR", "GEARNM", "NETNAME", "NETTYPE", 
+  select(c("trip_haul_ID", "START_TOW_DATE", "AREA", "NEGEAR", "GEARNM", "NETNAME", "NETTYPE", 
          "GRCABTYP", "BRDLGTYP", "BRDLGTYP", "FTROPTYP", "CODLINERUSD", "NESPP4", 
          "COMNAME", "CATDISP", "FISHDISP", "FISHDISPDESC", "GIS_LATHBEG", 
          "GIS_LONHBEG", "GIS_LATHEND", "GIS_LONHEND", "HAULDUR", "HAILWT", 
@@ -204,7 +206,7 @@ ob_trawl_slim <- observer_trawl %>%
 
 
 nefsc_slim <- nefsc %>%
-  select(c("cruise_station_ID", "STRATUM", "AREA", "SVGEAR", 
+  select(c("cruise_station_ID", "STRATUM", "AREA", "SVVESSEL", "SVGEAR", 
            "BEGIN_GMT_TOWDATE", "END_GMT_TOWDATE", "DECDEG_BEGLAT", 
            "DECDEG_BEGLON", "DECDEG_ENDLAT", "DECDEG_ENDLON", 
            "TOWDUR", "AVGDEPTH", "LOGGED_SPECIES_NAME", "SVSPP", 
