@@ -1,0 +1,262 @@
+---
+title: "import_clean_slim"
+author: "Keith Hankowsky"
+date: "3/28/2022"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(skimr)
+library(data.table)
+library(fuzzyjoin)
+library(lubridate)
+library(kableExtra)
+
+library(maps) # land masses
+library(rgdal) # read OGR vector maps into Spatial objects
+library(viridis) # for customizing scale bars
+library(mapproj)
+library(hexbin)
+library(sf)
+library(scales)
+library(beepr)
+```
+
+
+# Import Data
+## Study fleet data
+```{r}
+#importing the study fleet data
+study_fleet <- read_csv('./data/STUDY_FLEET_GROUNFISH_DATA_PULL_V1.csv')
+```
+
+
+## Observer data
+```{r}
+observer1 <- read_excel('./data/result1.xlsx')
+observer2 <- read_excel('./data/result2.xlsx', col_names = FALSE)
+
+
+observer_colnames <- as.vector(colnames(observer1))
+
+names(observer2) <- observer_colnames
+
+skim(observer1)
+
+observer2 <- observer2 %>%
+  mutate(PERMIT1 = as.logical(PERMIT1), 
+         GIS_LATHBEG = as.double(GIS_LATHBEG), 
+         GIS_LONHBEG = as.double(GIS_LONHBEG),
+         GIS_LATHEND = as.double(GIS_LATHEND), 
+         GIS_LONHEND = as.double(GIS_LONHEND), 
+         NSWEEPS = as.logical(NSWEEPS), 
+         SWEEPDIA = as.logical(SWEEPDIA), 
+         LINERMSIZE = as.logical(LINERMSIZE), 
+         CODMSIZE = as.logical(CODMSIZE),
+         MARKET = as.logical(MARKET), 
+         MSWGTAVG = as.double(MSWGTAVG), 
+         SOAKDUR = as.double(SOAKDUR), 
+         HAULDUR = as.double(HAULDUR), 
+         HAILWT = as.double(HAILWT), 
+         LIVE_WT = as.double(LIVE_WT)
+         )
+
+#bind the two sheets together
+observer <- bind_rows(observer1, observer2)
+
+#clear environment of unnecessary datasets
+rm(observer1)
+rm(observer2)
+
+```
+
+
+## NEFSC survey data
+```{r}
+#importing and joining the spring nefsc survey catch and station data and joining them 
+nefsc_station_spring <- read_csv('./data/22561_UNION_FSCS_SVSTA_spring.csv')
+
+nefsc_catch_spring <- read_csv('./data/22561_UNION_FSCS_SVCAT_spring.csv')
+
+nefsc_spring <- left_join(nefsc_station_spring, nefsc_catch_spring, 
+                           by = c("ID", "CRUISE6", "STRATUM", "TOW", "STATION"))
+
+
+#importing and joining the fall nefsc survey catch and station data and joining them 
+nefsc_station_fall <- read_csv('./data/22560_UNION_FSCS_SVSTA_fall.csv')
+
+nefsc_catch_fall <- read_csv('./data/22560_UNION_FSCS_SVCAT_fall.csv')
+  
+nefsc_fall <- left_join(nefsc_station_fall, nefsc_catch_fall, 
+                           by = c("ID", "CRUISE6", "STRATUM", "TOW", "STATION"))
+
+
+
+
+#joining the spring and fall survey datasets 
+nefsc <- rbind(nefsc_spring, nefsc_fall)
+
+
+rm(nefsc_station_spring)
+rm(nefsc_catch_spring)
+rm(nefsc_spring)
+rm(nefsc_station_fall)
+rm(nefsc_catch_fall)
+rm(nefsc_fall)
+```
+
+
+
+# Filtering
+## Filtering datasets for just trawl gears and after 2009
+```{r}
+#filtering the study fleet dataset to include only trawl gears and only after 2009
+sf_trawl <- study_fleet %>%
+  filter(VTR_GEAR_CODE %in% c('OHS', 'OTF', 'OTO', 'OTR')) %>%
+      #OHS - otter trawl, haddock separator
+      #OTF - otter trawl, bottom, fish 
+      #OTM - otter trawl, midwater
+      #OTO - otter trawl, bottom, other
+      #OTR - otter trawl, ruhle 
+      #OTS - otter trawl, bottom, shrimp
+  filter(YEAR >= 2009) %>%
+  mutate(survey_comercial_ID = 2)
+
+
+
+#filter the observer data set to include only trawl gears and only after 2009
+observer_trawl <- observer %>%
+  filter(NEGEAR %in% c("050", "057", "150")) %>%
+      #050 - Trawl, Otter, Bottom, Fish
+      #057 - Trawl, Otter, Bottom, Haddock Separator
+      #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  filter(YEARHBEG  >= 2009) %>%
+  mutate(survey_comercial_ID = 3)
+
+  
+  
+#filtering the nefsc survey dataset to only after 2009 because of the shift to the bigelow 
+nefsc <- nefsc %>%
+  mutate(cruise_station_ID = paste(CRUISE6,STATION, sep = '_')) %>%
+  relocate(cruise_station_ID) %>%
+  filter(EST_YEAR >= 2009) %>%
+  mutate(BEGIN_EST_TOWDATE = as.POSIXct(BEGIN_EST_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
+  mutate(END_EST_TOWDATE = as.POSIXct(END_EST_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
+  mutate(BEGIN_GMT_TOWDATE = as.POSIXct(BEGIN_GMT_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
+  mutate(END_GMT_TOWDATE = as.POSIXct(END_GMT_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
+  mutate(survey_commerical_ID = 1)
+
+
+rm(study_fleet)
+
+```
+
+
+
+## Slimming datasets
+```{r}
+#selecting just the variables of interest for each dataset 
+sf_trawl_slim <- sf_trawl %>%
+  select(c("TRIP_ID", "VESSEL_NAME", "TARGET_SPECIES", "VTR_GEAR_CODE", 
+           "EFFORT_ID", "COMMON_NAME", "NESPP4", "SPECIES_ITIS",
+           "DISPOSITION_DESCR", "AREA_CODE", "SOAK_DUR_HRS", "EFFORT_NUM",
+           "START_HAUL_DATE_GMT", "END_SET_DATE_GMT", "START_HAUL_LAT",
+           "START_HAUL_LON", "END_SET_LAT", "END_SET_LON", "DEPTH_FTH", 
+           "GEAR_QUANTITY", "GEAR_SIZE", "MESH_SIZE", "MESH_TYPE", 
+           "HAIL_AMOUNT", "HAIL_AMOUNT_LB", "CALC_DUR_HR", "CALC_DIST_NM", 
+           "MEAN_DPTH_M", "survey_comercial_ID")) %>%
+  # select(-c("VES_NAME", "HULL_ID", "PPORT", "HPORT", "ACCSP_GEAR_CODE", 
+  #           "PPST", "SAIL_PORT_NAME", "SAIL_STATE_POSTAL", "LAND_PORT_NAME", 
+  #           "LAND_STATE_POSTAL", "START_SET_DATE_GMT", "START_SET_LAT", "START_SET_LON", 
+  #           "END_HAUL_DATE_GMT")) %>%
+  rename(START_TOW_DATE_GMT = START_HAUL_DATE_GMT) %>%
+  rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
+  rename(START_TOW_LAT = START_HAUL_LAT) %>% 
+  rename(START_TOW_LON = START_HAUL_LON) %>%
+  rename(END_TOW_LAT = END_SET_LAT) %>%
+  rename(END_TOW_LON = END_SET_LON) %>%
+  drop_na(END_TOW_LAT) %>%
+  drop_na(END_TOW_LON)
+  
+
+
+#selecting just the variables of interest for each dataset 
+ob_trawl_slim <- observer_trawl %>%
+  mutate(START_TOW_DATE = make_date(YEARHBEG, MONTHHBEG, DAYHBEG)) %>%
+  select(c("START_TOW_DATE", "AREA", "NEGEAR", "GEARNM", "NETNAME", "NETTYPE", 
+         "GRCABTYP", "BRDLGTYP", "BRDLGTYP", "FTROPTYP", "CODLINERUSD", "NESPP4", 
+         "COMNAME", "CATDISP", "FISHDISP", "FISHDISPDESC", "GIS_LATHBEG", 
+         "GIS_LONHBEG", "GIS_LATHEND", "GIS_LONHEND", "HAULDUR", "HAILWT", 
+         "LIVE_WT", "survey_comercial_ID")) %>%
+  # rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
+    #no end date information in the observer dataset 
+  rename(START_TOW_LAT = GIS_LATHBEG) %>% 
+  rename(START_TOW_LON = GIS_LONHBEG) %>%
+  rename(END_TOW_LAT = GIS_LATHEND) %>%
+  rename(END_TOW_LON = GIS_LONHEND) %>%
+  drop_na(END_TOW_LAT) %>%
+  drop_na(END_TOW_LON)
+
+
+
+nefsc_slim <- nefsc %>%
+  select(c("cruise_station_ID", "STRATUM", "AREA", "SVGEAR", 
+           "BEGIN_GMT_TOWDATE", "END_GMT_TOWDATE", "DECDEG_BEGLAT", 
+           "DECDEG_BEGLON", "DECDEG_ENDLAT", "DECDEG_ENDLON", 
+           "TOWDUR", "AVGDEPTH", "LOGGED_SPECIES_NAME", "SVSPP", 
+           "EXPCATCHNUM", "EXPCATCHWT")) %>%
+  # select(-c("EST_MONTH","EST_DAY", "EST_JULIAN_DAY", "BEGLAT", "BEGLON", "ENDLAT", 
+  #           "ENDLON", "COURSE", "RPM", "DOPDISTW", "...11", "...12", 
+  #           "BEGIN_EST_TOWDATE", "END_EST_TOWDATE", "SURFSALIN", "SURFTEMP", 
+  #           "XBT", "BKTTEMP", "SWELLHGT", "SWELLDIR", "WAVEHGT", "WEATHER", 
+  #           "WINDSP", "WINDDIR", "BAROPRESS", "CLOUD", "AIRTEMP", "DESSPEED", "DOPDISTB", 
+  #           "HEADING", "PITCH")) %>%
+  rename(START_TOW_DATE_GMT = BEGIN_GMT_TOWDATE) %>%
+  rename(END_TOW_DATE_GMT = END_GMT_TOWDATE) %>%
+  rename(START_TOW_LAT = DECDEG_BEGLAT) %>%
+  rename(START_TOW_LON = DECDEG_BEGLON) %>%
+  rename(END_TOW_LAT = DECDEG_ENDLAT) %>%
+  rename(END_TOW_LON = DECDEG_ENDLON) %>%
+  drop_na(END_TOW_LAT) %>%
+  drop_na(END_TOW_LON)
+  
+
+
+#creating a dataset for just the station inf
+# nefsc_station <- rbind(nefsc_station_fall, nefsc_station_spring)
+# nefsc_station <- nefsc_station %>%
+#   mutate(cruise_station_ID = paste(CRUISE6,STATION, sep = '_')) %>%
+#   relocate(cruise_station_ID) %>%
+#   filter(EST_YEAR >= 2009) %>%
+#   mutate(BEGIN_EST_TOWDATE = as.POSIXct(BEGIN_EST_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
+#   mutate(END_EST_TOWDATE = as.POSIXct(END_EST_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
+#   mutate(BEGIN_GMT_TOWDATE = as.POSIXct(BEGIN_GMT_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
+#   mutate(END_GMT_TOWDATE = as.POSIXct(END_GMT_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
+#   mutate(survey_commerical_ID = 1) %>%
+# 
+#   select(c("cruise_station_ID", "STRATUM", "AREA", "SVGEAR", 
+#            "BEGIN_GMT_TOWDATE", "END_GMT_TOWDATE", "DECDEG_BEGLAT", 
+#            "DECDEG_BEGLON", "DECDEG_ENDLAT", "DECDEG_ENDLON", 
+#            "TOWDUR", "AVGDEPTH")) %>%
+#   rename(START_TOW_DATE_GMT = BEGIN_GMT_TOWDATE) %>%
+#   rename(END_TOW_DATE_GMT = END_GMT_TOWDATE) %>%
+#   rename(START_TOW_LAT = DECDEG_BEGLAT) %>%
+#   rename(START_TOW_LON = DECDEG_BEGLON) %>%
+#   rename(END_TOW_LAT = DECDEG_ENDLAT) %>%
+#   rename(END_TOW_LON = DECDEG_ENDLON) %>%
+#   drop_na(END_TOW_LAT) %>%
+#   drop_na(END_TOW_LON)
+
+```
+
+
+
+# Renaming Variables of Interest (so they are consistent across datasets)
+```{r}
+
+```
+
