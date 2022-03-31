@@ -117,12 +117,16 @@ rm(nefsc_fall)
 ```{r}
 #Additional Data for Maps
 #Statistical Areas
-
 sareas <- st_read(dsn = "./data/Statistical_Areas_2010_withNames") %>%
   st_set_crs(4269)
 sareas <- sareas %>% filter(Id %in% c("464", "465", "511", "512", "513", "514", "515", "521", "522", "525", "526", "537", "538", "539", "551", "561", "562", "611", "612", "613", "543", "542", "541", "534", "533", "616", "615", "614", "621", "622", "623", "624"))  
 centroids <- sf::st_coordinates(st_centroid(sareas)) 
 areas <- cbind(sareas, centroids)
+
+#NEFSC Survey Strata
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
 
 #Land Mass
 states <- map_data("state")
@@ -888,6 +892,109 @@ paired_tows_7mi_192hr %>%
   labs(title = "Study Fleet tows Matched to NEFSC tows", 
        subtitle = "within 7 mi and 192 hrs (8 days)")
 
+```
+
+
+
+## Map of Fuzzy joins of SF w NEFSC tows inside NEFSC Survey Strata
+```{r}
+#map of paired Sf w NEFSC tows within 1 mile and 1 day
+paired_tows_1mi_24hr %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), 
+               fill = "darkgreen", color="black",inherit.aes = FALSE)  +
+  geom_point(data = paired_tows_1mi_24hr, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x), col = "red") +
+  geom_point(data = paired_tows_1mi_24hr, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y), col = "blue") +
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_HAUL_LON, xend = END_SET_LON, 
+  #                                               y = START_HAUL_LAT, yend = END_SET_LAT)) +
+  coord_sf(ylim = c(38, 44),  xlim = c(-75, -67)) + 
+  labs(title = "Study Fleet tows Matched to NEFSC tows", subtitle = "within 1 mi and 24 hrs")
+
+
+
+#map of SF w NEFSC tows within 3 mile and 3 day 
+paired_tows_5mi_72hr %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = paired_tows_5mi_72hr, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, 
+                                              color = "NEFSC")) +
+  geom_point(data = paired_tows_5mi_72hr, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, 
+                                              color = "Study Fleet")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue")) +
+  labs(title = "Study Fleet tows Matched to NEFSC tows", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#Zooming in on the GOM and looking at tow length for map of SF w NEFSC tows within 3 mile and 3 day 
+paired_tows_5mi_72hr %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  # geom_point(data = paired_tows_5mi_72hr, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, 
+  #                                             color = "NEFSC")) +
+  # geom_point(data = paired_tows_5mi_72hr, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, 
+  #                                             color = "Study Fleet")) +
+  geom_segment(data = paired_tows_5mi_72hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+                                                y = START_TOW_LAT.x, yend = END_TOW_LAT.x, 
+                                                color = "NEFSC")) +
+  geom_segment(data = paired_tows_5mi_72hr, aes(x = START_TOW_LON.y, xend = END_TOW_LON.y,
+                                                y = START_TOW_LAT.y, yend = END_TOW_LAT.y, 
+                                                color = "Study Fleet")) +
+  coord_sf(ylim = c(41.9, 43.3),  xlim = c(-71, -69.6)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue"))
+  # labs(title = "Study Fleet tows Matched to NEFSC tows", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#Zooming in on the GB and looking at tow length for map of SF w NEFSC tows within 3 mile and 3 day 
+paired_tows_5mi_72hr %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  # geom_point(data = paired_tows_5mi_72hr, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x,
+  #                                             color = "NEFSC")) +
+  # geom_point(data = paired_tows_5mi_72hr, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y,
+  #                                             color = "Study Fleet")) +
+  geom_segment(data = paired_tows_5mi_72hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+                                                y = START_TOW_LAT.x, yend = END_TOW_LAT.x, 
+                                                color = "NEFSC")) +
+  geom_segment(data = paired_tows_5mi_72hr, aes(x = START_TOW_LON.y, xend = END_TOW_LON.y,
+                                                y = START_TOW_LAT.y, yend = END_TOW_LAT.y, 
+                                                color = "Study Fleet")) +
+  coord_sf(ylim = c(40.5, 42.5),  xlim = c(-69.6, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue"))
+# labs(title = "Study Fleet tows Matched to NEFSC tows", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#Zooming in on the SNE and looking at tow length for map of SF w NEFSC tows within 3 mile and 3 day 
+paired_tows_5mi_72hr %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  # geom_point(data = paired_tows_5mi_72hr, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, 
+  #                                             color = "NEFSC")) +
+  # geom_point(data = paired_tows_5mi_72hr, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, 
+  #                                             color = "Study Fleet")) +
+  geom_segment(data = paired_tows_5mi_72hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+                                                y = START_TOW_LAT.x, yend = END_TOW_LAT.x, 
+                                                color = "NEFSC")) +
+  geom_segment(data = paired_tows_5mi_72hr, aes(x = START_TOW_LON.y, xend = END_TOW_LON.y,
+                                                y = START_TOW_LAT.y, yend = END_TOW_LAT.y, 
+                                                color = "Study Fleet")) +
+  coord_sf(ylim = c(39.5, 41.5),  xlim = c(-72.2, -70.2)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue"))
+# labs(title = "Study Fleet tows Matched to NEFSC tows", subtitle = "within 5 mi and 72 hrs")
 ```
 
 
