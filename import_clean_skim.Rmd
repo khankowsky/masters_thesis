@@ -267,12 +267,13 @@ vw <- vw %>%
   mutate(START_TOW_DATE_GMT = with_tz(START_TOW_DATE, "GMT")) %>%
   mutate(END_TOW_DATE_GMT = with_tz(END_TOW_DATE, "GMT")) %>%
   relocate(START_TOW_DATE, .after = TowStartTime) %>%
+  relocate(START_TOW_DATE_GMT, .after = START_TOW_DATE) %>%
   relocate(END_TOW_DATE, .after = TowEndTime) %>%
+  relocate(END_TOW_DATE_GMT, .after = END_TOW_DATE) %>%
   mutate_at(c("TowStartLat", "TowEndLat"), str_remove, "N ") %>%
   mutate_at(c("TowStartLong", "TowEndLong"), str_replace, "W ", "-") %>%
-  mutate_at(c("TowStartLat", "TowEndLat", "TowStartLong", "TowEndLong"), str_replace, "\\.", "")
-
-
+  mutate_at(c("TowStartLat", "TowEndLat", "TowStartLong", "TowEndLong"), str_replace, "(?<=\\.\\d\\d)\\.", "") %>%
+  mutate(TotalWeight_lb = TotalWeight_kg*2.2046226218)
 
 
 
@@ -355,24 +356,17 @@ nefsc_slim <- nefsc %>%
 
 #selecting just the variables of interest for the VW dataset 
 vw_slim <- vw %>% 
-  select("TowID", "VesselID", "GearID", "Start_Tow_Date", "TowStartLat", 
-         "TowStartLong", "TowStartDepth", "END_TOW_DATE", "TowEndLat", 
+  select("TowID", "VesselID", "GearID", "START_TOW_DATE_GMT", "TowStartLat", 
+         "TowStartLong", "TowStartDepth", "END_TOW_DATE_GMT", "TowEndLat", 
          "TowEndLong", "TowEndLong", "TowEndDepth", "SpeciesID", 
-         "common_name", "TotalWeight_kg") %>%
-  
-  
-  
+         "common_name", "TotalWeight_lb") %>%
   rename(START_TOW_LAT = TowStartLat) %>%
   rename(START_TOW_LON = TowStartLong) %>%
   rename(END_TOW_LAT = TowEndLat) %>%
-  rename(END_TOW_LON = TowEndLong) %>%
+  rename(END_TOW_LON = TowEndLong)
   
   
   
-
-
-
-
 
 #creating a dataset for just the station inf
 # nefsc_station <- rbind(nefsc_station_fall, nefsc_station_spring)
@@ -407,4 +401,16 @@ vw_slim <- vw %>%
 ```{r}
 
 ```
+
+
+
+# Saving the Slimmed Down Datasets 
+```{r}
+# write.csv(sf_trawl_slim, './data/sf_trawl_slim.csv', row.names = FALSE)
+# write.csv(ob_trawl_slim, './data/ob_trawl_slim.csv', row.names = FALSE)
+# write.csv(nefsc_slim, './data/nefsc_slim.csv', row.names = FALSE)
+# write.csv(vw_slim, './data/vw_slim.csv', row.names = FALSE)
+```
+
+
 
