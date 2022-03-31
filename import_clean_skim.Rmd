@@ -71,7 +71,7 @@ observer <- bind_rows(observer1, observer2)
 #clear environment of unnecessary datasets
 rm(observer1)
 rm(observer2)
-
+rm(observer_colnames)
 ```
 
 
@@ -109,6 +109,112 @@ rm(nefsc_catch_fall)
 rm(nefsc_fall)
 ```
 
+
+## VW Trawl Data 
+```{r}
+#importing and joining the 2019 VW survey catch and station data and joining them 
+vw_station_2019 <- read_csv('./data/VW_2019-2020_Tow_Info.csv')
+
+vw_catch_2019 <- read_csv('./data/VW_2019-2020_WeightTable.csv')
+
+vw_2019 <- left_join(vw_station_2019, vw_catch_2019, 
+                           by = c("TowID"))
+
+
+#importing and joining the 2020 VW survey catch and station data and joining them 
+vw_station_2020 <- read_csv('./data/VW_2020-2021_TowInfo.csv')
+
+vw_catch_2020 <- read_csv('./data/VW_2020-2021_WeightTable.csv')
+
+vw_2020 <- left_join(vw_station_2020, vw_catch_2020, 
+                           by = c("TowID"))
+
+
+#joining the 2019 and 2020 survey datasets 
+vw <- rbind(vw_2019, vw_2020)
+
+
+#adding common species name column 
+vw <- vw %>%
+  mutate(common_name = case_when(
+    SpeciesID == 10 ~ "Alewife", 
+    SpeciesID == 124	~ "Monkfish",
+    SpeciesID == 230	~ "Bluefish",
+    SpeciesID == 511	~ "Butterfish",
+    SpeciesID == 818	~ "Atlantic Cod",
+    SpeciesID == 900	~ "Atlantic Croaker",
+    SpeciesID == 930	~ "Cunner",
+    SpeciesID == 960	~ "Cusk",
+    SpeciesID == 1120	~ "Herring, Blueback",
+    SpeciesID == 1150	~ "American Eel",
+    SpeciesID == 1160  ~ "Eel, Conger",
+    SpeciesID == 1200	~ "Flounder, Winter",
+    SpeciesID == 1219	~ "Flounder, Summer (Fluke)",
+    SpeciesID == 1220	~ "Flounder, Witch",
+    SpeciesID == 1230	~ "Flounder, Yellowtail",
+    SpeciesID == 1240	~ "Flounder, American Plaice",
+    SpeciesID == 1250	~ "Flounder, Windowpane",
+    SpeciesID == 1270	~ "Flounder, Fourspot",
+    SpeciesID == 1290	~ "Flounder, Gulfstream",
+    SpeciesID == 1300	~ "Flounder, Southern",
+    SpeciesID == 1477	~ "Haddock",
+    SpeciesID == 1520	~ "Hake, Red",
+    SpeciesID == 1539	~ "Hake, White",
+    SpeciesID == 1590	~ "Atlantic Halibut",
+    SpeciesID == 1685	~ "Herring, Atlantic",
+    SpeciesID == 2120	~ "Mackerel, Atlantic",
+    SpeciesID == 2210	~ "Menhaden, Atlantic",
+    SpeciesID == 2400	~ "Redfish",
+    SpeciesID == 2500	~ "Ocean Pout",
+    SpeciesID == 2695	~ "Pollock",
+    SpeciesID == 3270	~ "Sea Raven",
+    SpeciesID == 3295	~ "Scup",
+    SpeciesID == 3350	~ "Black Sea bass",
+    SpeciesID == 3400	~ "Sea Robin, Northern",
+    SpeciesID == 3420	~ "Sea Robin, Striped",
+    SpeciesID == 3446	~ "Weakfish",
+    SpeciesID == 3474	~ "Shad, American",
+    SpeciesID == 3511	~ "Dogfish, Smooth",
+    SpeciesID == 3521	~ "Dogfish, Spiny",
+    SpeciesID == 3531	~ "Shark, Thresher",
+    SpeciesID == 3610	~ "Capelin",
+    SpeciesID == 3650	~ "Skate, Mixed",
+    SpeciesID == 3660	~ "Skate, Little",
+    SpeciesID == 3670	~ "Skate, Winter",
+    SpeciesID == 3680	~ "Skate, Barndoor",
+    SpeciesID == 3690	~ "Skate, Smooth",
+    SpeciesID == 3700	~ "Skate, Thorny",
+    SpeciesID == 3720	~ "Skate, Clearnose",
+    SpeciesID == 4180	~ "Striped Bass",
+    SpeciesID == 4380	~ "Tautog",
+    SpeciesID == 4811	~ "Shark, Porbeagle",
+    SpeciesID == 4931	~ "Shark, Blue",
+    SpeciesID == 5090	~ "Hake, Silver",
+    SpeciesID == 5120	~ "Wolffish",
+    SpeciesID == 6602	~ "Hake, Spotted",
+    SpeciesID == 6616	~ "Kingfish, Northern",
+    SpeciesID == 6640	~ "Cutlassfish, Atlantic",
+    SpeciesID == 6678	~ "Sculpin, Longhorn",
+    SpeciesID == 6790	~ "Wrymouth",
+    SpeciesID == 6870	~ "Snail, Moonshell",
+    SpeciesID == 7120	~ "Crab, Cancer",
+    SpeciesID == 7270	~ "Lobster, American",
+    SpeciesID == 7360	~ "Northern Shrimp",
+    SpeciesID == 7690	~ "Clam, Surf",
+    SpeciesID == 8009	~ "Sea Scallop",
+    SpeciesID == 8010	~ "Squid, Atlantic Longfin",
+    SpeciesID == 8020	~ "Squid, Shortfin")) %>%
+  relocate(common_name, .after = SpeciesID)
+
+
+
+rm(vw_station_2019)
+rm(vw_catch_2019)
+rm(vw_station_2020)
+rm(vw_catch_2020)
+rm(vw_2019)
+rm(vw_2020)
+```
 
 
 # Filtering
@@ -153,15 +259,34 @@ nefsc <- nefsc %>%
   mutate(survey_commerical_ID = 1)
 
 
-rm(study_fleet)
 
+#filtering the VW survey dataset - creating datetime columns and cleaning lat/long columns
+vw <- vw %>%
+  mutate(START_TOW_DATE = as.POSIXct(paste(TripDate, TowStartTime), format = "%m/%d/%y %H:%M", tz = "EST")) %>%
+  mutate(END_TOW_DATE = as.POSIXct(paste(TripDate, TowEndTime), format = "%m/%d/%y %H:%M", tz = "EST")) %>%
+  mutate(START_TOW_DATE_GMT = with_tz(START_TOW_DATE, "GMT")) %>%
+  mutate(END_TOW_DATE_GMT = with_tz(END_TOW_DATE, "GMT")) %>%
+  relocate(START_TOW_DATE, .after = TowStartTime) %>%
+  relocate(END_TOW_DATE, .after = TowEndTime) %>%
+  mutate_at(c("TowStartLat", "TowEndLat"), str_remove, "N ") %>%
+  mutate_at(c("TowStartLong", "TowEndLong"), str_replace, "W ", "-") %>%
+  mutate_at(c("TowStartLat", "TowEndLat", "TowStartLong", "TowEndLong"), str_replace, "\\.", "")
+
+
+
+
+
+
+
+rm(study_fleet)
+rm(observer)
 ```
 
 
 
 ## Slimming datasets
 ```{r}
-#selecting just the variables of interest for each dataset 
+#selecting just the variables of interest for study fleet dataset 
 sf_trawl_slim <- sf_trawl %>%
   select(c("TRIP_ID", "VESSEL_NAME", "TARGET_SPECIES", "VTR_GEAR_CODE", 
            "EFFORT_ID", "COMMON_NAME", "NESPP4", "SPECIES_ITIS",
@@ -186,7 +311,7 @@ sf_trawl_slim <- sf_trawl %>%
   
 
 
-#selecting just the variables of interest for each dataset 
+#selecting just the variables of interest for observer dataset 
 ob_trawl_slim <- observer_trawl %>%
   mutate(START_TOW_DATE = make_date(YEARHBEG, MONTHHBEG, DAYHBEG)) %>%
   select(c("trip_haul_ID", "START_TOW_DATE", "AREA", "NEGEAR", "GEARNM", "NETNAME", "NETTYPE", 
@@ -204,7 +329,7 @@ ob_trawl_slim <- observer_trawl %>%
   drop_na(END_TOW_LON)
 
 
-
+#selecting just the variables of interest for the nefsc dataset 
 nefsc_slim <- nefsc %>%
   select(c("cruise_station_ID", "STRATUM", "AREA", "SVVESSEL", "SVGEAR", 
            "BEGIN_GMT_TOWDATE", "END_GMT_TOWDATE", "DECDEG_BEGLAT", 
@@ -226,6 +351,27 @@ nefsc_slim <- nefsc %>%
   drop_na(END_TOW_LAT) %>%
   drop_na(END_TOW_LON)
   
+
+
+#selecting just the variables of interest for the VW dataset 
+vw_slim <- vw %>% 
+  select("TowID", "VesselID", "GearID", "Start_Tow_Date", "TowStartLat", 
+         "TowStartLong", "TowStartDepth", "END_TOW_DATE", "TowEndLat", 
+         "TowEndLong", "TowEndLong", "TowEndDepth", "SpeciesID", 
+         "common_name", "TotalWeight_kg") %>%
+  
+  
+  
+  rename(START_TOW_LAT = TowStartLat) %>%
+  rename(START_TOW_LON = TowStartLong) %>%
+  rename(END_TOW_LAT = TowEndLat) %>%
+  rename(END_TOW_LON = TowEndLong) %>%
+  
+  
+  
+
+
+
 
 
 #creating a dataset for just the station inf
