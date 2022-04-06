@@ -45,7 +45,6 @@ observer_colnames <- as.vector(colnames(observer1))
 
 names(observer2) <- observer_colnames
 
-skim(observer1)
 
 observer2 <- observer2 %>%
   mutate(PERMIT1 = as.logical(PERMIT1), 
@@ -363,9 +362,10 @@ vw_slim <- vw %>%
   rename(START_TOW_LAT = TowStartLat) %>%
   rename(START_TOW_LON = TowStartLong) %>%
   rename(END_TOW_LAT = TowEndLat) %>%
-  rename(END_TOW_LON = TowEndLong)
+  rename(END_TOW_LON = TowEndLong) %>%
+  mutate(across(c("START_TOW_LAT", "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON"), as.double))
   
-  
+
   
 
 #creating a dataset for just the station inf
@@ -392,6 +392,16 @@ vw_slim <- vw %>%
 #   rename(END_TOW_LON = DECDEG_ENDLON) %>%
 #   drop_na(END_TOW_LAT) %>%
 #   drop_na(END_TOW_LON)
+
+rm(sf_trawl)
+rm(observer_trawl)
+rm(nefsc)
+rm(vw)
+```
+
+
+## Assigning NEFSC Survey Strata to Commercial/VW Tows 
+```{r}
 
 ```
 
