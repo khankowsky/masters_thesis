@@ -327,6 +327,54 @@ nefsc_slim <- nefsc_slim %>%
 
 
 
+## Assigning Survey Strata to Commercial Tows 
+```{r}
+#trying to determine which survey strata the commercial/VW tows occurred in 
+#using the midpoint of the tow as the determining criteria
+#move this section into the import_clean_skim if able to get it working properly
+sf_trawl_slim <- sf_trawl_slim %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LAT, END_TOW_LAT)) %>%
+  mutate(midpoint_lat = mean(c(START_TOW_LAT, END_TOW_LAT))) %>%
+  mutate(midpoint_long = mean(c(START_TOW_LAT, END_TOW_LAT)))
+
+
+ob_trawl_slim <- ob_trawl_slim %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LAT, END_TOW_LAT)) %>%
+  mutate(midpoint_lat = mean(c(START_TOW_LAT, END_TOW_LAT))) %>%
+  mutate(midpoint_long = mean(c(START_TOW_LAT, END_TOW_LAT)))
+
+vw_slim <- vw_slim %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LAT, END_TOW_LAT)) %>%
+  mutate(midpoint_lat = mean(c(START_TOW_LAT, END_TOW_LAT))) %>%
+  mutate(midpoint_long = mean(c(START_TOW_LAT, END_TOW_LAT)))
+
+
+
+#converting the midpoint lat/long into a geometry field for sf package 
+sf_trawl_slim <- st_as_sf(sf_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = 4269)
+
+ob_trawl_slim <- st_as_sf(ob_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = 4269)
+
+vw_slim <- st_as_sf(vw_slim, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = 4269)
+
+
+
+
+#seeing which tows are contained within which survey strata 
+st_contains(sf_trawl_slim, nefsc_strata)
+st_contains(ob_trawl_slim, nefsc_strata)
+st_contains(vw_slim, nefsc_strata)
+
+
+
+```
+
+
+
+
 
 # Matchcing Tows
 
