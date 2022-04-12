@@ -123,16 +123,19 @@ sareas <- sareas %>% filter(Id %in% c("464", "465", "511", "512", "513", "514", 
 centroids <- sf::st_coordinates(st_centroid(sareas)) 
 areas <- cbind(sareas, centroids)
 
-#NEFSC Survey Strata
-nefsc_strata <- st_read(dsn = "./data/strata") %>%
-  st_set_crs(4269)
-
 
 #Land Mass
 states <- map_data("state")
 NEUS <- subset(states, region %in% c("Maine", "massachusetts", "new hampshire", "vermont", "maine", "rhode island",
                 "connecticut","new york","new jersey","delaware","pennsylvania",
                             "maryland","virginia","north carolina","west virginia"))
+
+
+#NEFSC Survey Strata
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") #%>%
+  # st_set_crs(4269)
+
 ```
 
 
@@ -352,13 +355,13 @@ vw_slim <- vw_slim %>%
 
 #converting the midpoint lat/long into a geometry field for sf package 
 sf_trawl_slim <- st_as_sf(sf_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
-                             crs = 4269)
+                             crs = st_crs(nefsc_strata))
 
 ob_trawl_slim <- st_as_sf(ob_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
-                             crs = 4269)
+                             crs = st_crs(nefsc_strata))
 
 vw_slim <- st_as_sf(vw_slim, coords = c("midpoint_long", "midpoint_lat"), 
-                             crs = 4269)
+                             crs = st_crs(nefsc_strata))
 
 
 
@@ -574,12 +577,32 @@ paired_tows_1mi_192hr %>%
 paired_tows_1mi_24hr_ob <- nefsc_slim %>% 
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
-                           max_dist = 1, unit = "miles")
-
-
-  mutate(time_dif = difftime(START_TOW_DATE_GMT.x, START_TOW_DATE.y, units = "days")) %>%
+                           max_dist = 1, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
   filter(time_dif > -1 & time_dif < 1)
+
+head(ob_trawl_slim)
+
 ```
+
+
+
+## VW w NEFSC fuzzy join
+```{r}
+paired_tows_1mi_192hr <- vw_slim %>% 
+  fuzzyjoin::geo_inner_join(nefsc_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192)
+
+paired_tows_1mi_192hr %>%
+  count(cruise_station_ID)
+paired_tows_1mi_192hr %>%
+  count(EFFORT_ID)
+```
+
+
 
 
 
