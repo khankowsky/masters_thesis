@@ -133,8 +133,9 @@ NEUS <- subset(states, region %in% c("Maine", "massachusetts", "new hampshire", 
 
 #NEFSC Survey Strata
 sf::sf_use_s2(FALSE)
-nefsc_strata <- st_read(dsn = "./data/strata") #%>%
-  # st_set_crs(4269)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
 
 ```
 
@@ -354,24 +355,45 @@ vw_slim <- vw_slim %>%
 
 
 #converting the midpoint lat/long into a geometry field for sf package 
-sf_trawl_slim <- st_as_sf(sf_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
+sf_trawl_slim_sf <- st_as_sf(sf_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
                              crs = st_crs(nefsc_strata))
 
-ob_trawl_slim <- st_as_sf(ob_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
+ob_trawl_slim_sf <- st_as_sf(ob_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
                              crs = st_crs(nefsc_strata))
 
-vw_slim <- st_as_sf(vw_slim, coords = c("midpoint_long", "midpoint_lat"), 
+vw_slim_sf <- st_as_sf(vw_slim, coords = c("midpoint_long", "midpoint_lat"), 
                              crs = st_crs(nefsc_strata))
 
 
+
+#removing the edges that have an issue
+head(nefsc_strata)
+
+nefsc_strata1 <- nefsc_strata %>%
+  filter(!STRATA %in% c("520", "804", "470"))
+
+nefsc_strata %>%
+  count(STRATA)
 
 
 #seeing which tows are contained within which survey strata 
-st_contains(sf_trawl_slim, nefsc_strata)
-st_contains(ob_trawl_slim, nefsc_strata)
-st_contains(vw_slim, nefsc_strata)
+overlay <- st_contains(sf_trawl_slim_sf, nefsc_strata)
+st_contains(ob_trawl_slim_sf, nefsc_strata)
+overlay3 <- st_contains(vw_slim_sf, nefsc_strata)
 
 
+ggplot() + 
+  geom_sf(data = overlay3)
+
+
+
+
+sf_trawl_slim_strat <- sf_trawl_slim 
+for (i in 1:dim(sf_trawl_slim)) {
+  if(sf_trawl_slim$midpoint_lat[i] & sf_trawl_slim$midpoint_long[i] sf::st_contains())
+}
+
+  
 
 ```
 
@@ -386,7 +408,6 @@ st_contains(vw_slim, nefsc_strata)
 rm(sf_trawl)
 rm(nefsc)
 
-memory.limit(size = 999999)
 
 #Fuzzy joining sf tows that are within 1mi and 1 day of nefsc tows
 paired_tows_1mi_24hr <- nefsc_slim %>% 
@@ -1090,6 +1111,18 @@ paired_tows_5mi_72hr %>%
 
 # Joins that didnt work 
 ```{r}
+
+fList = list()
+for(i in )
+
+
+for(i in 1:length(nefsc$ID)) {
+  
+
+
+
+
+
 
 ################### Joining Techniques that didn't pan out ####################
 
