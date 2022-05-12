@@ -402,7 +402,82 @@ rm(vw)
 
 ## Assigning NEFSC Survey Strata to Commercial/VW Tows 
 ```{r}
+#Assigning NEFSC survey strata to commercial Study Fleet tows 
+#read in the nefsc survey strata data
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
 
+st_make_valid(nefsc_strata)
+
+#creating a midpoint variable of the tow and using that as the determining criteria
+sf_trawl_slim <- sf_trawl_slim %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
+
+#selecting just the midpoint values because the geometry field will not be created correctly with all the other variables in the dataset
+sf_points <- sf_trawl_slim %>%  
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  select(midpoint_lat, midpoint_long)
+
+#turning the lat/long variables into an sf feature 
+sf_points_sf <- st_as_sf(sf_points, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+#running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
+sf_points$strata <- apply(st_intersects(nefsc_strata, sf_points_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+#changing the strata column to numeric instead of a list 
+sf_points <- sf_points %>%
+  mutate(strata = as.numeric(strata))
+
+#left joining the points dataset (with the stratum column) to the OG study fleet trawl dataset by the lat/long columns
+sf_trawl_slim <- left_join(sf_trawl_slim, sf_points, by = c("midpoint_lat", "midpoint_long"))
+
+
+
+
+
+#Assigning NEFSC survey strata to commercial Observer tows 
+#creating a midpoint variable of the tow and using that as the determining criteria
+ob_trawl_slim <- ob_trawl_slim %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
+
+#selecting just the midpoint values because the geometry field will not be created correctly with all the other variables in the dataset
+ob_points <- ob_trawl_slim %>%  
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  select(midpoint_lat, midpoint_long)
+
+#turning the lat/long variables into an sf feature 
+ob_points_sf <- st_as_sf(ob_points, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+#running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
+ob_points$strata <- apply(st_intersects(nefsc_strata, ob_points_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+#changing the strata column to numeric instead of a list 
+ob_points <- ob_points %>%
+  mutate(strata = as.numeric(strata))
+
+#left joining the points dataset (with the stratum column) to the OG study fleet trawl dataset by the lat/long columns
+ob_trawl_slim <- left_join(ob_trawl_slim, ob_points, by = c("midpoint_lat", "midpoint_long"))
+
+
+
+
+rm(sf_points)
+rm(sf_points_sf)
+rm(ob_points)
+rm(ob_points_sf)
 ```
 
 
