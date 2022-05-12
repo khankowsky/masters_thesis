@@ -388,6 +388,20 @@ ggplot() +
 
 
 
+
+
+sf_trawl_slim_sf <- sf_trawl_slim_sf %>%
+  add_column(strata = NA)
+
+
+
+sf_trawl_slim_sf$strata <- apply(st_intersects(nefsc_strata, sf_trawl_slim_sf, sparse = FALSE), 2, 
+                                 function(col) {
+                                   nefsc_strata[which(col),]$STRATA
+                                 })
+
+
+
 sf_trawl_slim_strat <- sf_trawl_slim 
 for (i in 1:dim(sf_trawl_slim)) {
   if(sf_trawl_slim$midpoint_lat[i] & sf_trawl_slim$midpoint_long[i] sf::st_contains())
