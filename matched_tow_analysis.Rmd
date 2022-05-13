@@ -41,7 +41,8 @@ paired_tows_1mi_24hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -24 & time_dif < 24)
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
 
 
 #confirming that I have 6 matches 
@@ -54,13 +55,15 @@ view(paired_tows_1mi_24hr)
 
 
 
+
 #Fuzzy joining sf tows that are within 5mi and 3 day of nefsc tows
 paired_tows_5mi_72hr <- nefsc_slim %>% 
   fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -72 & time_dif < 72)
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
 
 
 paired_tows_5mi_72hr %>%
@@ -104,7 +107,8 @@ paired_tows_1mi_24hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -24 & time_dif < 24)
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_24hr %>%
   count(cruise_station_ID)
@@ -119,7 +123,8 @@ paired_tows_1mi_48hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -48 & time_dif < 48)
+  filter(time_dif > -48 & time_dif < 48) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_48hr %>%
   count(cruise_station_ID)
@@ -134,7 +139,8 @@ paired_tows_1mi_72hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -72 & time_dif < 72)
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_72hr %>%
   count(cruise_station_ID)
@@ -148,7 +154,8 @@ paired_tows_1mi_96hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -96 & time_dif < 96)
+  filter(time_dif > -96 & time_dif < 96) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_96hr %>%
   count(cruise_station_ID)
@@ -164,7 +171,9 @@ paired_tows_1mi_120hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -120 & time_dif < 120)
+  filter(time_dif > -120 & time_dif < 120) %>%
+  filter(STRATUM == strata)
+
 
 paired_tows_1mi_120hr %>%
   count(cruise_station_ID)
@@ -179,7 +188,8 @@ paired_tows_1mi_144hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -144 & time_dif < 144)
+  filter(time_dif > -144 & time_dif < 144) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_144hr %>%
   count(cruise_station_ID)
@@ -193,7 +203,8 @@ paired_tows_1mi_168hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -168 & time_dif < 168)
+  filter(time_dif > -168 & time_dif < 168) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_168hr %>%
   count(cruise_station_ID)
@@ -208,7 +219,8 @@ paired_tows_1mi_192hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -192 & time_dif < 192)
+  filter(time_dif > -192 & time_dif < 192) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_192hr %>%
   count(cruise_station_ID)
@@ -226,7 +238,8 @@ paired_tows_1mi_24hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1)
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
 
 
 paired_tows_1mi_24hr_ob %>%
@@ -248,7 +261,8 @@ paired_tows_1mi_24hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1)
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_24hr_ob %>%
   count(cruise_station_ID)
@@ -263,7 +277,8 @@ paired_tows_1mi_48hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2)
+  filter(time_dif > -2 & time_dif < 2) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_48hr_ob %>%
   count(cruise_station_ID)
@@ -278,7 +293,8 @@ paired_tows_1mi_72hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3)
+  filter(time_dif > -3 & time_dif < 3) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_72hr_ob %>%
   count(cruise_station_ID)
@@ -292,7 +308,8 @@ paired_tows_1mi_96hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4)
+  filter(time_dif > -4 & time_dif < 4) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_96hr_ob %>%
   count(cruise_station_ID)
@@ -308,7 +325,8 @@ paired_tows_1mi_120hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5)
+  filter(time_dif > -5 & time_dif < 5) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_120hr_ob %>%
   count(cruise_station_ID)
@@ -323,7 +341,8 @@ paired_tows_1mi_144hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6)
+  filter(time_dif > -6 & time_dif < 6) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_144hr_ob %>%
   count(cruise_station_ID)
@@ -337,7 +356,8 @@ paired_tows_1mi_168hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7)
+  filter(time_dif > -7 & time_dif < 7) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_168hr_ob %>%
   count(cruise_station_ID)
@@ -352,7 +372,8 @@ paired_tows_1mi_192hr_ob <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8)
+  filter(time_dif > -8 & time_dif < 8) %>%
+  filter(STRATUM == strata)
 
 paired_tows_1mi_192hr_ob %>%
   count(cruise_station_ID)
