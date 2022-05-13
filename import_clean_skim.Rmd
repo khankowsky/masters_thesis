@@ -48,20 +48,20 @@ names(observer2) <- observer_colnames
 
 observer2 <- observer2 %>%
   mutate(PERMIT1 = as.logical(PERMIT1), 
-         GIS_LATHBEG = as.double(GIS_LATHBEG), 
-         GIS_LONHBEG = as.double(GIS_LONHBEG),
-         GIS_LATHEND = as.double(GIS_LATHEND), 
-         GIS_LONHEND = as.double(GIS_LONHEND), 
+         GIS_LATHBEG = as.numeric(GIS_LATHBEG), 
+         GIS_LONHBEG = as.numeric(GIS_LONHBEG),
+         GIS_LATHEND = as.numeric(GIS_LATHEND), 
+         GIS_LONHEND = as.numeric(GIS_LONHEND), 
          NSWEEPS = as.logical(NSWEEPS), 
          SWEEPDIA = as.logical(SWEEPDIA), 
          LINERMSIZE = as.logical(LINERMSIZE), 
          CODMSIZE = as.logical(CODMSIZE),
          MARKET = as.logical(MARKET), 
-         MSWGTAVG = as.double(MSWGTAVG), 
-         SOAKDUR = as.double(SOAKDUR), 
-         HAULDUR = as.double(HAULDUR), 
-         HAILWT = as.double(HAILWT), 
-         LIVE_WT = as.double(LIVE_WT)
+         MSWGTAVG = as.numeric(MSWGTAVG), 
+         SOAKDUR = as.numeric(SOAKDUR), 
+         HAULDUR = as.numeric(HAULDUR), 
+         HAILWT = as.numeric(HAILWT), 
+         LIVE_WT = as.numeric(LIVE_WT)
          )
 
 #bind the two sheets together
@@ -131,8 +131,6 @@ vw_2020 <- left_join(vw_station_2020, vw_catch_2020,
 
 #joining the 2019 and 2020 survey datasets 
 vw <- rbind(vw_2019, vw_2020)
-
-head(vw_2019)
 
 
 #adding common species name column 
@@ -231,8 +229,15 @@ sf_trawl <- study_fleet %>%
       #OTR - otter trawl, ruhle 
       #OTS - otter trawl, bottom, shrimp
   filter(YEAR >= 2009) %>%
-  mutate(survey_comercial_ID = 2)
-
+  mutate(survey_comercial_ID = 2) %>%
+  rename(START_TOW_DATE_GMT = START_HAUL_DATE_GMT) %>%
+  rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
+  rename(START_TOW_LAT = START_HAUL_LAT) %>% 
+  rename(START_TOW_LON = START_HAUL_LON) %>%
+  rename(END_TOW_LAT = END_SET_LAT) %>%
+  rename(END_TOW_LON = END_SET_LON) %>%
+  drop_na(END_TOW_LAT) %>%
+  drop_na(END_TOW_LON)
 
 
 #filter the observer data set to include only trawl gears and only after 2009
@@ -244,8 +249,15 @@ observer_trawl <- observer %>%
   mutate(trip_haul_ID = paste(TRIPID,HAULNUM, sep = '_')) %>%
   relocate(trip_haul_ID) %>%
   filter(YEARHBEG  >= 2009) %>%
-  mutate(survey_comercial_ID = 3)
-
+  mutate(survey_comercial_ID = 3) %>%
+  rename(START_TOW_LAT = GIS_LATHBEG) %>% 
+  rename(START_TOW_LON = GIS_LONHBEG) %>%
+  rename(END_TOW_LAT = GIS_LATHEND) %>%
+  rename(END_TOW_LON = GIS_LONHEND) %>%
+  drop_na(END_TOW_LAT) %>%
+  drop_na(END_TOW_LON)
+  # rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
+    #no end date information in the observer dataset 
   
   
 #filtering the nefsc survey dataset to only after 2009 because of the shift to the bigelow 
@@ -257,7 +269,15 @@ nefsc <- nefsc %>%
   mutate(END_EST_TOWDATE = as.POSIXct(END_EST_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
   mutate(BEGIN_GMT_TOWDATE = as.POSIXct(BEGIN_GMT_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
   mutate(END_GMT_TOWDATE = as.POSIXct(END_GMT_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
-  mutate(survey_commerical_ID = 1)
+  mutate(survey_commerical_ID = 1) %>%
+  rename(START_TOW_DATE_GMT = BEGIN_GMT_TOWDATE) %>%
+  rename(END_TOW_DATE_GMT = END_GMT_TOWDATE) %>%
+  rename(START_TOW_LAT = DECDEG_BEGLAT) %>%
+  rename(START_TOW_LON = DECDEG_BEGLON) %>%
+  rename(END_TOW_LAT = DECDEG_ENDLAT) %>%
+  rename(END_TOW_LON = DECDEG_ENDLON) %>%
+  drop_na(END_TOW_LAT) %>%
+  drop_na(END_TOW_LON)
 
 
 
@@ -274,7 +294,12 @@ vw <- vw %>%
   mutate_at(c("TowStartLat", "TowEndLat"), str_remove, "N ") %>%
   mutate_at(c("TowStartLong", "TowEndLong"), str_replace, "W ", "-") %>%
   mutate_at(c("TowStartLat", "TowEndLat", "TowStartLong", "TowEndLong"), str_replace, "(?<=\\.\\d\\d)\\.", "") %>%
-  mutate(TotalWeight_lb = TotalWeight_kg*2.2046226218)
+  mutate(TotalWeight_lb = TotalWeight_kg*2.2046226218) %>%
+  rename(START_TOW_LAT = TowStartLat) %>%
+  rename(START_TOW_LON = TowStartLong) %>%
+  rename(END_TOW_LAT = TowEndLat) %>%
+  rename(END_TOW_LON = TowEndLong) %>%
+  mutate(across(c("START_TOW_LAT", "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON"), as.double))
 
 
 
@@ -282,6 +307,142 @@ vw <- vw %>%
 
 rm(study_fleet)
 rm(observer)
+```
+
+
+
+## Assigning NEFSC Survey Strata to Commercial/VW Tows 
+```{r}
+#Assigning NEFSC survey strata to commercial Study Fleet tows 
+#read in the nefsc survey strata data
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
+st_make_valid(nefsc_strata)
+
+#creating a midpoint variable of the tow and using that as the determining criteria
+sf_trawl <- sf_trawl %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
+
+#selecting just the midpoint values because the geometry field will not be created correctly with all the other variables in the dataset
+sf_points <- sf_trawl %>%  
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  select(midpoint_lat, midpoint_long)
+
+#turning the lat/long variables into an sf feature 
+sf_points_sf <- st_as_sf(sf_points, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+#running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
+sf_points$strata <- apply(st_contains(nefsc_strata, sf_points_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+#changing the strata column to numeric instead of a list 
+sf_points <- sf_points %>%
+  mutate(strata = as.numeric(strata))
+
+#left joining the points dataset (with the stratum column) to the OG study fleet trawl dataset by the lat/long columns
+sf_trawl <- left_join(sf_trawl, sf_points, by = c("midpoint_lat", "midpoint_long"))
+
+
+
+
+
+#Assigning NEFSC survey strata to commercial Observer tows 
+#creating a midpoint variable of the tow and using that as the determining criteria
+observer_trawl <- observer_trawl %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
+
+#selecting just the midpoint values because the geometry field will not be created correctly with all the other variables in the dataset
+ob_points <- observer_trawl %>%  
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  select(midpoint_lat, midpoint_long)
+
+#turning the lat/long variables into an sf feature 
+ob_points_sf <- st_as_sf(ob_points, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+#running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
+ob_points$strata <- apply(st_contains(nefsc_strata, ob_points_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+#changing the strata column to numeric instead of a list 
+ob_points <- ob_points %>%
+  mutate(strata = as.numeric(strata))
+
+#left joining the points dataset (with the stratum column) to the OG study fleet trawl dataset by the lat/long columns
+observer_trawl <- left_join(observer_trawl, ob_points, by = c("midpoint_lat", "midpoint_long"))
+
+
+
+
+rm(sf_points)
+rm(sf_points_sf)
+rm(ob_points)
+rm(ob_points_sf)
+```
+
+
+
+## Estimating Swept Area
+```{r}
+#All of this is taken from 'FISHING EFFECTS MODEL NORTHEAST REGION - NEFMC (2019)' APPENDIX A 
+
+# DISTANCE
+sf_trawl$d_t <- sf_trawl$CALC_DIST_NM #distance towed
+
+
+
+# BOARDS Weight of otter trawl doors estimated by regression
+sf_trawl$weight <- 70.848 + (1.844 * sf_trawl$GTONS) + (0.5344 * sf_trawl$VHP)
+# Width trawl doors (meters) estimated by regression
+sf_trawl$width_o <- 0.001 * (1223 + (sf_trawl$weight * 0.8333))
+# Angle of attack (radians)
+sf_trawl$rad_o <- (2 * pi * 40)/360
+# Effective Width of otter board (meters)
+sf_trawl$w_o <- sf_trawl$width_o * sin(sf_trawl$rad_o)
+# Contact index for otter boards is constant
+sf_trawl$c_o <- 1
+
+
+
+# CABLES (contact index set below) Width of ground cable (meters) based on regression
+sf_trawl$width_c <- 0.3048 * (137.54 + (sf_trawl$LEN * 1.823))
+# Angle of attack (radians) of ground cable
+sf_trawl$rad_c <- (2 * pi * 15)/360
+# Effective width of ground cable (meters)
+sf_trawl$w_c <- sf_trawl$width_c * sin(sf_trawl$rad_c)
+
+
+
+# SWEEP (contact index set below)
+sf_trawl$raw_sweep <- sf_trawl$GEAR_SIZE
+sf_trawl$w_s <- 0.43 * sf_trawl$raw_sweep # Effective width of sweep (meters)
+
+
+
+# CONTACT INDECIES 
+sf_trawl$c_c <- 0.95 #CABLES
+sf_trawl$c_s <- 0.9  #SWEEP
+
+
+
+sf_trawl$boards <- 2 * sf_trawl$w_o * sf_trawl$c_o # Width of both boards (meters)
+sf_trawl$cables <- 2 * sf_trawl$w_c * sf_trawl$c_c # Width of both cables (meters)
+sf_trawl$sweep <- sf_trawl$w_s * sf_trawl$c_s # Width of the sweep (meters)
+sf_trawl$lin_eff_width <- sf_trawl$boards + sf_trawl$cables + sf_trawl$sweep
+sf_trawl$swept_area <- sf_trawl$d_t * (0.001 * sf_trawl$lin_eff_width) # SA without sensitivity (km)
+
+
 ```
 
 
@@ -297,19 +458,12 @@ sf_trawl_slim <- sf_trawl %>%
            "START_HAUL_LON", "END_SET_LAT", "END_SET_LON", "DEPTH_FTH", 
            "GEAR_QUANTITY", "GEAR_SIZE", "MESH_SIZE", "MESH_TYPE", 
            "HAIL_AMOUNT", "HAIL_AMOUNT_LB", "CALC_DUR_HR", "CALC_DIST_NM", 
-           "MEAN_DPTH_M", "survey_comercial_ID")) %>%
+           "MEAN_DPTH_M", "survey_comercial_ID", "strata", "swept_area"))
   # select(-c("VES_NAME", "HULL_ID", "PPORT", "HPORT", "ACCSP_GEAR_CODE", 
   #           "PPST", "SAIL_PORT_NAME", "SAIL_STATE_POSTAL", "LAND_PORT_NAME", 
   #           "LAND_STATE_POSTAL", "START_SET_DATE_GMT", "START_SET_LAT", "START_SET_LON", 
   #           "END_HAUL_DATE_GMT")) %>%
-  rename(START_TOW_DATE_GMT = START_HAUL_DATE_GMT) %>%
-  rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
-  rename(START_TOW_LAT = START_HAUL_LAT) %>% 
-  rename(START_TOW_LON = START_HAUL_LON) %>%
-  rename(END_TOW_LAT = END_SET_LAT) %>%
-  rename(END_TOW_LON = END_SET_LON) %>%
-  drop_na(END_TOW_LAT) %>%
-  drop_na(END_TOW_LON)
+
   
 
 
@@ -320,15 +474,9 @@ ob_trawl_slim <- observer_trawl %>%
          "GRCABTYP", "BRDLGTYP", "BRDLGTYP", "FTROPTYP", "CODLINERUSD", "NESPP4", 
          "COMNAME", "CATDISP", "FISHDISP", "FISHDISPDESC", "GIS_LATHBEG", 
          "GIS_LONHBEG", "GIS_LATHEND", "GIS_LONHEND", "HAULDUR", "HAILWT", 
-         "LIVE_WT", "survey_comercial_ID")) %>%
-  # rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
-    #no end date information in the observer dataset 
-  rename(START_TOW_LAT = GIS_LATHBEG) %>% 
-  rename(START_TOW_LON = GIS_LONHBEG) %>%
-  rename(END_TOW_LAT = GIS_LATHEND) %>%
-  rename(END_TOW_LON = GIS_LONHEND) %>%
-  drop_na(END_TOW_LAT) %>%
-  drop_na(END_TOW_LON)
+         "LIVE_WT", "survey_comercial_ID", "strata"))
+
+
 
 
 #selecting just the variables of interest for the nefsc dataset 
@@ -337,21 +485,14 @@ nefsc_slim <- nefsc %>%
            "BEGIN_GMT_TOWDATE", "END_GMT_TOWDATE", "DECDEG_BEGLAT", 
            "DECDEG_BEGLON", "DECDEG_ENDLAT", "DECDEG_ENDLON", 
            "TOWDUR", "AVGDEPTH", "LOGGED_SPECIES_NAME", "SVSPP", 
-           "EXPCATCHNUM", "EXPCATCHWT")) %>%
+           "EXPCATCHNUM", "EXPCATCHWT"))
   # select(-c("EST_MONTH","EST_DAY", "EST_JULIAN_DAY", "BEGLAT", "BEGLON", "ENDLAT", 
   #           "ENDLON", "COURSE", "RPM", "DOPDISTW", "...11", "...12", 
   #           "BEGIN_EST_TOWDATE", "END_EST_TOWDATE", "SURFSALIN", "SURFTEMP", 
   #           "XBT", "BKTTEMP", "SWELLHGT", "SWELLDIR", "WAVEHGT", "WEATHER", 
   #           "WINDSP", "WINDDIR", "BAROPRESS", "CLOUD", "AIRTEMP", "DESSPEED", "DOPDISTB", 
   #           "HEADING", "PITCH")) %>%
-  rename(START_TOW_DATE_GMT = BEGIN_GMT_TOWDATE) %>%
-  rename(END_TOW_DATE_GMT = END_GMT_TOWDATE) %>%
-  rename(START_TOW_LAT = DECDEG_BEGLAT) %>%
-  rename(START_TOW_LON = DECDEG_BEGLON) %>%
-  rename(END_TOW_LAT = DECDEG_ENDLAT) %>%
-  rename(END_TOW_LON = DECDEG_ENDLON) %>%
-  drop_na(END_TOW_LAT) %>%
-  drop_na(END_TOW_LON)
+
   
 
 
@@ -360,17 +501,13 @@ vw_slim <- vw %>%
   select("TowID", "VesselID", "GearID", "START_TOW_DATE_GMT", "TowStartLat", 
          "TowStartLong", "TowStartDepth", "END_TOW_DATE_GMT", "TowEndLat", 
          "TowEndLong", "TowEndLong", "TowEndDepth", "SpeciesID", 
-         "common_name", "TotalWeight_lb") %>%
-  rename(START_TOW_LAT = TowStartLat) %>%
-  rename(START_TOW_LON = TowStartLong) %>%
-  rename(END_TOW_LAT = TowEndLat) %>%
-  rename(END_TOW_LON = TowEndLong) %>%
-  mutate(across(c("START_TOW_LAT", "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON"), as.double))
+         "common_name", "TotalWeight_lb") 
+
   
 
   
 
-#creating a dataset for just the station inf
+#creating a dataset for just the station info
 # nefsc_station <- rbind(nefsc_station_fall, nefsc_station_spring)
 # nefsc_station <- nefsc_station %>%
 #   mutate(cruise_station_ID = paste(CRUISE6,STATION, sep = '_')) %>%
@@ -399,87 +536,6 @@ rm(sf_trawl)
 rm(observer_trawl)
 rm(nefsc)
 rm(vw)
-```
-
-
-## Assigning NEFSC Survey Strata to Commercial/VW Tows 
-```{r}
-#Assigning NEFSC survey strata to commercial Study Fleet tows 
-#read in the nefsc survey strata data
-sf::sf_use_s2(FALSE)
-nefsc_strata <- st_read(dsn = "./data/strata") %>%
-  st_set_crs(4269)
-
-st_make_valid(nefsc_strata)
-
-#creating a midpoint variable of the tow and using that as the determining criteria
-sf_trawl_slim <- sf_trawl_slim %>%
-  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
-  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
-  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
-
-#selecting just the midpoint values because the geometry field will not be created correctly with all the other variables in the dataset
-sf_points <- sf_trawl_slim %>%  
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  select(midpoint_lat, midpoint_long)
-
-#turning the lat/long variables into an sf feature 
-sf_points_sf <- st_as_sf(sf_points, coords = c("midpoint_long", "midpoint_lat"), 
-                             crs = st_crs(nefsc_strata))
-
-#running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
-sf_points$strata <- apply(st_contains(nefsc_strata, sf_points_sf, sparse = FALSE), 2, 
-               function(col) { 
-                  nefsc_strata[which(col), ]$STRATA
-               })
-
-#changing the strata column to numeric instead of a list 
-sf_points <- sf_points %>%
-  mutate(strata = as.numeric(strata))
-
-#left joining the points dataset (with the stratum column) to the OG study fleet trawl dataset by the lat/long columns
-sf_trawl_slim <- left_join(sf_trawl_slim, sf_points, by = c("midpoint_lat", "midpoint_long"))
-
-
-
-
-
-#Assigning NEFSC survey strata to commercial Observer tows 
-#creating a midpoint variable of the tow and using that as the determining criteria
-ob_trawl_slim <- ob_trawl_slim %>%
-  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
-  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
-  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
-
-#selecting just the midpoint values because the geometry field will not be created correctly with all the other variables in the dataset
-ob_points <- ob_trawl_slim %>%  
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  select(midpoint_lat, midpoint_long)
-
-#turning the lat/long variables into an sf feature 
-ob_points_sf <- st_as_sf(ob_points, coords = c("midpoint_long", "midpoint_lat"), 
-                             crs = st_crs(nefsc_strata))
-
-#running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
-ob_points$strata <- apply(st_contains(nefsc_strata, ob_points_sf, sparse = FALSE), 2, 
-               function(col) { 
-                  nefsc_strata[which(col), ]$STRATA
-               })
-
-#changing the strata column to numeric instead of a list 
-ob_points <- ob_points %>%
-  mutate(strata = as.numeric(strata))
-
-#left joining the points dataset (with the stratum column) to the OG study fleet trawl dataset by the lat/long columns
-ob_trawl_slim <- left_join(ob_trawl_slim, ob_points, by = c("midpoint_lat", "midpoint_long"))
-
-
-
-
-rm(sf_points)
-rm(sf_points_sf)
-rm(ob_points)
-rm(ob_points_sf)
 ```
 
 
