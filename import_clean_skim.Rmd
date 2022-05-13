@@ -132,6 +132,8 @@ vw_2020 <- left_join(vw_station_2020, vw_catch_2020,
 #joining the 2019 and 2020 survey datasets 
 vw <- rbind(vw_2019, vw_2020)
 
+head(vw_2019)
+
 
 #adding common species name column 
 vw <- vw %>%
@@ -426,7 +428,7 @@ sf_points_sf <- st_as_sf(sf_points, coords = c("midpoint_long", "midpoint_lat"),
                              crs = st_crs(nefsc_strata))
 
 #running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
-sf_points$strata <- apply(st_intersects(nefsc_strata, sf_points_sf, sparse = FALSE), 2, 
+sf_points$strata <- apply(st_contains(nefsc_strata, sf_points_sf, sparse = FALSE), 2, 
                function(col) { 
                   nefsc_strata[which(col), ]$STRATA
                })
@@ -459,7 +461,7 @@ ob_points_sf <- st_as_sf(ob_points, coords = c("midpoint_long", "midpoint_lat"),
                              crs = st_crs(nefsc_strata))
 
 #running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
-ob_points$strata <- apply(st_intersects(nefsc_strata, ob_points_sf, sparse = FALSE), 2, 
+ob_points$strata <- apply(st_contains(nefsc_strata, ob_points_sf, sparse = FALSE), 2, 
                function(col) { 
                   nefsc_strata[which(col), ]$STRATA
                })
