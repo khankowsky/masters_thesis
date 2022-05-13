@@ -337,20 +337,20 @@ nefsc_slim <- nefsc_slim %>%
 #using the midpoint of the tow as the determining criteria
 #move this section into the import_clean_skim if able to get it working properly
 sf_trawl_slim <- sf_trawl_slim %>%
-  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LAT, END_TOW_LAT)) %>%
-  mutate(midpoint_lat = mean(c(START_TOW_LAT, END_TOW_LAT))) %>%
-  mutate(midpoint_long = mean(c(START_TOW_LAT, END_TOW_LAT)))
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
 
 
 ob_trawl_slim <- ob_trawl_slim %>%
-  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LAT, END_TOW_LAT)) %>%
-  mutate(midpoint_lat = mean(c(START_TOW_LAT, END_TOW_LAT))) %>%
-  mutate(midpoint_long = mean(c(START_TOW_LAT, END_TOW_LAT)))
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
 
 vw_slim <- vw_slim %>%
-  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LAT, END_TOW_LAT)) %>%
-  mutate(midpoint_lat = mean(c(START_TOW_LAT, END_TOW_LAT))) %>%
-  mutate(midpoint_long = mean(c(START_TOW_LAT, END_TOW_LAT)))
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
 
 
 
@@ -365,6 +365,45 @@ vw_slim_sf <- st_as_sf(vw_slim, coords = c("midpoint_long", "midpoint_lat"),
                              crs = st_crs(nefsc_strata))
 
 
+
+############################## Okay I think I finally got this to work #########################################
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
+st_make_valid(nefsc_strata)
+
+#selecting just the midpoint values because the geometry field will not be created correctly with all the other variables in the dataset
+points <- sf_trawl_slim %>%  
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  select(midpoint_lat, midpoint_long)
+
+
+#turning the lat/long variables into 
+points_sf <- st_as_sf(points, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+
+#running the actualy intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
+points$strata <- apply(st_intersects(nefsc_strata, points_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+#changing the strata column to numeric instead of a list 
+points <- points %>%
+  mutate(strata = as.numeric(strata))
+
+
+
+#left joining the points dataset (with the stratum column) to the OG study fleet trawl dataset by the lat/long columns
+sf_trawl_slim_a <- left_join(sf_trawl_slim, points, by = c("midpoint_lat", "midpoint_long"))
+
+
+
+
+################################################################################################################################################## Everything Below this is Failed Attempts ####################################
+################################################################################################################
 
 #removing the edges that have an issue
 head(nefsc_strata)
@@ -388,26 +427,122 @@ ggplot() +
 
 
 
+#trying another method I found online 
+#NEFSC Survey Strata
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
+st_make_valid(nefsc_strata)
 
 
+sf_trawl_slim_sf <- st_as_sf(sf_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+
+sf_trawl_slim <- points_sf %>%
+  mutate(intersection = as.integer(st_intersects(geometry, nefsc_strata)), 
+         strata = if_else(is.na(intersection), '', nefsc_strata$STRATA[intersection]))
+
+head(sf_trawl_slim_sf)
+head(nefsc_strata)
+
+view(sf_trawl_slim_sf)
+
+
+
+
+## fuck this I hate this task 
+points <- sf_trawl_slim %>%  
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  select(midpoint_lat, midpoint_long)
+
+points_sf <- st_as_sf(points, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+pnts_sf <- do.call("st_sfc",c(lapply(1:nrow(points), 
+function(i) {st_point(as.numeric(points[i, ]))}), list("crs" = 4269))) 
+
+pnts_trans <- st_transform(pnts_sf, 2163) # apply transformation to pnts sf
+nefsc_strata_trans <- st_transform(nefsc_strata, 2163)      # apply transformation to polygons sf
+
+points$region <- apply(st_intersects(nefsc_strata, pnts_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+points$strata <- apply(st_intersects(nefsc_strata, points_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+
+points %>%
+  mutate(strata = as.numeric(strata)) %>%
+  count(strata)
+
+
+
+
+
+
+
+
+#trying to a method i found on stack overflow
 sf_trawl_slim_sf <- sf_trawl_slim_sf %>%
   add_column(strata = NA)
 
+sf_trawl_trans <- st_transform(sf_trawl_slim_sf, 4269)
+nefsc_strata_trans <- st_transform(nefsc_strata, 4269)
 
-
-sf_trawl_slim_sf$strata <- apply(st_intersects(nefsc_strata, sf_trawl_slim_sf, sparse = FALSE), 2, 
+sf_trawl_slim_sf$strata <- apply(st_intersects(nefsc_strata_trans, sf_trawl_trans, sparse = FALSE), 2, 
                                  function(col) {
                                    nefsc_strata[which(col),]$STRATA
                                  })
 
 
 
+#trying a for loop for this
 sf_trawl_slim_strat <- sf_trawl_slim 
 for (i in 1:dim(sf_trawl_slim)) {
   if(sf_trawl_slim$midpoint_lat[i] & sf_trawl_slim$midpoint_long[i] sf::st_contains())
 }
 
+
+```
+
+
+
+
+## Estimating Swept Area
+```{r}
+
+dt <-  #distance towed
+w0 <- (1223.7+(0.8*(70.8+(1.8*VesselTonnage)+(0.5*VesselHP)))*sin(40)) #effective width of otter board
+c0 <- 1.00  #contact index of otter board
+wc <- ((23.3 + (0.4*vessellength)*0.001*2)*sin(15)) #effective width of ground cable (km)
+cc <- 0.95 #contact index of ground cables 
+ws <-  #effective width of sweep 
+cs <- 0.90 #contact index of sweep
   
+
+
+
+
+
+
+
+
+
+
+
+
+sf_trawl_slim <- sf_trawl_slim %>%
+  mutate(swept_area = dt[(2*w0*c0) + (2*wc*cc) + (ws*cs)])
+  
+
+
+
 
 ```
 
@@ -429,7 +564,8 @@ paired_tows_1mi_24hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -24 & time_dif < 24)
+  filter(time_dif > -24 & time_dif < 24) 
+  
 
 
 #confirming that I have 6 matches 
