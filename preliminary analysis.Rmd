@@ -385,7 +385,7 @@ points_sf <- st_as_sf(points, coords = c("midpoint_long", "midpoint_lat"),
 
 
 #running the actualy intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
-points$strata <- apply(st_intersects(nefsc_strata, points_sf, sparse = FALSE), 2, 
+points$strata <- apply(st_contains(nefsc_strata, points_sf, sparse = FALSE), 2, 
                function(col) { 
                   nefsc_strata[which(col), ]$STRATA
                })
@@ -516,33 +516,54 @@ for (i in 1:dim(sf_trawl_slim)) {
 
 ## Estimating Swept Area
 ```{r}
+#All of this is taken from 'FISHING EFFECTS MODEL NORTHEAST REGION - NEFMC (2019)' APPENDIX A 
 
-dt <-  #distance towed
-w0 <- (1223.7+(0.8*(70.8+(1.8*VesselTonnage)+(0.5*VesselHP)))*sin(40)) #effective width of otter board
-c0 <- 1.00  #contact index of otter board
-wc <- ((23.3 + (0.4*vessellength)*0.001*2)*sin(15)) #effective width of ground cable (km)
-cc <- 0.95 #contact index of ground cables 
-ws <-  #effective width of sweep 
-cs <- 0.90 #contact index of sweep
+head(sf_trawl)
   
+# DISTANCE
+sf_trawl$d_t <- sf_trawl$CALC_DIST_NM #distance towed
 
 
 
+# BOARDS Weight of otter trawl doors estimated by regression
+sf_trawl$weight <- 70.848 + (1.844 * sf_trawl$GTONS) + (0.5344 * sf_trawl$VHP)
+# Width trawl doors (meters) estimated by regression
+sf_trawl$width_o <- 0.001 * (1223 + (sf_trawl$weight * 0.8333))
+# Angle of attack (radians)
+sf_trawl$rad_o <- (2 * pi * 40)/360
+# Effective Width of otter board (meters)
+sf_trawl$w_o <- sf_trawl$width_o * sin(sf_trawl$rad_o)
+# Contact index for otter boards is constant
+sf_trawl$c_o <- 1
 
 
 
+# CABLES (contact index set below) Width of ground cable (meters) based on regression
+sf_trawl$width_c <- 0.3048 * (137.54 + (sf_trawl$LEN * 1.823))
+# Angle of attack (radians) of ground cable
+sf_trawl$rad_c <- (2 * pi * 15)/360
+# Effective width of ground cable (meters)
+sf_trawl$w_c <- sf_trawl$width_c * sin(sf_trawl$rad_c)
 
 
 
+# SWEEP (contact index set below)
+sf_trawl$raw_sweep <- sf_trawl$GEAR_SIZE
+sf_trawl$w_s <- 0.43 * sf_trawl$raw_sweep # Effective width of sweep (meters)
 
 
 
-sf_trawl_slim <- sf_trawl_slim %>%
-  mutate(swept_area = dt[(2*w0*c0) + (2*wc*cc) + (ws*cs)])
-  
+# CONTACT INDECIES 
+sf_trawl$c_c <- 0.95 #CABLES
+sf_trawl$c_s <- 0.9  #SWEEP
 
 
 
+sf_trawl$boards <- 2 * sf_trawl$w_o * sf_trawl$c_o # Width of both boards (meters)
+sf_trawl$cables <- 2 * sf_trawl$w_c * sf_trawl$c_c # Width of both cables (meters)
+sf_trawl$sweep <- sf_trawl$w_s * sf_trawl$c_s # Width of the sweep (meters)
+sf_trawl$lin_eff_width <- sf_trawl$boards + sf_trawl$cables + sf_trawl$sweep
+sf_trawl$A <- sf_trawl$d_t * (0.001 * sf_trawl$lin_eff_width) # SA without sensitivity (km)
 
 ```
 
