@@ -37,40 +37,46 @@ study_fleet <- read_csv('./data/STUDY_FLEET_GROUNFISH_DATA_PULL_V1.csv')
 
 ## Observer data
 ```{r}
-observer1 <- read_excel('./data/result1.xlsx')
-observer2 <- read_excel('./data/result2.xlsx', col_names = FALSE)
+observer1 <- read_csv('./data/result1.csv')
+observer2 <- read_csv('./data/result2.csv')
 
 
-observer_colnames <- as.vector(colnames(observer1))
-
-names(observer2) <- observer_colnames
-
-
-observer2 <- observer2 %>%
-  mutate(PERMIT1 = as.logical(PERMIT1), 
-         GIS_LATHBEG = as.numeric(GIS_LATHBEG), 
-         GIS_LONHBEG = as.numeric(GIS_LONHBEG),
-         GIS_LATHEND = as.numeric(GIS_LATHEND), 
-         GIS_LONHEND = as.numeric(GIS_LONHEND), 
-         NSWEEPS = as.logical(NSWEEPS), 
-         SWEEPDIA = as.logical(SWEEPDIA), 
-         LINERMSIZE = as.logical(LINERMSIZE), 
-         CODMSIZE = as.logical(CODMSIZE),
-         MARKET = as.logical(MARKET), 
-         MSWGTAVG = as.numeric(MSWGTAVG), 
-         SOAKDUR = as.numeric(SOAKDUR), 
-         HAULDUR = as.numeric(HAULDUR), 
-         HAILWT = as.numeric(HAILWT), 
-         LIVE_WT = as.numeric(LIVE_WT)
-         )
+observer1 <- observer1 %>%
+  mutate(PROGRAM = as.double(PROGRAM))
 
 #bind the two sheets together
 observer <- bind_rows(observer1, observer2)
 
+observer <- observer %>%
+  mutate(YEAR = YEARHBEG,
+         PERMIT = PERMIT1)
+
+
+#import permit 
+permit <- read_csv('./data/permit_output.csv')
+
+#clean permit
+permit_names <- permit %>% 
+  names() %>% 
+  str_squish() %>%
+  str_split(., pattern = " ")
+
+permit <- permit %>% 
+  mutate_all(str_squish) %>% 
+  separate(1, into = permit_names[[1]], sep = " ") %>% 
+  mutate_all(as.numeric)
+
+
+#join observer and permit data 
+observer <- left_join(observer, permit, by = c("YEAR", "PERMIT"), all.x = TRUE, no.dups = TRUE)
+
+
 #clear environment of unnecessary datasets
 rm(observer1)
 rm(observer2)
-rm(observer_colnames)
+rm(permit)
+rm(permit_names)
+
 ```
 
 
@@ -93,6 +99,9 @@ nefsc_catch_fall <- read_csv('./data/22560_UNION_FSCS_SVCAT_fall.csv')
 nefsc_fall <- left_join(nefsc_station_fall, nefsc_catch_fall, 
                            by = c("ID", "CRUISE6", "STRATUM", "TOW", "STATION"))
 
+
+
+#assigning commercial selectivity to the NEFSC trawl survey based on minimum fish size
 
 
 
@@ -255,7 +264,8 @@ observer_trawl <- observer %>%
   rename(END_TOW_LAT = GIS_LATHEND) %>%
   rename(END_TOW_LON = GIS_LONHEND) %>%
   drop_na(END_TOW_LAT) %>%
-  drop_na(END_TOW_LON)
+  drop_na(END_TOW_LON) %>%
+  drop_na(LENGTH)
   # rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
     #no end date information in the observer dataset 
   
@@ -397,8 +407,10 @@ rm(ob_points_sf)
 ```{r}
 #All of this is taken from 'FISHING EFFECTS MODEL NORTHEAST REGION - NEFMC (2019)' APPENDIX A 
 
+###############################################################################################################
+####################################Swept area for Study Fleet Hauls ########################################
 # DISTANCE
-sf_trawl$d_t <- sf_trawl$CALC_DIST_NM #distance towed
+sf_trawl$d_t <- sf_trawl$CALC_DIST_NM * 1.852 # Distance towed (kilometers)
 
 
 
@@ -443,6 +455,57 @@ sf_trawl$lin_eff_width <- sf_trawl$boards + sf_trawl$cables + sf_trawl$sweep
 sf_trawl$swept_area <- sf_trawl$d_t * (0.001 * sf_trawl$lin_eff_width) # SA without sensitivity (km)
 
 
+
+###############################################################################################################
+####################################Swept area for Observer Hauls ########################################
+# DISTANCE
+observer_trawl$towspeed <- 3 # Towspeed (Nautical Miles/Hr)
+observer_trawl$hours_fished <- observer_trawl$HAULDUR # Total hours fished
+observer_trawl$d_nm <- observer_trawl$towspeed * observer_trawl$hours_fished # Distance (Nautical Miles)
+observer_trawl$d_t <- observer_trawl$d_nm * 1.852 # Distance towed (kilometers)
+
+
+
+# BOARDS Weight of otter trawl doors estimated by regression
+observer_trawl$weight <- 70.848 + (1.844 * observer_trawl$GTONS) + (0.5344 * observer_trawl$VHP)
+# Width trawl doors (meters) estimated by regression
+observer_trawl$width_o <- 0.001 * (1223 + (observer_trawl$weight * 0.8333))
+# Angle of attack (radians)
+observer_trawl$rad_o <- (2 * pi * 40)/360
+# Effective Width of otter board (meters)
+observer_trawl$w_o <- observer_trawl$width_o * sin(observer_trawl$rad_o)
+# Contact index for otter boards is constant
+observer_trawl$c_o <- 1
+
+
+
+# CABLES (contact index set below) Width of ground cable (meters) based on regression
+observer_trawl$width_c <- 0.3048 * (137.54 + (observer_trawl$LENGTH * 1.823))
+# Angle of attack (radians) of ground cable
+observer_trawl$rad_c <- (2 * pi * 15)/360
+# Effective width of ground cable (meters)
+observer_trawl$w_c <- observer_trawl$width_c * sin(observer_trawl$rad_c)
+
+
+
+# SWEEP (contact index set below)
+observer_trawl$raw_sweep <- observer_trawl$GEAR_SIZE
+observer_trawl$w_s <- 0.43 * observer_trawl$raw_sweep # Effective width of sweep (meters)
+
+
+
+# CONTACT INDECIES 
+observer_trawl$c_c <- 0.95 #CABLES
+observer_trawl$c_s <- 0.9  #SWEEP
+
+
+
+observer_trawl$boards <- 2 * observer_trawl$w_o * observer_trawl$c_o # Width of both boards (meters)
+observer_trawl$cables <- 2 * observer_trawl$w_c * observer_trawl$c_c # Width of both cables (meters)
+observer_trawl$sweep <- observer_trawl$w_s * observer_trawl$c_s # Width of the sweep (meters)
+observer_trawl$lin_eff_width <- observer_trawl$boards + observer_trawl$cables + observer_trawl$sweep
+observer_trawl$swept_area <- observer_trawl$d_t * (0.001 * observer_trawl$lin_eff_width) # SA without sensitivity (km)
+
 ```
 
 
@@ -474,7 +537,7 @@ ob_trawl_slim <- observer_trawl %>%
          "GRCABTYP", "BRDLGTYP", "BRDLGTYP", "FTROPTYP", "CODLINERUSD", "NESPP4", 
          "COMNAME", "CATDISP", "FISHDISP", "FISHDISPDESC", "GIS_LATHBEG", 
          "GIS_LONHBEG", "GIS_LATHEND", "GIS_LONHEND", "HAULDUR", "HAILWT", 
-         "LIVE_WT", "survey_comercial_ID", "strata"))
+         "LIVE_WT", "survey_comercial_ID", "strata", "swept_area"))
 
 
 
