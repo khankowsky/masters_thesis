@@ -172,25 +172,14 @@ nefsc_catch_fall <- read_csv('./data/22560_UNION_FSCS_SVCAT_fall.csv',
 nefsc_fall <- left_join(nefsc_station_fall, nefsc_catch_fall, 
                            by = c("ID", "CRUISE6", "STRATUM", "TOW", "STATION"))
 
+#joining the spring and fall survey datasets 
+nefsc <- rbind(nefsc_spring, nefsc_fall)
 
 
 
 #assigning commercial selectivity to the NEFSC trawl survey based on minimum fish size
-#import the length data
-nefsc_length_spring <- read_csv("./data/22560_UNION_FSCS_SVLEN_fall.csv", 
-                                col_types = list(
-                                  CRUISE6 = col_double(),
-                                  STRATUM = col_double(),
-                                  TOW = col_double(),
-                                  STATION = col_double(),
-                                  ID = col_double(),
-                                  LOGGED_SPECIES_NAME = col_character(),
-                                  SVSPP = col_double(),
-                                  CATCHSEX = col_double(),
-                                  LENGTH = col_double(),
-                                  EXPNUMLEN = col_double()))
-  
-nefsc_length_fall <- read_csv("./data/22561_UNION_FSCS_SVLEN_spring.csv", 
+#import the spring length data
+nefsc_length_spring <- read_csv("./data/22561_UNION_FSCS_SVLEN_spring.csv", 
                                 col_types = list(
                                   CRUISE6 = col_double(),
                                   STRATUM = col_double(),
@@ -203,10 +192,9 @@ nefsc_length_fall <- read_csv("./data/22561_UNION_FSCS_SVLEN_spring.csv",
                                   LENGTH = col_double(),
                                   EXPNUMLEN = col_double()))
 
-head(nefsc_length_fall)
-head(nefsc_catch_spring)
-skim(nefsc_catch_spring)
-skim(nefsc_length_fall)
+#the goal here is to select the individuals smaller than commercial selectivity
+#and apply a length-weight relationship to get their estimated weight and then 
+#subtract that from the aggregate catch weight 
 
 #filtering for species of interest and above their minimum landing size
 nefsc_length_spring_select <- nefsc_length_spring %>%
@@ -224,6 +212,71 @@ nefsc_length_spring_select <- nefsc_length_spring %>%
                                                     #for tails only 
            )
 
+
+
+#applying the length-weight relationship to the spring survey data 
+#length-weight parameters were obtained from Wigley et al (2003)
+nefsc_length_spring_select <- nefsc_length_spring_select %>%
+  mutate(ln_L = log(LENGTH)) %>%
+  mutate(ln_a = case_when(
+    SVSPP == 73 ~ -11.7803, 
+    SVSPP == 74 ~ -11.8062, 
+    SVSPP == 107 ~ -13.2151, 
+    SVSPP == 105 ~ -12.3581, 
+    SVSPP == 102 ~ -12.8117, 
+    SVSPP == 106 ~ -11.4718, 
+    SVSPP == 197 ~ -10.7668)) %>%
+  mutate(b = case_when(
+    SVSPP == 73 ~ 3.0606, 
+    SVSPP == 74 ~ 3.0766, 
+    SVSPP == 107 ~ 3.3289, 
+    SVSPP == 105 ~ 3.2099, 
+    SVSPP == 102 ~ 3.3125, 
+    SVSPP == 106 ~ 3.0431, 
+    SVSPP == 197 ~ 2.9302)) %>%
+  mutate(ln_W = ln_a + (b*ln_L)) %>%
+  mutate(Weight = exp(ln_W)) %>% 
+  mutate(totalWeight = Weight*EXPNUMLEN) %>%
+  group_by(CRUISE6, STRATUM, TOW, STATION, ID, SVSPP) %>%
+  summarise(undersized_fish_WT = sum(Weight)) %>%
+  ungroup() %>%
+  drop_na(undersized_fish_WT)
+
+
+#join the undersized fish data (length + weight) with the aggregate catch data
+nefsc_catch_spring_updated <- full_join(nefsc_catch_spring, nefsc_length_spring_select, 
+                                        by = c("CRUISE6", "STRATUM", "TOW", "STATION", "SVSPP"))
+
+
+#subtracting the small fish from the total weight at each station for each species 
+nefsc_catch_spring_updated <- nefsc_catch_spring_updated %>%
+  mutate(undersized_fish_WT = ifelse(is.na(undersized_fish_WT), 0, undersized_fish_WT)) %>%
+  mutate(CATCHWT_updated = EXPCATCHWT - undersized_fish_WT) %>%
+  mutate(CATCHWT_updated = ifelse(CATCHWT_updated <0, 0 , CATCHWT_updated))
+
+
+#joining the updated spring catch data with the spring station data
+nefsc_spring_updated <- left_join(nefsc_station_spring, nefsc_catch_spring_updated, 
+                           by = c("CRUISE6", "STRATUM", "TOW", "STATION"))
+
+
+
+#SAME THING BUT FOR FALL SURVEY 
+#import the fall length data
+nefsc_length_fall <- read_csv("./data/22560_UNION_FSCS_SVLEN_fall.csv", 
+                                col_types = list(
+                                  CRUISE6 = col_double(),
+                                  STRATUM = col_double(),
+                                  TOW = col_double(),
+                                  STATION = col_double(),
+                                  ID = col_double(),
+                                  LOGGED_SPECIES_NAME = col_character(),
+                                  SVSPP = col_double(),
+                                  CATCHSEX = col_double(),
+                                  LENGTH = col_double(),
+                                  EXPNUMLEN = col_double()))
+
+#filtering for species of interest and below their minimum landing size
 nefsc_length_fall_select <- nefsc_length_fall %>%
   filter(SVSPP %in% c(73, 74, 75, 107, 105, 102, 101, 106, 155, 197)) %>%
   filter(SVSPP == 73 & LENGTH < 48.26 | #cod, minimum size 19in (48.26cm)
@@ -239,85 +292,52 @@ nefsc_length_fall_select <- nefsc_length_fall %>%
                                                     #for tails only 
            )
 
-
-#applying the length-weight relationship to the survey data 
-nefsc_length_spring_select <- nefsc_length_spring_select %>%
+#applying the length-weight relationship to the fall survey data 
+nefsc_length_fall_select <- nefsc_length_fall_select %>%
   mutate(ln_L = log(LENGTH)) %>%
   mutate(ln_a = case_when(
-    SVSPP == 73 ~ -11.8467, 
-    SVSPP == 74 ~ -11.8087, 
-    SVSPP == 107 ~ -12.9743, 
-    SVSPP == 105 ~ -12.2057, 
-    SVSPP == 102 ~ -12.7805, 
-    SVSPP == 106 ~ -11.5989, 
-    SVSPP == 197 ~ -10.7387)) %>%
+    SVSPP == 73 ~ -11.9920, 
+    SVSPP == 74 ~ -11.8111, 
+    SVSPP == 107 ~ -12.7334, 
+    SVSPP == 105 ~ -11.8381, 
+    SVSPP == 102 ~ -12.7492, 
+    SVSPP == 106 ~ -11.6356, 
+    SVSPP == 197 ~ -10.7106)) %>%
   mutate(b = case_when(
-    SVSPP == 73 ~ 3.0798, 
-    SVSPP == 74 ~ 3.0827, 
-    SVSPP == 107 ~ 3.2643, 
-    SVSPP == 105 ~ 3.1689, 
-    SVSPP == 102 ~ 3.3094, 
-    SVSPP == 106 ~ 3.0904, 
-    SVSPP == 197 ~ 2.9265)) %>%
+    SVSPP == 73 ~ 3.1262, 
+    SVSPP == 74 ~ 3.0888, 
+    SVSPP == 107 ~ 3.1997, 
+    SVSPP == 105 ~ 3.0559, 
+    SVSPP == 102 ~ 3.3062, 
+    SVSPP == 106 ~ 3.1091, 
+    SVSPP == 197 ~ 2.9227)) %>%
   mutate(ln_W = ln_a + (b*ln_L)) %>%
   mutate(Weight = exp(ln_W)) %>% 
   mutate(totalWeight = Weight*EXPNUMLEN) %>%
   group_by(CRUISE6, STRATUM, TOW, STATION, ID, SVSPP) %>%
-  summarise(sumCATCH = sum(totalWeight)) %>%
-  drop_na(sumCATCH)
-  
+  summarise(undersized_fish_WT = sum(Weight)) %>%
+  ungroup() %>%
+  drop_na(undersized_fish_WT)
 
-nefsc_length_spring_select %>%
-  count(sumCATCH)
-  
+#join the undersized fish data (length + weight) with the aggregate catch data
+nefsc_catch_fall_updated <- full_join(nefsc_catch_fall, nefsc_length_fall_select, 
+                                        by = c("CRUISE6", "STRATUM", "TOW", "STATION", "SVSPP"))
 
-nefsc_length_fall %>%
-  count(SVSPP)
+#subtracting the small fish from the total weight at each station for each species 
+nefsc_catch_fall_updated <- nefsc_catch_fall_updated %>%
+  mutate(undersized_fish_WT = ifelse(is.na(undersized_fish_WT), 0, undersized_fish_WT)) %>%
+  mutate(CATCHWT_updated = EXPCATCHWT - undersized_fish_WT) %>%
+  mutate(CATCHWT_updated = ifelse(CATCHWT_updated <0, 0 , CATCHWT_updated))
 
-nefsc_catch_spring %>%
-  filter(CRUISE6 > 200900) 
-
-nefsc_catch_spring <- nefsc_catch_spring %>%
-  select(-c("...11","...12"))
-
-
-nefsc_length_spring_select %>%
-  filter(CRUISE6 > 200900) %>%
-  filter(SVSPP %in% c(73, 74))
-
-#now join this with the catch data and subtract the small fish from the total weight 
-nefsc_catch_spring_updated <- left_join(nefsc_catch_spring, nefsc_length_spring_select, 
-                                        by = c("ID", "CRUISE6", "STRATUM", "TOW", "STATION", "SVSPP"))
+#joining the updated fall catch data with the fall station data
+nefsc_fall_updated <- left_join(nefsc_station_fall, nefsc_catch_fall_updated, 
+                           by = c("CRUISE6", "STRATUM", "TOW", "STATION"))
 
 
 
-nefsc_catch_spring_updated %>%
-  count(sumCATCH)
+#joining the updated spring and fall survey datasets 
+nefsc <- rbind(nefsc_spring_updated, nefsc_fall_updated)
 
-
-#subtracting the small fish from the total weight
-nefsc_catch_spring_updated %>%
-  filter(CRUISE6 > 200900) %>%
-  filter(SVSPP %in% c(73, 74))
-
-skim(nefsc_catch_spring)
-
-
-
-
-
-nefsc_length_fall %>%
-  count(EXPNUMLEN)
-
-nefsc_length_fall %>%
-  group_by(CRUISE6, STRATUM, TOW, STATION, SVSPP) %>%
-  summarise(sumCATCH = sum(EXPNUMLEN))
-
-nefsc_catch_fall
-
-
-#joining the spring and fall survey datasets 
-nefsc <- rbind(nefsc_spring, nefsc_fall)
 
 
 rm(nefsc_station_spring)
