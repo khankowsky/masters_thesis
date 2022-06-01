@@ -225,16 +225,17 @@ nefsc_length_spring_select <- nefsc_length_spring %>%
            )
 
 nefsc_length_fall_select <- nefsc_length_fall %>%
-  filter(SVSPP == 73 & LENGTH > 48.26 | #cod, minimum size 19in (48.26cm)
-           SVSPP == 74 & LENGTH > 40.64 | #haddock, minimum size 16in (40.64cm)
-           SVSPP == 75 & LENGTH > 48.26 | #pollock, minimum size 19in (48.26cm)
-           SVSPP == 107 & LENGTH > 33.03 | #witch flounder, minimum size 13in (33.03cm)
-           SVSPP == 105 & LENGTH > 30.38 | #yellowtail flounder, minimum size 12in (30.48cm)
-           SVSPP == 102 & LENGTH > 30.38 | #american plaice, minimum size 12in (30.48cm)
-           SVSPP == 101 & LENGTH > 104.14 | #atlantic halibut, minimum size 41in (104.14cm)
-           SVSPP == 106 & LENGTH > 30.38 | #winter flounder, minimum size 12in (30.48cm)
-           SVSPP == 155 & LENGTH > 17.78 | #acadian redfish, minimum size 7in (17.78cm)   #NE Groundfish spp
-           SVSPP == 197 & LENGTH > 43.81 #goosefish, minimum size 17in (43.81cm) for whole fish or 11in 
+  filter(SVSPP %in% c(73, 74, 75, 107, 105, 102, 101, 106, 155, 197)) %>%
+  filter(SVSPP == 73 & LENGTH < 48.26 | #cod, minimum size 19in (48.26cm)
+           SVSPP == 74 & LENGTH < 40.64 | #haddock, minimum size 16in (40.64cm)
+           SVSPP == 75 & LENGTH < 48.26 | #pollock, minimum size 19in (48.26cm)
+           SVSPP == 107 & LENGTH < 33.03 | #witch flounder, minimum size 13in (33.03cm)
+           SVSPP == 105 & LENGTH < 30.38 | #yellowtail flounder, minimum size 12in (30.48cm)
+           SVSPP == 102 & LENGTH < 30.38 | #american plaice, minimum size 12in (30.48cm)
+           SVSPP == 101 & LENGTH < 104.14 | #atlantic halibut, minimum size 41in (104.14cm)
+           SVSPP == 106 & LENGTH < 30.38 | #winter flounder, minimum size 12in (30.48cm)
+           SVSPP == 155 & LENGTH < 17.78 | #acadian redfish, minimum size 7in (17.78cm)   #NE Groundfish spp
+           SVSPP == 197 & LENGTH < 43.81 #goosefish, minimum size 17in (43.81cm) for whole fish or 11in 
                                                     #for tails only 
            )
 
@@ -262,10 +263,15 @@ nefsc_length_spring_select <- nefsc_length_spring_select %>%
   mutate(Weight = exp(ln_W)) %>% 
   mutate(totalWeight = Weight*EXPNUMLEN) %>%
   group_by(CRUISE6, STRATUM, TOW, STATION, ID, SVSPP) %>%
-  summarise(sumCATCH = sum(totalWeight))
+  summarise(sumCATCH = sum(totalWeight)) %>%
+  drop_na(sumCATCH)
   
 
-nefsc_length_spring %>%
+nefsc_length_spring_select %>%
+  count(sumCATCH)
+  
+
+nefsc_length_fall %>%
   count(SVSPP)
 
 nefsc_catch_spring %>%
@@ -283,6 +289,10 @@ nefsc_length_spring_select %>%
 nefsc_catch_spring_updated <- left_join(nefsc_catch_spring, nefsc_length_spring_select, 
                                         by = c("ID", "CRUISE6", "STRATUM", "TOW", "STATION", "SVSPP"))
 
+
+
+nefsc_catch_spring_updated %>%
+  count(sumCATCH)
 
 
 #subtracting the small fish from the total weight
