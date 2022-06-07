@@ -91,6 +91,77 @@ skim(observer_trawl)
 ###############################################################################################################
 ############################################# OLD OBSERVER DATA READIN ######################################
 
+#Figuring out what the deal is with all the NAs in the NETTYPE 
+observer1 <- read_csv('./data/result1.csv')
+
+observer11 <- read_csv('./data/result1.csv', 
+                       col_types = list(
+                        NETTYPE = col_double(),
+                        NSWEEPS = col_double()))
+
+observer12 <- read_excel('./data/result1.xlsx')
+
+
+observer1 <- observer1 %>%
+ filter(NEGEAR %in% c("050", "057", "150")) %>%
+      #050 - Trawl, Otter, Bottom, Fish
+      #057 - Trawl, Otter, Bottom, Haddock Separator
+      #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  mutate(trip_haul_ID = paste(TRIPID,HAULNUM, sep = '_')) %>%
+  relocate(trip_haul_ID) %>%
+  filter(YEARHBEG  >= 2009) %>%
+  mutate(survey_comercial_ID = 3) %>%
+  rename(START_TOW_LAT = GIS_LATHBEG) %>% 
+  rename(START_TOW_LON = GIS_LONHBEG) %>%
+  rename(END_TOW_LAT = GIS_LATHEND) %>%
+  rename(END_TOW_LON = GIS_LONHEND) %>%
+  drop_na(END_TOW_LAT) %>%
+  drop_na(END_TOW_LON)
+
+
+observer11 <- observer11 %>%
+  filter(NEGEAR %in% c("050", "057", "150")) %>%
+      #050 - Trawl, Otter, Bottom, Fish
+      #057 - Trawl, Otter, Bottom, Haddock Separator
+      #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  filter(YEARHBEG  >= 2009)
+
+observer12 <- observer12 %>%
+  filter(NEGEAR %in% c("050", "057", "150")) %>%
+      #050 - Trawl, Otter, Bottom, Fish
+      #057 - Trawl, Otter, Bottom, Haddock Separator
+      #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  filter(YEARHBEG  >= 2009)
+
+
+skim(observer1)
+skim(observer11)
+skim(observer12)
+
+
+
+#Figuring out what the deal is with all the NAs in the NETTYPE 
+observer2 <- read_csv('./data/result2.csv')
+
+observer21 <- read_csv('./data/result2.csv', 
+                       col_types = list(
+                        NETTYPE = col_double(),
+                        NSWEEPS = col_double(), 
+                        PERMIT1 = col_double()))
+
+observer22 <- read_excel('./data/result2.xlsx')
+
+observer2 %>%
+  count(YEARHBEG)
+
+skim(observer2)
+skim(observer21)
+skim(observer22)
+
+
+
+
+#old observer read in 
 observer1 <- read_excel('./data/result1.xlsx')
 observer2 <- read_excel('./data/result2.xlsx', col_names = FALSE)
 
@@ -106,11 +177,11 @@ observer2 <- observer2 %>%
          GIS_LONHBEG = as.numeric(GIS_LONHBEG),
          GIS_LATHEND = as.numeric(GIS_LATHEND), 
          GIS_LONHEND = as.numeric(GIS_LONHEND), 
-         NSWEEPS = as.logical(NSWEEPS), 
-         SWEEPDIA = as.logical(SWEEPDIA), 
-         LINERMSIZE = as.logical(LINERMSIZE), 
-         CODMSIZE = as.logical(CODMSIZE),
-         MARKET = as.logical(MARKET), 
+         NSWEEPS = as.numeric(NSWEEPS), 
+         SWEEPDIA = as.numeric(SWEEPDIA), 
+         LINERMSIZE = as.numeric(LINERMSIZE), 
+         CODMSIZE = as.numeric(CODMSIZE),
+         MARKET = as.numeric(MARKET), 
          MSWGTAVG = as.numeric(MSWGTAVG), 
          SOAKDUR = as.numeric(SOAKDUR), 
          HAULDUR = as.numeric(HAULDUR), 
@@ -810,6 +881,76 @@ sf_trawl$sweep <- sf_trawl$w_s * sf_trawl$c_s # Width of the sweep (meters)
 sf_trawl$lin_eff_width <- sf_trawl$boards + sf_trawl$cables + sf_trawl$sweep
 sf_trawl$A <- sf_trawl$d_t * (0.001 * sf_trawl$lin_eff_width) # SA without sensitivity (km)
 
+```
+
+
+## Categorizing Trawls based on Net Type
+```{r}
+#Categorizing observer tows
+observer_trawl %>%
+  mutate(NETTYPE = as.numeric(NETTYPE)) %>% 
+  filter(!NETTYPE %in% c(76, 77, 75, 74, 78, 73, 61, 62, 60, 26, 27, 25)) %>%
+      #filtering out net types that don't belong (pelagic, scallop, shrimp trawls)
+      #76 - 2-seam pelagic pair trawl
+      #77 - 4-seam pelagic pair trawl
+      #75 - pelagic pair trawl, seams unknown
+      #74 - 2-seam pelagic single trawl
+      #78 - 4-seam pelagic single trawl
+      #73 - pelagic single trawl, seams unknown
+      #61 - 2-seam scallop trawl
+      #62 - 4-seam scallop trawl
+      #60 - scallop trawl, seams unknown
+      #26 - 2-seam shrimp trawl 
+      #27 - 4-seam shrimp trawl
+      #25 - shrimp trawl, seams unknown
+  mutate(trawl_type = case_when(
+    NETTYPE %in% c(89, 90, 88, 24, 86, 87, 85) ~ 1,
+      #89 - 2-seam balloon trawl 
+      #90 - 4-seam balloon trawl 
+      #88 - balloon trawl, seams unknown
+      #24 - 4-seam box trawl
+      #86 - 2-seam groundfish trawl 
+      #87 - 4-seam groundfish trawl 
+      #85 - groundfish trawl, seams unknown 
+    NETTYPE %in% c(10, 11, 12, 13) ~ 2, 
+      #10 - flatfish trawl, seams unknown 
+      #11 - 2-seam flatfish trawl 
+      #12 - 4-seam flatfish trawl 
+      #13 - flounder trawl 
+    NETTYPE %in% c(3, 4, 9, 16) ~ 3
+      #03 - 2-seam haddock separator trawl 
+      #04 - 4-seam haddock separator trawl 
+      #09 - haddock separator trawl, seams unknown 
+      #16 - rope separator trawl 
+  )) 
+  count(trawl_type)
+  
+skim(observer_trawl)
+  
+observer_trawl %>%
+  count(NETTYPE)
+  
+  
+observer_trawl %>%
+  filter(is.na(NETTYPE)) %>%
+  count(YEARHBEG)
+
+observer_trawl %>%
+  filter(trip_haul_ID == "T35010_0001")
+
+  count(NETTYPE)
+  filter(is.na(NETTYPE))
+
+view(observer_trawl)
+
+
+
+sf_trawl %>%
+  count(VTR_GEAR_CODE)
+  count(VESSEL_NAME)
+  
+sf_trawl %>%
+  mutate()
 ```
 
 
