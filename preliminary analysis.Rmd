@@ -904,7 +904,7 @@ observer_trawl %>%
       #27 - 4-seam shrimp trawl
       #25 - shrimp trawl, seams unknown
   mutate(trawl_type = case_when(
-    NETTYPE %in% c(89, 90, 88, 24, 86, 87, 85) ~ 1,
+    NETTYPE %in% c(89, 90, 88, 24, 86, 87, 85) ~ 1, #Generic Groundfish Trawls 
       #89 - 2-seam balloon trawl 
       #90 - 4-seam balloon trawl 
       #88 - balloon trawl, seams unknown
@@ -912,45 +912,94 @@ observer_trawl %>%
       #86 - 2-seam groundfish trawl 
       #87 - 4-seam groundfish trawl 
       #85 - groundfish trawl, seams unknown 
-    NETTYPE %in% c(10, 11, 12, 13) ~ 2, 
+    NETTYPE %in% c(10, 11, 12, 13, 01, 02, 08, 66, 67, 65) ~ 2, #Flatfish Trawls
       #10 - flatfish trawl, seams unknown 
       #11 - 2-seam flatfish trawl 
       #12 - 4-seam flatfish trawl 
       #13 - flounder trawl 
-    NETTYPE %in% c(3, 4, 9, 16) ~ 3
+      #01 - 2-seam flynet trawl
+      #02 - 4-seam flynet trawl 
+      #08 - flynet, seams unknown
+      #66 - 2-seam monkfish trawl
+      #67 - 4-seam monkfish trawl
+      #65 - monkfish trawl, seams unknown 
+    NETTYPE %in% c(3, 4, 9, 16, 06, 07, 05) ~ 3, #Separator Trawls
       #03 - 2-seam haddock separator trawl 
       #04 - 4-seam haddock separator trawl 
       #09 - haddock separator trawl, seams unknown 
       #16 - rope separator trawl 
-  )) 
+      #06 - 2-seam separator trawl
+      #07 - 4-seam separator trawl
+      #05 - separator trawl, seams unknown 
+    NETTYPE %in% c(31, 30, 32, 17, 18, 15, 81, 82, 80) ~ 4, #Eliminator Trawls
+      #31 - 2-seam eliminator trawl
+      #30 - 4-seam eliminator trawl
+      #32 - eliminator trawl, seams unknown
+      #17 - 4-seam mid-sized ruhle trawl
+      #18 - 4-seam millionaire trawl
+      #15 - 4-seam ruhle trawl
+      #81 - 2-seam shuman trawl
+      #82 - 4-seam shuman trawl
+      #80 - shuman trawl, seams unknown
+  ))
   count(trawl_type)
   
-skim(observer_trawl)
-  
+
 observer_trawl %>%
   count(NETTYPE)
-  
-  
-observer_trawl %>%
-  filter(is.na(NETTYPE)) %>%
-  count(YEARHBEG)
-
-observer_trawl %>%
-  filter(trip_haul_ID == "T35010_0001")
-
-  count(NETTYPE)
-  filter(is.na(NETTYPE))
-
-view(observer_trawl)
 
 
 
+#categorizing study fleet trawls 
 sf_trawl %>%
   count(VTR_GEAR_CODE)
   count(VESSEL_NAME)
   
 sf_trawl %>%
   mutate()
+
+sf_trawl %>%
+  group_by(YEAR) %>%
+  count(VESSEL_PERMIT_NUM)
+
+observer_trawl %>%
+  group_by(YEARHBEG) %>%
+  count(PERMIT1)
+
+observer_trawl %>%
+  filter(PERMIT1 == 410342 & YEARHBEG == 2010)
+
+sf_trawl %>%
+  count(VESSEL_PERMIT_NUM)
+
+
+sf_trawl_permit <- sf_trawl %>%
+  select(YEAR, VESSEL_PERMIT_NUM) %>%
+  group_by(YEAR) %>%
+  distinct(VESSEL_PERMIT_NUM) %>%
+  arrange(YEAR) %>%
+  mutate(year_permit = paste(YEAR,VESSEL_PERMIT_NUM, sep = '_'))
+
+
+observer_trawl_permit <- observer_trawl %>%
+  group_by(YEARHBEG) %>%
+  distinct(PERMIT1) %>%
+  arrange(YEARHBEG) %>%
+  mutate(year_permit = paste(YEARHBEG,PERMIT1, sep = '_'))
+
+sf_obsv_permit_match <- inner_join(sf_trawl_permit, observer_trawl_permit, 
+                                   by = "year_permit")
+
+df2 <- inner_join(observer_trawl, sf_obsv_permit_match, 
+                  by = c("PERMIT1", "YEARHBEG"))
+
+df2 %>%
+  group_by(PERMIT1, YEARHBEG) %>%
+  count(NETTYPE)
+
+
+
+sf_trawl_permits <- as.vector(n_distinct(sf_trawl$VESSEL_PERMIT_NUM))
 ```
 
 
