@@ -428,8 +428,8 @@ observer_trawl <- observer %>%
   rename(END_TOW_LAT = GIS_LATHEND) %>%
   rename(END_TOW_LON = GIS_LONHEND) %>%
   drop_na(END_TOW_LAT) %>%
-  drop_na(END_TOW_LON) %>%
-  drop_na(LENGTH)
+  drop_na(END_TOW_LON)
+  # drop_na(LENGTH)
   # rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
     #no end date information in the observer dataset 
   
@@ -670,6 +670,67 @@ observer_trawl$sweep <- observer_trawl$w_s * observer_trawl$c_s # Width of the s
 observer_trawl$lin_eff_width <- observer_trawl$boards + observer_trawl$cables + observer_trawl$sweep
 observer_trawl$swept_area <- observer_trawl$d_t * (0.001 * observer_trawl$lin_eff_width) # SA without sensitivity (km)
 
+```
+
+
+
+## Categorizing Trawl Types 
+```{r}
+observer_trawl <- observer_trawl %>%
+  mutate(NETTYPE = as.numeric(NETTYPE)) %>% 
+  filter(!NETTYPE %in% c(76, 77, 75, 74, 78, 73, 61, 62, 60, 26, 27, 25)) %>%
+      #filtering out net types that don't belong (pelagic, scallop, shrimp trawls)
+      #76 - 2-seam pelagic pair trawl
+      #77 - 4-seam pelagic pair trawl
+      #75 - pelagic pair trawl, seams unknown
+      #74 - 2-seam pelagic single trawl
+      #78 - 4-seam pelagic single trawl
+      #73 - pelagic single trawl, seams unknown
+      #61 - 2-seam scallop trawl
+      #62 - 4-seam scallop trawl
+      #60 - scallop trawl, seams unknown
+      #26 - 2-seam shrimp trawl 
+      #27 - 4-seam shrimp trawl
+      #25 - shrimp trawl, seams unknown
+  mutate(trawl_type = case_when(
+    NETTYPE %in% c(89, 90, 88, 24, 86, 87, 85) ~ 1, #Generic Groundfish Trawls 
+      #89 - 2-seam balloon trawl 
+      #90 - 4-seam balloon trawl 
+      #88 - balloon trawl, seams unknown
+      #24 - 4-seam box trawl
+      #86 - 2-seam groundfish trawl 
+      #87 - 4-seam groundfish trawl 
+      #85 - groundfish trawl, seams unknown 
+    NETTYPE %in% c(10, 11, 12, 13, 01, 02, 08, 66, 67, 65) ~ 2, #Flatfish Trawls
+      #10 - flatfish trawl, seams unknown 
+      #11 - 2-seam flatfish trawl 
+      #12 - 4-seam flatfish trawl 
+      #13 - flounder trawl 
+      #01 - 2-seam flynet trawl
+      #02 - 4-seam flynet trawl 
+      #08 - flynet, seams unknown
+      #66 - 2-seam monkfish trawl
+      #67 - 4-seam monkfish trawl
+      #65 - monkfish trawl, seams unknown 
+    NETTYPE %in% c(3, 4, 9, 16, 06, 07, 05) ~ 3, #Separator Trawls
+      #03 - 2-seam haddock separator trawl 
+      #04 - 4-seam haddock separator trawl 
+      #09 - haddock separator trawl, seams unknown 
+      #16 - rope separator trawl 
+      #06 - 2-seam separator trawl
+      #07 - 4-seam separator trawl
+      #05 - separator trawl, seams unknown 
+    NETTYPE %in% c(31, 30, 32, 17, 18, 15, 81, 82, 80) ~ 4, #Eliminator Trawls
+      #31 - 2-seam eliminator trawl
+      #30 - 4-seam eliminator trawl
+      #32 - eliminator trawl, seams unknown
+      #17 - 4-seam mid-sized ruhle trawl
+      #18 - 4-seam millionaire trawl
+      #15 - 4-seam ruhle trawl
+      #81 - 2-seam shuman trawl
+      #82 - 4-seam shuman trawl
+      #80 - shuman trawl, seams unknown
+  ))
 ```
 
 
