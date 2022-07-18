@@ -115,6 +115,8 @@ paired_tows_1mi_24hr %>%
 paired_tows_1mi_24hr %>%
   count(EFFORT_ID)
 
+gc()
+
 
 
 #Fuzzy joining sf tows that are within 1mi and 2days of nefsc tows
@@ -130,6 +132,8 @@ paired_tows_1mi_48hr %>%
   count(cruise_station_ID)
 paired_tows_1mi_48hr %>%
   count(EFFORT_ID)
+
+gc()
 
 
 
@@ -147,6 +151,9 @@ paired_tows_1mi_72hr %>%
 paired_tows_1mi_72hr %>%
   count(EFFORT_ID)
 
+gc()
+
+
 
 #Fuzzy joining sf tows that are within 1mi and 4days of nefsc tows
 paired_tows_1mi_96hr <- nefsc_slim %>% 
@@ -162,6 +169,7 @@ paired_tows_1mi_96hr %>%
 paired_tows_1mi_96hr %>%
   count(EFFORT_ID)
 
+gc()
 
 
 
@@ -180,6 +188,8 @@ paired_tows_1mi_120hr %>%
 paired_tows_1mi_120hr %>%
   count(EFFORT_ID)
 
+gc()
+
 
 
 #Fuzzy joining sf tows that are within 1mi and 6days of nefsc tows
@@ -196,6 +206,9 @@ paired_tows_1mi_144hr %>%
 paired_tows_1mi_144hr %>%
   count(EFFORT_ID) 
 
+gc()
+
+
 
 #Fuzzy joining sf tows that are within 1mi and 7days of nefsc tows
 paired_tows_1mi_168hr <- nefsc_slim %>% 
@@ -210,6 +223,8 @@ paired_tows_1mi_168hr %>%
   count(cruise_station_ID)
 paired_tows_1mi_168hr %>%
   count(EFFORT_ID) 
+
+gc()
 
 
 
@@ -226,6 +241,8 @@ paired_tows_1mi_192hr %>%
   count(cruise_station_ID)
 paired_tows_1mi_192hr %>%
   count(EFFORT_ID)
+
+gc()
 
 ```
 
@@ -269,6 +286,8 @@ paired_tows_1mi_24hr_ob %>%
 paired_tows_1mi_24hr_ob %>%
   count(trip_haul_ID)
 
+gc()
+
 
 
 #Fuzzy joining sf tows that are within 1mi and 2days of nefsc tows
@@ -284,6 +303,8 @@ paired_tows_1mi_48hr_ob %>%
   count(cruise_station_ID)
 paired_tows_1mi_48hr_ob %>%
   count(trip_haul_ID)
+
+gc()
 
 
 
@@ -301,6 +322,9 @@ paired_tows_1mi_72hr_ob %>%
 paired_tows_1mi_72hr_ob %>%
   count(trip_haul_ID)
 
+gc()
+
+
 
 #Fuzzy joining sf tows that are within 1mi and 4days of nefsc tows
 paired_tows_1mi_96hr_ob <- nefsc_slim %>% 
@@ -316,6 +340,7 @@ paired_tows_1mi_96hr_ob %>%
 paired_tows_1mi_96hr_ob %>%
   count(trip_haul_ID)
 
+gc()
 
 
 
@@ -333,6 +358,8 @@ paired_tows_1mi_120hr_ob %>%
 paired_tows_1mi_120hr_ob %>%
   count(trip_haul_ID)
 
+gc()
+
 
 
 #Fuzzy joining sf tows that are within 1mi and 6days of nefsc tows
@@ -349,6 +376,9 @@ paired_tows_1mi_144hr_ob %>%
 paired_tows_1mi_144hr_ob %>%
   count(trip_haul_ID) 
 
+gc()
+
+
 
 #Fuzzy joining sf tows that are within 1mi and 7days of nefsc tows
 paired_tows_1mi_168hr_ob <- nefsc_slim %>% 
@@ -363,6 +393,8 @@ paired_tows_1mi_168hr_ob %>%
   count(cruise_station_ID)
 paired_tows_1mi_168hr_ob %>%
   count(trip_haul_ID) 
+
+gc()
 
 
 
@@ -379,6 +411,8 @@ paired_tows_1mi_192hr_ob %>%
   count(cruise_station_ID)
 paired_tows_1mi_192hr_ob %>%
   count(trip_haul_ID)
+
+gc()
 
 ```
 
