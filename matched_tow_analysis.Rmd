@@ -28,7 +28,7 @@ library(beepr)
 
 # Matchcing Tows
 
-## SF w NEFSC fuzzy join based on prosopsed criteria 
+# SF w NEFSC fuzzy join based on prosopsed criteria 
 ```{r}
 rm(sf_trawl)
 rm(nefsc)
@@ -97,7 +97,8 @@ paired_tows_5mi_72hr %>%
 
 
 
-## SF w NEFSC fuzzy join for all combinations of miles/days 
+## SF w NEFSC fuzzy join for all combinations of miles/days
+### 1-mile matches 
 ```{r}
 ####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
 
@@ -244,11 +245,951 @@ paired_tows_1mi_192hr %>%
 
 gc()
 
+beep(8)
+
+```
+
+### 2-mile matches 
+```{r}
+####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
+
+#Fuzzy joining sf tows that are within 2mi and 1days of nefsc tows
+paired_tows_2mi_24hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 2days of nefsc tows
+paired_tows_2mi_48hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 3days of nefsc tows
+paired_tows_2mi_72hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 4days of nefsc tows
+paired_tows_2mi_96hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 5days of nefsc tows
+paired_tows_2mi_120hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 6days of nefsc tows
+paired_tows_2mi_144hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 7days of nefsc tows
+paired_tows_2mi_168hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 8days of nefsc tows
+paired_tows_2mi_192hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+paired_tows_2mi_24hr %>%
+  count(EFFORT_ID)
+
+paired_tows_2mi_48hr %>%
+  count(EFFORT_ID)
+
+paired_tows_2mi_72hr %>%
+  count(EFFORT_ID)
+
+paired_tows_2mi_96hr %>%
+  count(EFFORT_ID)
+
+paired_tows_2mi_120hr %>%
+  count(EFFORT_ID)
+
+paired_tows_2mi_144hr %>%
+  count(EFFORT_ID)
+
+paired_tows_2mi_168hr %>%
+  count(EFFORT_ID)
+
+paired_tows_2mi_192hr %>%
+  count(EFFORT_ID)
+
+beep(8)
+
+```
+
+### 3-mile matches 
+```{r}
+####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
+
+#Fuzzy joining sf tows that are within 3mi and 1days of nefsc tows
+paired_tows_3mi_24hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 2days of nefsc tows
+paired_tows_3mi_48hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 3days of nefsc tows
+paired_tows_3mi_72hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 4days of nefsc tows
+paired_tows_3mi_96hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 5days of nefsc tows
+paired_tows_3mi_120hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 6days of nefsc tows
+paired_tows_3mi_144hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 7days of nefsc tows
+paired_tows_3mi_168hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 8days of nefsc tows
+paired_tows_3mi_192hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+paired_tows_3mi_24hr %>%
+  count(EFFORT_ID)
+
+paired_tows_3mi_48hr %>%
+  count(EFFORT_ID)
+
+paired_tows_3mi_72hr %>%
+  count(EFFORT_ID)
+
+paired_tows_3mi_96hr %>%
+  count(EFFORT_ID)
+
+paired_tows_3mi_120hr %>%
+  count(EFFORT_ID)
+
+paired_tows_3mi_144hr %>%
+  count(EFFORT_ID)
+
+paired_tows_3mi_168hr %>%
+  count(EFFORT_ID)
+
+paired_tows_3mi_192hr %>%
+  count(EFFORT_ID)
+
+beep(8)
+
+```
+
+### 4-mile matches 
+```{r}
+####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
+
+#Fuzzy joining sf tows that are within 4mi and 1days of nefsc tows
+paired_tows_4mi_24hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 2days of nefsc tows
+paired_tows_4mi_48hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 3days of nefsc tows
+paired_tows_4mi_72hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 4days of nefsc tows
+paired_tows_4mi_96hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 5days of nefsc tows
+paired_tows_4mi_120hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 6days of nefsc tows
+paired_tows_4mi_144hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 7days of nefsc tows
+paired_tows_4mi_168hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 8days of nefsc tows
+paired_tows_4mi_192hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+paired_tows_4mi_24hr %>%
+  count(EFFORT_ID)
+
+paired_tows_4mi_48hr %>%
+  count(EFFORT_ID)
+
+paired_tows_4mi_72hr %>%
+  count(EFFORT_ID)
+
+paired_tows_4mi_96hr %>%
+  count(EFFORT_ID)
+
+paired_tows_4mi_120hr %>%
+  count(EFFORT_ID)
+
+paired_tows_4mi_144hr %>%
+  count(EFFORT_ID)
+
+paired_tows_4mi_168hr %>%
+  count(EFFORT_ID)
+
+paired_tows_4mi_192hr %>%
+  count(EFFORT_ID)
+
+beep(8)
+
+```
+
+### 5-mile matches 
+```{r}
+####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
+
+#Fuzzy joining sf tows that are within 5mi and 1days of nefsc tows
+paired_tows_5mi_24hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 2days of nefsc tows
+paired_tows_5mi_48hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 3days of nefsc tows
+paired_tows_5mi_72hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 4days of nefsc tows
+paired_tows_5mi_96hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 5days of nefsc tows
+paired_tows_5mi_120hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 6days of nefsc tows
+paired_tows_5mi_144hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 7days of nefsc tows
+paired_tows_5mi_168hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 8days of nefsc tows
+paired_tows_5mi_192hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+paired_tows_5mi_24hr %>%
+  count(EFFORT_ID)
+
+paired_tows_5mi_48hr %>%
+  count(EFFORT_ID)
+
+paired_tows_5mi_72hr %>%
+  count(EFFORT_ID)
+
+paired_tows_5mi_96hr %>%
+  count(EFFORT_ID)
+
+paired_tows_5mi_120hr %>%
+  count(EFFORT_ID)
+
+paired_tows_5mi_144hr %>%
+  count(EFFORT_ID)
+
+paired_tows_5mi_168hr %>%
+  count(EFFORT_ID)
+
+paired_tows_5mi_192hr %>%
+  count(EFFORT_ID)
+
+beep(8)
+
+```
+
+### 6-mile matches 
+```{r}
+####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
+
+#Fuzzy joining sf tows that are within 6mi and 1days of nefsc tows
+paired_tows_6mi_24hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 2days of nefsc tows
+paired_tows_6mi_48hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 3days of nefsc tows
+paired_tows_6mi_72hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 4days of nefsc tows
+paired_tows_6mi_96hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 5days of nefsc tows
+paired_tows_6mi_120hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 6days of nefsc tows
+paired_tows_6mi_144hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 7days of nefsc tows
+paired_tows_6mi_168hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 8days of nefsc tows
+paired_tows_6mi_192hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+paired_tows_6mi_24hr %>%
+  count(EFFORT_ID)
+
+paired_tows_6mi_48hr %>%
+  count(EFFORT_ID)
+
+paired_tows_6mi_72hr %>%
+  count(EFFORT_ID)
+
+paired_tows_6mi_96hr %>%
+  count(EFFORT_ID)
+
+paired_tows_6mi_120hr %>%
+  count(EFFORT_ID)
+
+paired_tows_6mi_144hr %>%
+  count(EFFORT_ID)
+
+paired_tows_6mi_168hr %>%
+  count(EFFORT_ID)
+
+paired_tows_6mi_192hr %>%
+  count(EFFORT_ID)
+
+beep(8)
+
+```
+
+### 7-mile matches 
+```{r}
+####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
+
+#Fuzzy joining sf tows that are within 7mi and 1days of nefsc tows
+paired_tows_7mi_24hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 2days of nefsc tows
+paired_tows_7mi_48hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 3days of nefsc tows
+paired_tows_7mi_72hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 4days of nefsc tows
+paired_tows_7mi_96hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 5days of nefsc tows
+paired_tows_7mi_120hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 6days of nefsc tows
+paired_tows_7mi_144hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 7days of nefsc tows
+paired_tows_7mi_168hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 8days of nefsc tows
+paired_tows_7mi_192hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+paired_tows_7mi_24hr %>%
+  count(EFFORT_ID)
+
+paired_tows_7mi_48hr %>%
+  count(EFFORT_ID)
+
+paired_tows_7mi_72hr %>%
+  count(EFFORT_ID)
+
+paired_tows_7mi_96hr %>%
+  count(EFFORT_ID)
+
+paired_tows_7mi_120hr %>%
+  count(EFFORT_ID)
+
+paired_tows_7mi_144hr %>%
+  count(EFFORT_ID)
+
+paired_tows_7mi_168hr %>%
+  count(EFFORT_ID)
+
+paired_tows_7mi_192hr %>%
+  count(EFFORT_ID)
+
+beep(8)
+
+```
+
+### 8-mile matches 
+```{r}
+####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
+
+#Fuzzy joining sf tows that are within 8mi and 1days of nefsc tows
+paired_tows_8mi_24hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 2days of nefsc tows
+paired_tows_8mi_48hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 3days of nefsc tows
+paired_tows_8mi_72hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 4days of nefsc tows
+paired_tows_8mi_96hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 5days of nefsc tows
+paired_tows_8mi_120hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 6days of nefsc tows
+paired_tows_8mi_144hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 7days of nefsc tows
+paired_tows_8mi_168hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 8days of nefsc tows
+paired_tows_8mi_192hr <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(sf_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+paired_tows_8mi_24hr %>%
+  count(EFFORT_ID)
+
+paired_tows_8mi_48hr %>%
+  count(EFFORT_ID)
+
+paired_tows_8mi_72hr %>%
+  count(EFFORT_ID)
+
+paired_tows_8mi_96hr %>%
+  count(EFFORT_ID)
+
+paired_tows_8mi_120hr %>%
+  count(EFFORT_ID)
+
+paired_tows_8mi_144hr %>%
+  count(EFFORT_ID)
+
+paired_tows_8mi_168hr %>%
+  count(EFFORT_ID)
+
+paired_tows_8mi_192hr %>%
+  count(EFFORT_ID)
+
+beep(8)
+
 ```
 
 
 
-## Observer w NEFSC fuzzy join datasets based on proposed criteria 
+# Observer w NEFSC fuzzy join datasets based on proposed criteria 
 ```{r}
 paired_tows_1mi_24hr_ob <- nefsc_slim %>% 
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
@@ -269,6 +1210,7 @@ paired_tows_1mi_24hr_ob %>%
 
 
 ## Observer w NEFSC fuzzy join for all combinations of miles/days 
+### 1-mile matches
 ```{r}
 ####### Run the Fuzzy Join for all combinations of miles/days from 1-8 #########
 
@@ -414,8 +1356,931 @@ paired_tows_1mi_192hr_ob %>%
 
 gc()
 
+beep(8)
+
+```
+
+### 2 mile matches
+```{r}
+#Fuzzy joining sf tows that are within 2mi and 1days of nefsc tows
+paired_tows_2mi_24hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+#Fuzzy joining sf tows that are within 2mi and 2days of nefsc tows
+paired_tows_2mi_48hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -2 & time_dif < 2) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 3days of nefsc tows
+paired_tows_2mi_72hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -3 & time_dif < 3) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 4days of nefsc tows
+paired_tows_2mi_96hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -4 & time_dif < 4) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 5days of nefsc tows
+paired_tows_2mi_120hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -5 & time_dif < 5) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 6days of nefsc tows
+paired_tows_2mi_144hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -6 & time_dif < 6) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 7days of nefsc tows
+paired_tows_2mi_168hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -7 & time_dif < 7) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 2mi and 8days of nefsc tows
+paired_tows_2mi_192hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 2, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -8 & time_dif < 8) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+
+paired_tows_2mi_24hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_2mi_48hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_2mi_72hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_2mi_96hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_2mi_120hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_2mi_144hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_2mi_168hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_2mi_192hr_ob %>%
+  count(trip_haul_ID)
+
+```
+
+### 3 mile matches 
+```{r}
+#Fuzzy joining sf tows that are within 3mi and 1days of nefsc tows
+paired_tows_3mi_24hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+#Fuzzy joining sf tows that are within 3mi and 2days of nefsc tows
+paired_tows_3mi_48hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -2 & time_dif < 2) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 3days of nefsc tows
+paired_tows_3mi_72hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -3 & time_dif < 3) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 4days of nefsc tows
+paired_tows_3mi_96hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -4 & time_dif < 4) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 5days of nefsc tows
+paired_tows_3mi_120hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -5 & time_dif < 5) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 6days of nefsc tows
+paired_tows_3mi_144hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -6 & time_dif < 6) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 7days of nefsc tows
+paired_tows_3mi_168hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -7 & time_dif < 7) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 3mi and 8days of nefsc tows
+paired_tows_3mi_192hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 3, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -8 & time_dif < 8) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+
+paired_tows_3mi_24hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_3mi_48hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_3mi_72hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_3mi_96hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_3mi_120hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_3mi_144hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_3mi_168hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_3mi_192hr_ob %>%
+  count(trip_haul_ID)
+
+```
+
+### 4 mile matches 
+```{r}
+#Fuzzy joining sf tows that are within 4mi and 1days of nefsc tows
+paired_tows_4mi_24hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+#Fuzzy joining sf tows that are within 4mi and 2days of nefsc tows
+paired_tows_4mi_48hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -2 & time_dif < 2) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 3days of nefsc tows
+paired_tows_4mi_72hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -3 & time_dif < 3) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 4days of nefsc tows
+paired_tows_4mi_96hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -4 & time_dif < 4) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 5days of nefsc tows
+paired_tows_4mi_120hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -5 & time_dif < 5) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 6days of nefsc tows
+paired_tows_4mi_144hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -6 & time_dif < 6) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 7days of nefsc tows
+paired_tows_4mi_168hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -7 & time_dif < 7) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 4mi and 8days of nefsc tows
+paired_tows_4mi_192hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 4, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -8 & time_dif < 8) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+
+paired_tows_4mi_24hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_4mi_48hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_4mi_72hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_4mi_96hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_4mi_120hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_4mi_144hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_4mi_168hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_4mi_192hr_ob %>%
+  count(trip_haul_ID)
+
+```
+
+### 5 mile matches 
+```{r}
+#Fuzzy joining sf tows that are within 5mi and 1days of nefsc tows
+paired_tows_5mi_24hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+#Fuzzy joining sf tows that are within 5mi and 2days of nefsc tows
+paired_tows_5mi_48hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -2 & time_dif < 2) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 3days of nefsc tows
+paired_tows_5mi_72hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -3 & time_dif < 3) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 4days of nefsc tows
+paired_tows_5mi_96hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -4 & time_dif < 4) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 5days of nefsc tows
+paired_tows_5mi_120hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -5 & time_dif < 5) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 6days of nefsc tows
+paired_tows_5mi_144hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -6 & time_dif < 6) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 7days of nefsc tows
+paired_tows_5mi_168hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -7 & time_dif < 7) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 5mi and 8days of nefsc tows
+paired_tows_5mi_192hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 5, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -8 & time_dif < 8) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+
+paired_tows_5mi_24hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_5mi_48hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_5mi_72hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_5mi_96hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_5mi_120hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_5mi_144hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_5mi_168hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_5mi_192hr_ob %>%
+  count(trip_haul_ID)
+
+```
+
+### 6 mile matches 
+```{r}
+#Fuzzy joining sf tows that are within 6mi and 1days of nefsc tows
+paired_tows_6mi_24hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+#Fuzzy joining sf tows that are within 6mi and 2days of nefsc tows
+paired_tows_6mi_48hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -2 & time_dif < 2) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 3days of nefsc tows
+paired_tows_6mi_72hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -3 & time_dif < 3) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 4days of nefsc tows
+paired_tows_6mi_96hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -4 & time_dif < 4) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 5days of nefsc tows
+paired_tows_6mi_120hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -5 & time_dif < 5) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 6days of nefsc tows
+paired_tows_6mi_144hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -6 & time_dif < 6) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 7days of nefsc tows
+paired_tows_6mi_168hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -7 & time_dif < 7) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 6mi and 8days of nefsc tows
+paired_tows_6mi_192hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 6, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -8 & time_dif < 8) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+
+paired_tows_6mi_24hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_6mi_48hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_6mi_72hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_6mi_96hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_6mi_120hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_6mi_144hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_6mi_168hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_6mi_192hr_ob %>%
+  count(trip_haul_ID)
+
+```
+
+### 7 mile matches 
+```{r}
+#Fuzzy joining sf tows that are within 7mi and 1days of nefsc tows
+paired_tows_7mi_24hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+#Fuzzy joining sf tows that are within 7mi and 2days of nefsc tows
+paired_tows_7mi_48hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -2 & time_dif < 2) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 3days of nefsc tows
+paired_tows_7mi_72hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -3 & time_dif < 3) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 4days of nefsc tows
+paired_tows_7mi_96hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -4 & time_dif < 4) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 5days of nefsc tows
+paired_tows_7mi_120hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -5 & time_dif < 5) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 6days of nefsc tows
+paired_tows_7mi_144hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -6 & time_dif < 6) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 7days of nefsc tows
+paired_tows_7mi_168hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -7 & time_dif < 7) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 7mi and 8days of nefsc tows
+paired_tows_7mi_192hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 7, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -8 & time_dif < 8) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+
+paired_tows_7mi_24hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_7mi_48hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_7mi_72hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_7mi_96hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_7mi_120hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_7mi_144hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_7mi_168hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_7mi_192hr_ob %>%
+  count(trip_haul_ID)
+
 ```
 
 
+### 8 mile matches 
+```{r}
+#Fuzzy joining sf tows that are within 8mi and 1days of nefsc tows
+paired_tows_8mi_24hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -1 & time_dif < 1) %>%
+  filter(STRATUM == strata)
+
+gc()
 
 
+#Fuzzy joining sf tows that are within 8mi and 2days of nefsc tows
+paired_tows_8mi_48hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -2 & time_dif < 2) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 3days of nefsc tows
+paired_tows_8mi_72hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -3 & time_dif < 3) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 4days of nefsc tows
+paired_tows_8mi_96hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -4 & time_dif < 4) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 5days of nefsc tows
+paired_tows_8mi_120hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -5 & time_dif < 5) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 6days of nefsc tows
+paired_tows_8mi_144hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -6 & time_dif < 6) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 7days of nefsc tows
+paired_tows_8mi_168hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -7 & time_dif < 7) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+#Fuzzy joining sf tows that are within 8mi and 8days of nefsc tows
+paired_tows_8mi_192hr_ob <- nefsc_slim %>% 
+  fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -8 & time_dif < 8) %>%
+  filter(STRATUM == strata)
+
+gc()
+
+
+
+
+paired_tows_8mi_24hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_8mi_48hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_8mi_72hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_8mi_96hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_8mi_120hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_8mi_144hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_8mi_168hr_ob %>%
+  count(trip_haul_ID)
+
+paired_tows_8mi_192hr_ob %>%
+  count(trip_haul_ID)
+
+```
