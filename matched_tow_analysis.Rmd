@@ -33,7 +33,7 @@ library(beepr)
 rm(sf_trawl)
 rm(nefsc)
 
-memory.limit(size = 999999)
+memory.limit(size = 9999999999999)
 
 #Fuzzy joining sf tows that are within 1mi and 1 day of nefsc tows
 paired_tows_1mi_24hr <- nefsc_slim %>% 
