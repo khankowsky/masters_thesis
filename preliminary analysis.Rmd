@@ -38,6 +38,130 @@ study_fleet <- read_csv('./data/STUDY_FLEET_GROUNFISH_DATA_PULL_V1.csv')
 
 ## Observer data
 ```{r}
+observer1 <- read_csv('./data/result1.csv')
+observer2 <- read_csv('./data/result2.csv')
+
+
+glimpse(observer1)
+glimpse(observer2)
+
+observer1 <- observer1 %>%
+  mutate(PROGRAM = as.double(PROGRAM))
+
+#bind the two sheets together
+observer <- bind_rows(observer1, observer2)
+
+observer <- observer %>%
+  mutate(YEAR = YEARHBEG,
+         PERMIT = PERMIT1)
+
+#clear environment of unnecessary datasets
+rm(observer1)
+rm(observer2)
+
+
+#import permit 
+permit <- read_csv('./data/permit_output.csv')
+
+#clean permit
+permit_names <- permit %>% 
+  names() %>% 
+  str_squish() %>%
+  str_split(., pattern = " ")
+permit_names
+permit <- permit %>% 
+  mutate_all(str_squish) %>% 
+  separate(1, into = permit_names[[1]], sep = " ") %>% 
+  mutate_all(as.numeric) 
+permit
+
+
+#join observer and permit data 
+observer <- left_join(observer, permit, by = c("YEAR", "PERMIT"), all.x = TRUE, no.dups = TRUE)
+
+observer %>%
+  drop_na(PERMIT)
+
+glimpse(observer)
+skim(observer)
+skim(permit)
+skim(observer_trawl)
+
+
+###############################################################################################################
+############################################# OLD OBSERVER DATA READIN ######################################
+
+#Figuring out what the deal is with all the NAs in the NETTYPE 
+observer1 <- read_csv('./data/result1.csv')
+
+observer11 <- read_csv('./data/result1.csv', 
+                       col_types = list(
+                        NETTYPE = col_double(),
+                        NSWEEPS = col_double()))
+
+observer12 <- read_excel('./data/result1.xlsx')
+
+
+observer1 <- observer1 %>%
+ filter(NEGEAR %in% c("050", "057", "150")) %>%
+      #050 - Trawl, Otter, Bottom, Fish
+      #057 - Trawl, Otter, Bottom, Haddock Separator
+      #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  mutate(trip_haul_ID = paste(TRIPID,HAULNUM, sep = '_')) %>%
+  relocate(trip_haul_ID) %>%
+  filter(YEARHBEG  >= 2009) %>%
+  mutate(survey_comercial_ID = 3) %>%
+  rename(START_TOW_LAT = GIS_LATHBEG) %>% 
+  rename(START_TOW_LON = GIS_LONHBEG) %>%
+  rename(END_TOW_LAT = GIS_LATHEND) %>%
+  rename(END_TOW_LON = GIS_LONHEND) %>%
+  drop_na(END_TOW_LAT) %>%
+  drop_na(END_TOW_LON)
+
+
+observer11 <- observer11 %>%
+  filter(NEGEAR %in% c("050", "057", "150")) %>%
+      #050 - Trawl, Otter, Bottom, Fish
+      #057 - Trawl, Otter, Bottom, Haddock Separator
+      #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  filter(YEARHBEG  >= 2009)
+
+observer12 <- observer12 %>%
+  filter(NEGEAR %in% c("050", "057", "150")) %>%
+      #050 - Trawl, Otter, Bottom, Fish
+      #057 - Trawl, Otter, Bottom, Haddock Separator
+      #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  filter(YEARHBEG  >= 2009)
+
+
+skim(observer1)
+skim(observer11)
+skim(observer12)
+
+
+
+#Figuring out what the deal is with all the NAs in the NETTYPE 
+observer2 <- read_csv('./data/result2.csv')
+
+observer21 <- read_csv('./data/result2.csv', 
+                       col_types = list(
+                        NETTYPE = col_double(),
+                        NSWEEPS = col_double(), 
+                        PERMIT1 = col_double()))
+
+observer22 <- read_excel('./data/result2.xlsx')
+
+observer2 %>%
+  count(YEARHBEG)
+
+skim(observer2)
+skim(observer21)
+skim(observer22)
+
+
+
+
+#old observer read in 
 observer1 <- read_excel('./data/result1.xlsx')
 observer2 <- read_excel('./data/result2.xlsx', col_names = FALSE)
 
@@ -46,32 +170,33 @@ observer_colnames <- as.vector(colnames(observer1))
 
 names(observer2) <- observer_colnames
 
-skim(observer1)
 
 observer2 <- observer2 %>%
   mutate(PERMIT1 = as.logical(PERMIT1), 
-         GIS_LATHBEG = as.double(GIS_LATHBEG), 
-         GIS_LONHBEG = as.double(GIS_LONHBEG),
-         GIS_LATHEND = as.double(GIS_LATHEND), 
-         GIS_LONHEND = as.double(GIS_LONHEND), 
-         NSWEEPS = as.logical(NSWEEPS), 
-         SWEEPDIA = as.logical(SWEEPDIA), 
-         LINERMSIZE = as.logical(LINERMSIZE), 
-         CODMSIZE = as.logical(CODMSIZE),
-         MARKET = as.logical(MARKET), 
-         MSWGTAVG = as.double(MSWGTAVG), 
-         SOAKDUR = as.double(SOAKDUR), 
-         HAULDUR = as.double(HAULDUR), 
-         HAILWT = as.double(HAILWT), 
-         LIVE_WT = as.double(LIVE_WT)
+         GIS_LATHBEG = as.numeric(GIS_LATHBEG), 
+         GIS_LONHBEG = as.numeric(GIS_LONHBEG),
+         GIS_LATHEND = as.numeric(GIS_LATHEND), 
+         GIS_LONHEND = as.numeric(GIS_LONHEND), 
+         NSWEEPS = as.numeric(NSWEEPS), 
+         SWEEPDIA = as.numeric(SWEEPDIA), 
+         LINERMSIZE = as.numeric(LINERMSIZE), 
+         CODMSIZE = as.numeric(CODMSIZE),
+         MARKET = as.numeric(MARKET), 
+         MSWGTAVG = as.numeric(MSWGTAVG), 
+         SOAKDUR = as.numeric(SOAKDUR), 
+         HAULDUR = as.numeric(HAULDUR), 
+         HAILWT = as.numeric(HAILWT), 
+         LIVE_WT = as.numeric(LIVE_WT)
          )
 
 #bind the two sheets together
-observer <- bind_rows(observer1, observer2)
+observer_old <- bind_rows(observer1, observer2)
 
 #clear environment of unnecessary datasets
 rm(observer1)
 rm(observer2)
+rm(observer_colnames)
+
 
 ```
 
@@ -82,7 +207,18 @@ rm(observer2)
 #importing and joining the spring nefsc survey catch and station data and joining them 
 nefsc_station_spring <- read_csv('./data/22561_UNION_FSCS_SVSTA_spring.csv')
 
-nefsc_catch_spring <- read_csv('./data/22561_UNION_FSCS_SVCAT_spring.csv')
+nefsc_catch_spring <- read_csv('./data/22561_UNION_FSCS_SVCAT_spring.csv', 
+                               col_types = list(
+                                CRUISE6 = col_double(),
+                                STRATUM = col_double(),
+                                TOW = col_double(),
+                                STATION = col_double(),
+                                ID = col_double(),
+                                LOGGED_SPECIES_NAME = col_character(),
+                                SVSPP = col_double(),
+                                CATCHSEX = col_double(),
+                                EXPCATCHNUM = col_double(),
+                                EXPCATCHWT = col_double()))
 
 nefsc_spring <- left_join(nefsc_station_spring, nefsc_catch_spring, 
                            by = c("ID", "CRUISE6", "STRATUM", "TOW", "STATION"))
@@ -91,16 +227,188 @@ nefsc_spring <- left_join(nefsc_station_spring, nefsc_catch_spring,
 #importing and joining the fall nefsc survey catch and station data and joining them 
 nefsc_station_fall <- read_csv('./data/22560_UNION_FSCS_SVSTA_fall.csv')
 
-nefsc_catch_fall <- read_csv('./data/22560_UNION_FSCS_SVCAT_fall.csv')
+nefsc_catch_fall <- read_csv('./data/22560_UNION_FSCS_SVCAT_fall.csv', 
+                              col_types = list(
+                                CRUISE6 = col_double(),
+                                STRATUM = col_double(),
+                                TOW = col_double(),
+                                STATION = col_double(),
+                                ID = col_double(),
+                                LOGGED_SPECIES_NAME = col_character(),
+                                SVSPP = col_double(),
+                                CATCHSEX = col_double(),
+                                EXPCATCHNUM = col_double(),
+                                EXPCATCHWT = col_double()))
   
 nefsc_fall <- left_join(nefsc_station_fall, nefsc_catch_fall, 
                            by = c("ID", "CRUISE6", "STRATUM", "TOW", "STATION"))
 
-
-
-
 #joining the spring and fall survey datasets 
 nefsc <- rbind(nefsc_spring, nefsc_fall)
+
+
+
+#assigning commercial selectivity to the NEFSC trawl survey based on minimum fish size
+#import the spring length data
+nefsc_length_spring <- read_csv("./data/22561_UNION_FSCS_SVLEN_spring.csv", 
+                                col_types = list(
+                                  CRUISE6 = col_double(),
+                                  STRATUM = col_double(),
+                                  TOW = col_double(),
+                                  STATION = col_double(),
+                                  ID = col_double(),
+                                  LOGGED_SPECIES_NAME = col_character(),
+                                  SVSPP = col_double(),
+                                  CATCHSEX = col_double(),
+                                  LENGTH = col_double(),
+                                  EXPNUMLEN = col_double()))
+
+#the goal here is to select the individuals smaller than commercial selectivity
+#and apply a length-weight relationship to get their estimated weight and then 
+#subtract that from the aggregate catch weight 
+
+#filtering for species of interest and above their minimum landing size
+nefsc_length_spring_select <- nefsc_length_spring %>%
+  filter(SVSPP %in% c(73, 74, 75, 107, 105, 102, 101, 106, 155, 197)) %>%
+  filter(SVSPP == 73 & LENGTH < 48.26 | #cod, minimum size 19in (48.26cm)
+           SVSPP == 74 & LENGTH < 40.64 | #haddock, minimum size 16in (40.64cm)
+           SVSPP == 75 & LENGTH < 48.26 | #pollock, minimum size 19in (48.26cm)
+           SVSPP == 107 & LENGTH < 33.03 | #witch flounder, minimum size 13in (33.03cm)
+           SVSPP == 105 & LENGTH < 30.38 | #yellowtail flounder, minimum size 12in (30.48cm)
+           SVSPP == 102 & LENGTH < 30.38 | #american plaice, minimum size 12in (30.48cm)
+           SVSPP == 101 & LENGTH < 104.14 | #atlantic halibut, minimum size 41in (104.14cm)
+           SVSPP == 106 & LENGTH < 30.38 | #winter flounder, minimum size 12in (30.48cm)
+           SVSPP == 155 & LENGTH < 17.78 | #acadian redfish, minimum size 7in (17.78cm)   #NE Groundfish spp
+           SVSPP == 197 & LENGTH < 43.81 #goosefish, minimum size 17in (43.81cm) for whole fish or 11in 
+                                                    #for tails only 
+           )
+
+
+
+#applying the length-weight relationship to the spring survey data 
+#length-weight parameters were obtained from Wigley et al (2003)
+nefsc_length_spring_select <- nefsc_length_spring_select %>%
+  mutate(ln_L = log(LENGTH)) %>%
+  mutate(ln_a = case_when(
+    SVSPP == 73 ~ -11.7803, 
+    SVSPP == 74 ~ -11.8062, 
+    SVSPP == 107 ~ -13.2151, 
+    SVSPP == 105 ~ -12.3581, 
+    SVSPP == 102 ~ -12.8117, 
+    SVSPP == 106 ~ -11.4718, 
+    SVSPP == 197 ~ -10.7668)) %>%
+  mutate(b = case_when(
+    SVSPP == 73 ~ 3.0606, 
+    SVSPP == 74 ~ 3.0766, 
+    SVSPP == 107 ~ 3.3289, 
+    SVSPP == 105 ~ 3.2099, 
+    SVSPP == 102 ~ 3.3125, 
+    SVSPP == 106 ~ 3.0431, 
+    SVSPP == 197 ~ 2.9302)) %>%
+  mutate(ln_W = ln_a + (b*ln_L)) %>%
+  mutate(Weight = exp(ln_W)) %>% 
+  mutate(totalWeight = Weight*EXPNUMLEN) %>%
+  group_by(CRUISE6, STRATUM, TOW, STATION, ID, SVSPP) %>%
+  summarise(undersized_fish_WT = sum(Weight)) %>%
+  ungroup() %>%
+  drop_na(undersized_fish_WT)
+
+
+#join the undersized fish data (length + weight) with the aggregate catch data
+nefsc_catch_spring_updated <- full_join(nefsc_catch_spring, nefsc_length_spring_select, 
+                                        by = c("CRUISE6", "STRATUM", "TOW", "STATION", "SVSPP"))
+
+
+#subtracting the small fish from the total weight at each station for each species 
+nefsc_catch_spring_updated <- nefsc_catch_spring_updated %>%
+  mutate(undersized_fish_WT = ifelse(is.na(undersized_fish_WT), 0, undersized_fish_WT)) %>%
+  mutate(CATCHWT_updated = EXPCATCHWT - undersized_fish_WT) %>%
+  mutate(CATCHWT_updated = ifelse(CATCHWT_updated <0, 0 , CATCHWT_updated))
+
+
+#joining the updated spring catch data with the spring station data
+nefsc_spring_updated <- left_join(nefsc_station_spring, nefsc_catch_spring_updated, 
+                           by = c("CRUISE6", "STRATUM", "TOW", "STATION"))
+
+
+
+#SAME THING BUT FOR FALL SURVEY 
+#import the fall length data
+nefsc_length_fall <- read_csv("./data/22560_UNION_FSCS_SVLEN_fall.csv", 
+                                col_types = list(
+                                  CRUISE6 = col_double(),
+                                  STRATUM = col_double(),
+                                  TOW = col_double(),
+                                  STATION = col_double(),
+                                  ID = col_double(),
+                                  LOGGED_SPECIES_NAME = col_character(),
+                                  SVSPP = col_double(),
+                                  CATCHSEX = col_double(),
+                                  LENGTH = col_double(),
+                                  EXPNUMLEN = col_double()))
+
+#filtering for species of interest and below their minimum landing size
+nefsc_length_fall_select <- nefsc_length_fall %>%
+  filter(SVSPP %in% c(73, 74, 75, 107, 105, 102, 101, 106, 155, 197)) %>%
+  filter(SVSPP == 73 & LENGTH < 48.26 | #cod, minimum size 19in (48.26cm)
+           SVSPP == 74 & LENGTH < 40.64 | #haddock, minimum size 16in (40.64cm)
+           SVSPP == 75 & LENGTH < 48.26 | #pollock, minimum size 19in (48.26cm)
+           SVSPP == 107 & LENGTH < 33.03 | #witch flounder, minimum size 13in (33.03cm)
+           SVSPP == 105 & LENGTH < 30.38 | #yellowtail flounder, minimum size 12in (30.48cm)
+           SVSPP == 102 & LENGTH < 30.38 | #american plaice, minimum size 12in (30.48cm)
+           SVSPP == 101 & LENGTH < 104.14 | #atlantic halibut, minimum size 41in (104.14cm)
+           SVSPP == 106 & LENGTH < 30.38 | #winter flounder, minimum size 12in (30.48cm)
+           SVSPP == 155 & LENGTH < 17.78 | #acadian redfish, minimum size 7in (17.78cm)   #NE Groundfish spp
+           SVSPP == 197 & LENGTH < 43.81 #goosefish, minimum size 17in (43.81cm) for whole fish or 11in 
+                                                    #for tails only 
+           )
+
+#applying the length-weight relationship to the fall survey data 
+nefsc_length_fall_select <- nefsc_length_fall_select %>%
+  mutate(ln_L = log(LENGTH)) %>%
+  mutate(ln_a = case_when(
+    SVSPP == 73 ~ -11.9920, 
+    SVSPP == 74 ~ -11.8111, 
+    SVSPP == 107 ~ -12.7334, 
+    SVSPP == 105 ~ -11.8381, 
+    SVSPP == 102 ~ -12.7492, 
+    SVSPP == 106 ~ -11.6356, 
+    SVSPP == 197 ~ -10.7106)) %>%
+  mutate(b = case_when(
+    SVSPP == 73 ~ 3.1262, 
+    SVSPP == 74 ~ 3.0888, 
+    SVSPP == 107 ~ 3.1997, 
+    SVSPP == 105 ~ 3.0559, 
+    SVSPP == 102 ~ 3.3062, 
+    SVSPP == 106 ~ 3.1091, 
+    SVSPP == 197 ~ 2.9227)) %>%
+  mutate(ln_W = ln_a + (b*ln_L)) %>%
+  mutate(Weight = exp(ln_W)) %>% 
+  mutate(totalWeight = Weight*EXPNUMLEN) %>%
+  group_by(CRUISE6, STRATUM, TOW, STATION, ID, SVSPP) %>%
+  summarise(undersized_fish_WT = sum(Weight)) %>%
+  ungroup() %>%
+  drop_na(undersized_fish_WT)
+
+#join the undersized fish data (length + weight) with the aggregate catch data
+nefsc_catch_fall_updated <- full_join(nefsc_catch_fall, nefsc_length_fall_select, 
+                                        by = c("CRUISE6", "STRATUM", "TOW", "STATION", "SVSPP"))
+
+#subtracting the small fish from the total weight at each station for each species 
+nefsc_catch_fall_updated <- nefsc_catch_fall_updated %>%
+  mutate(undersized_fish_WT = ifelse(is.na(undersized_fish_WT), 0, undersized_fish_WT)) %>%
+  mutate(CATCHWT_updated = EXPCATCHWT - undersized_fish_WT) %>%
+  mutate(CATCHWT_updated = ifelse(CATCHWT_updated <0, 0 , CATCHWT_updated))
+
+#joining the updated fall catch data with the fall station data
+nefsc_fall_updated <- left_join(nefsc_station_fall, nefsc_catch_fall_updated, 
+                           by = c("CRUISE6", "STRATUM", "TOW", "STATION"))
+
+
+
+#joining the updated spring and fall survey datasets 
+nefsc <- rbind(nefsc_spring_updated, nefsc_fall_updated)
+
 
 
 rm(nefsc_station_spring)
@@ -123,16 +431,20 @@ sareas <- sareas %>% filter(Id %in% c("464", "465", "511", "512", "513", "514", 
 centroids <- sf::st_coordinates(st_centroid(sareas)) 
 areas <- cbind(sareas, centroids)
 
-#NEFSC Survey Strata
-nefsc_strata <- st_read(dsn = "./data/strata") %>%
-  st_set_crs(4269)
-
 
 #Land Mass
 states <- map_data("state")
 NEUS <- subset(states, region %in% c("Maine", "massachusetts", "new hampshire", "vermont", "maine", "rhode island",
                 "connecticut","new york","new jersey","delaware","pennsylvania",
                             "maryland","virginia","north carolina","west virginia"))
+
+
+#NEFSC Survey Strata
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
+
 ```
 
 
@@ -156,6 +468,14 @@ sf_trawl <- study_fleet %>%
 
 #filter the observer data set to include only trawl gears and only after 2009
 observer_trawl <- observer %>%
+  filter(NEGEAR %in% c("050", "057", "150")) %>%
+      #050 - Trawl, Otter, Bottom, Fish
+      #057 - Trawl, Otter, Bottom, Haddock Separator
+      #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
+  filter(YEARHBEG  >= 2009) %>%
+  mutate(survey_comercial_ID = 3)
+
+observer_trawl_old <- observer_old %>%
   filter(NEGEAR %in% c("050", "057", "150")) %>%
       #050 - Trawl, Otter, Bottom, Fish
       #057 - Trawl, Otter, Bottom, Haddock Separator
@@ -327,6 +647,364 @@ nefsc_slim <- nefsc_slim %>%
 
 
 
+## Assigning Survey Strata to Commercial Tows 
+```{r}
+#trying to determine which survey strata the commercial/VW tows occurred in 
+#using the midpoint of the tow as the determining criteria
+#move this section into the import_clean_skim if able to get it working properly
+sf_trawl_slim <- sf_trawl_slim %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
+
+
+ob_trawl_slim <- ob_trawl_slim %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
+
+vw_slim <- vw_slim %>%
+  drop_na(c(START_TOW_LAT, END_TOW_LAT, START_TOW_LON, END_TOW_LON)) %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON))))
+
+
+
+#converting the midpoint lat/long into a geometry field for sf package 
+sf_trawl_slim_sf <- st_as_sf(sf_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+ob_trawl_slim_sf <- st_as_sf(ob_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+vw_slim_sf <- st_as_sf(vw_slim, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+
+
+############################## Okay I think I finally got this to work #########################################
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
+st_make_valid(nefsc_strata)
+
+#selecting just the midpoint values because the geometry field will not be created correctly with all the other variables in the dataset
+points <- sf_trawl_slim %>%  
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  select(midpoint_lat, midpoint_long)
+
+
+#turning the lat/long variables into 
+points_sf <- st_as_sf(points, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+
+#running the actualy intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
+points$strata <- apply(st_contains(nefsc_strata, points_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+#changing the strata column to numeric instead of a list 
+points <- points %>%
+  mutate(strata = as.numeric(strata))
+
+
+
+#left joining the points dataset (with the stratum column) to the OG study fleet trawl dataset by the lat/long columns
+sf_trawl_slim_a <- left_join(sf_trawl_slim, points, by = c("midpoint_lat", "midpoint_long"))
+
+
+
+
+################################################################################################################################################## Everything Below this is Failed Attempts ####################################
+################################################################################################################
+
+#removing the edges that have an issue
+head(nefsc_strata)
+
+nefsc_strata1 <- nefsc_strata %>%
+  filter(!STRATA %in% c("520", "804", "470"))
+
+nefsc_strata %>%
+  count(STRATA)
+
+
+#seeing which tows are contained within which survey strata 
+overlay <- st_contains(sf_trawl_slim_sf, nefsc_strata)
+st_contains(ob_trawl_slim_sf, nefsc_strata)
+overlay3 <- st_contains(vw_slim_sf, nefsc_strata)
+
+
+ggplot() + 
+  geom_sf(data = overlay3)
+
+
+
+
+#trying another method I found online 
+#NEFSC Survey Strata
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
+st_make_valid(nefsc_strata)
+
+
+sf_trawl_slim_sf <- st_as_sf(sf_trawl_slim, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+
+sf_trawl_slim <- points_sf %>%
+  mutate(intersection = as.integer(st_intersects(geometry, nefsc_strata)), 
+         strata = if_else(is.na(intersection), '', nefsc_strata$STRATA[intersection]))
+
+head(sf_trawl_slim_sf)
+head(nefsc_strata)
+
+view(sf_trawl_slim_sf)
+
+
+
+
+## fuck this I hate this task 
+points <- sf_trawl_slim %>%  
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  select(midpoint_lat, midpoint_long)
+
+points_sf <- st_as_sf(points, coords = c("midpoint_long", "midpoint_lat"), 
+                             crs = st_crs(nefsc_strata))
+
+pnts_sf <- do.call("st_sfc",c(lapply(1:nrow(points), 
+function(i) {st_point(as.numeric(points[i, ]))}), list("crs" = 4269))) 
+
+pnts_trans <- st_transform(pnts_sf, 2163) # apply transformation to pnts sf
+nefsc_strata_trans <- st_transform(nefsc_strata, 2163)      # apply transformation to polygons sf
+
+points$region <- apply(st_intersects(nefsc_strata, pnts_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+points$strata <- apply(st_intersects(nefsc_strata, points_sf, sparse = FALSE), 2, 
+               function(col) { 
+                  nefsc_strata[which(col), ]$STRATA
+               })
+
+
+points %>%
+  mutate(strata = as.numeric(strata)) %>%
+  count(strata)
+
+
+
+
+
+
+
+
+#trying to a method i found on stack overflow
+sf_trawl_slim_sf <- sf_trawl_slim_sf %>%
+  add_column(strata = NA)
+
+sf_trawl_trans <- st_transform(sf_trawl_slim_sf, 4269)
+nefsc_strata_trans <- st_transform(nefsc_strata, 4269)
+
+sf_trawl_slim_sf$strata <- apply(st_intersects(nefsc_strata_trans, sf_trawl_trans, sparse = FALSE), 2, 
+                                 function(col) {
+                                   nefsc_strata[which(col),]$STRATA
+                                 })
+
+
+
+#trying a for loop for this
+sf_trawl_slim_strat <- sf_trawl_slim 
+for (i in 1:dim(sf_trawl_slim)) {
+  if(sf_trawl_slim$midpoint_lat[i] & sf_trawl_slim$midpoint_long[i] sf::st_contains())
+}
+
+
+```
+
+
+
+
+## Estimating Swept Area
+```{r}
+#All of this is taken from 'FISHING EFFECTS MODEL NORTHEAST REGION - NEFMC (2019)' APPENDIX A 
+head(observer_trawl)
+head(sf_trawl)
+  
+# DISTANCE
+sf_trawl$d_t <- sf_trawl$CALC_DIST_NM #distance towed
+
+
+
+# BOARDS Weight of otter trawl doors estimated by regression
+sf_trawl$weight <- 70.848 + (1.844 * sf_trawl$GTONS) + (0.5344 * sf_trawl$VHP)
+# Width trawl doors (meters) estimated by regression
+sf_trawl$width_o <- 0.001 * (1223 + (sf_trawl$weight * 0.8333))
+# Angle of attack (radians)
+sf_trawl$rad_o <- (2 * pi * 40)/360
+# Effective Width of otter board (meters)
+sf_trawl$w_o <- sf_trawl$width_o * sin(sf_trawl$rad_o)
+# Contact index for otter boards is constant
+sf_trawl$c_o <- 1
+
+
+
+# CABLES (contact index set below) Width of ground cable (meters) based on regression
+sf_trawl$width_c <- 0.3048 * (137.54 + (sf_trawl$LEN * 1.823))
+# Angle of attack (radians) of ground cable
+sf_trawl$rad_c <- (2 * pi * 15)/360
+# Effective width of ground cable (meters)
+sf_trawl$w_c <- sf_trawl$width_c * sin(sf_trawl$rad_c)
+
+
+
+# SWEEP (contact index set below)
+sf_trawl$raw_sweep <- sf_trawl$GEAR_SIZE
+sf_trawl$w_s <- 0.43 * sf_trawl$raw_sweep # Effective width of sweep (meters)
+
+
+
+# CONTACT INDECIES 
+sf_trawl$c_c <- 0.95 #CABLES
+sf_trawl$c_s <- 0.9  #SWEEP
+
+
+
+sf_trawl$boards <- 2 * sf_trawl$w_o * sf_trawl$c_o # Width of both boards (meters)
+sf_trawl$cables <- 2 * sf_trawl$w_c * sf_trawl$c_c # Width of both cables (meters)
+sf_trawl$sweep <- sf_trawl$w_s * sf_trawl$c_s # Width of the sweep (meters)
+sf_trawl$lin_eff_width <- sf_trawl$boards + sf_trawl$cables + sf_trawl$sweep
+sf_trawl$A <- sf_trawl$d_t * (0.001 * sf_trawl$lin_eff_width) # SA without sensitivity (km)
+
+```
+
+
+## Categorizing Trawls based on Net Type
+```{r}
+#Categorizing observer tows
+observer_trawl %>%
+  mutate(NETTYPE = as.numeric(NETTYPE)) %>% 
+  filter(!NETTYPE %in% c(76, 77, 75, 74, 78, 73, 61, 62, 60, 26, 27, 25)) %>%
+      #filtering out net types that don't belong (pelagic, scallop, shrimp trawls)
+      #76 - 2-seam pelagic pair trawl
+      #77 - 4-seam pelagic pair trawl
+      #75 - pelagic pair trawl, seams unknown
+      #74 - 2-seam pelagic single trawl
+      #78 - 4-seam pelagic single trawl
+      #73 - pelagic single trawl, seams unknown
+      #61 - 2-seam scallop trawl
+      #62 - 4-seam scallop trawl
+      #60 - scallop trawl, seams unknown
+      #26 - 2-seam shrimp trawl 
+      #27 - 4-seam shrimp trawl
+      #25 - shrimp trawl, seams unknown
+  mutate(trawl_type = case_when(
+    NETTYPE %in% c(89, 90, 88, 24, 86, 87, 85) ~ 1, #Generic Groundfish Trawls 
+      #89 - 2-seam balloon trawl 
+      #90 - 4-seam balloon trawl 
+      #88 - balloon trawl, seams unknown
+      #24 - 4-seam box trawl
+      #86 - 2-seam groundfish trawl 
+      #87 - 4-seam groundfish trawl 
+      #85 - groundfish trawl, seams unknown 
+    NETTYPE %in% c(10, 11, 12, 13, 01, 02, 08, 66, 67, 65) ~ 2, #Flatfish Trawls
+      #10 - flatfish trawl, seams unknown 
+      #11 - 2-seam flatfish trawl 
+      #12 - 4-seam flatfish trawl 
+      #13 - flounder trawl 
+      #01 - 2-seam flynet trawl
+      #02 - 4-seam flynet trawl 
+      #08 - flynet, seams unknown
+      #66 - 2-seam monkfish trawl
+      #67 - 4-seam monkfish trawl
+      #65 - monkfish trawl, seams unknown 
+    NETTYPE %in% c(3, 4, 9, 16, 06, 07, 05) ~ 3, #Separator Trawls
+      #03 - 2-seam haddock separator trawl 
+      #04 - 4-seam haddock separator trawl 
+      #09 - haddock separator trawl, seams unknown 
+      #16 - rope separator trawl 
+      #06 - 2-seam separator trawl
+      #07 - 4-seam separator trawl
+      #05 - separator trawl, seams unknown 
+    NETTYPE %in% c(31, 30, 32, 17, 18, 15, 81, 82, 80) ~ 4, #Eliminator Trawls
+      #31 - 2-seam eliminator trawl
+      #30 - 4-seam eliminator trawl
+      #32 - eliminator trawl, seams unknown
+      #17 - 4-seam mid-sized ruhle trawl
+      #18 - 4-seam millionaire trawl
+      #15 - 4-seam ruhle trawl
+      #81 - 2-seam shuman trawl
+      #82 - 4-seam shuman trawl
+      #80 - shuman trawl, seams unknown
+  ))
+  count(trawl_type)
+  
+
+observer_trawl %>%
+  count(NETTYPE)
+
+
+
+#categorizing study fleet trawls 
+sf_trawl %>%
+  count(VTR_GEAR_CODE)
+  count(VESSEL_NAME)
+  
+sf_trawl %>%
+  mutate()
+
+sf_trawl %>%
+  group_by(YEAR) %>%
+  count(VESSEL_PERMIT_NUM)
+
+observer_trawl %>%
+  group_by(YEARHBEG) %>%
+  count(PERMIT1)
+
+observer_trawl %>%
+  filter(PERMIT1 == 410342 & YEARHBEG == 2010)
+
+sf_trawl %>%
+  count(VESSEL_PERMIT_NUM)
+
+
+sf_trawl_permit <- sf_trawl %>%
+  select(YEAR, VESSEL_PERMIT_NUM) %>%
+  group_by(YEAR) %>%
+  distinct(VESSEL_PERMIT_NUM) %>%
+  arrange(YEAR) %>%
+  mutate(year_permit = paste(YEAR,VESSEL_PERMIT_NUM, sep = '_'))
+
+
+observer_trawl_permit <- observer_trawl %>%
+  group_by(YEARHBEG) %>%
+  distinct(PERMIT1) %>%
+  arrange(YEARHBEG) %>%
+  mutate(year_permit = paste(YEARHBEG,PERMIT1, sep = '_'))
+
+sf_obsv_permit_match <- inner_join(sf_trawl_permit, observer_trawl_permit, 
+                                   by = "year_permit")
+
+df2 <- inner_join(observer_trawl, sf_obsv_permit_match, 
+                  by = c("PERMIT1", "YEARHBEG"))
+
+df2 %>%
+  group_by(PERMIT1, YEARHBEG) %>%
+  count(NETTYPE)
+
+
+
+sf_trawl_permits <- as.vector(n_distinct(sf_trawl$VESSEL_PERMIT_NUM))
+```
+
+
+
+
 
 # Matchcing Tows
 
@@ -335,7 +1013,6 @@ nefsc_slim <- nefsc_slim %>%
 rm(sf_trawl)
 rm(nefsc)
 
-memory.limit(size = 999999)
 
 #Fuzzy joining sf tows that are within 1mi and 1 day of nefsc tows
 paired_tows_1mi_24hr <- nefsc_slim %>% 
@@ -343,7 +1020,8 @@ paired_tows_1mi_24hr <- nefsc_slim %>%
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
   mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
-  filter(time_dif > -24 & time_dif < 24)
+  filter(time_dif > -24 & time_dif < 24) 
+  
 
 
 #confirming that I have 6 matches 
@@ -526,12 +1204,32 @@ paired_tows_1mi_192hr %>%
 paired_tows_1mi_24hr_ob <- nefsc_slim %>% 
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
-                           max_dist = 1, unit = "miles")
-
-
-  mutate(time_dif = difftime(START_TOW_DATE_GMT.x, START_TOW_DATE.y, units = "days")) %>%
+                           max_dist = 1, unit = "miles") %>%
+  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
   filter(time_dif > -1 & time_dif < 1)
+
+head(ob_trawl_slim)
+
 ```
+
+
+
+## VW w NEFSC fuzzy join
+```{r}
+paired_tows_1mi_192hr <- vw_slim %>% 
+  fuzzyjoin::geo_inner_join(nefsc_slim, by = c("END_TOW_LAT", 
+                                                   "END_TOW_LON"),
+                           max_dist = 8, unit = "miles") %>%
+  mutate(time_dif = difftime(END_TOW_DATE_GMT.x, END_TOW_DATE_GMT.y, units = "hours")) %>%
+  filter(time_dif > -192 & time_dif < 192)
+
+paired_tows_1mi_192hr %>%
+  count(cruise_station_ID)
+paired_tows_1mi_192hr %>%
+  count(EFFORT_ID)
+```
+
+
 
 
 
@@ -1019,6 +1717,18 @@ paired_tows_5mi_72hr %>%
 
 # Joins that didnt work 
 ```{r}
+
+fList = list()
+for(i in )
+
+
+for(i in 1:length(nefsc$ID)) {
+  
+
+
+
+
+
 
 ################### Joining Techniques that didn't pan out ####################
 
