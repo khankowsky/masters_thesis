@@ -766,6 +766,18 @@ observer_trawl <- observer_trawl %>%
   ))
 ```
 
+## Calculating catch per swept area
+```{r}
+sf_trawl <- sf_trawl %>% 
+  mutate(CATCH_per_SWEPT_AREA = HAIL_AMOUNT_LB/swept_area)
+  
+
+
+nefsc <- nefsc %>%
+  rename(SWEPT_AREA = AREA_SWEPT_DOORS_MEAN_KM2) %>%
+  mutate(CATCH_per_SWEPT_AREA = CATCHWT_updated/SWEPT_AREA)
+
+```
 
 
 ## Slimming datasets
@@ -779,7 +791,8 @@ sf_trawl_slim <- sf_trawl %>%
            "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", "DEPTH_FTH", 
            "GEAR_QUANTITY", "GEAR_SIZE", "MESH_SIZE", "MESH_TYPE", 
            "HAIL_AMOUNT", "HAIL_AMOUNT_LB", "CALC_DUR_HR", "CALC_DIST_NM", 
-           "MEAN_DPTH_M", "survey_comercial_ID", "strata", "swept_area"))
+           "MEAN_DPTH_M", "survey_comercial_ID", "strata", "swept_area", 
+           "CATCH_per_SWEPT_AREA"))
   # select(-c("VES_NAME", "HULL_ID", "PPORT", "HPORT", "ACCSP_GEAR_CODE", 
   #           "PPST", "SAIL_PORT_NAME", "SAIL_STATE_POSTAL", "LAND_PORT_NAME", 
   #           "LAND_STATE_POSTAL", "START_SET_DATE_GMT", "START_SET_LAT", "START_SET_LON", 
@@ -807,7 +820,8 @@ nefsc_slim <- nefsc %>%
            "START_TOW_DATE_GMT", "END_TOW_DATE_GMT", "START_TOW_LAT", 
            "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", 
            "TOWDUR", "AVGDEPTH", "LOGGED_SPECIES_NAME", "SVSPP", 
-           "EXPCATCHNUM", "EXPCATCHWT", "undersized_fish_WT", "CATCHWT_updated"))
+           "EXPCATCHNUM", "EXPCATCHWT", "undersized_fish_WT", "CATCHWT_updated", 
+           "SWEPT_AREA", "CATCH_per_SWEPT_AREA"))
   # select(-c("EST_MONTH","EST_DAY", "EST_JULIAN_DAY", "BEGLAT", "BEGLON", "ENDLAT", 
   #           "ENDLON", "COURSE", "RPM", "DOPDISTW", "...11", "...12", 
   #           "BEGIN_EST_TOWDATE", "END_EST_TOWDATE", "SURFSALIN", "SURFTEMP", 
