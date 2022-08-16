@@ -420,7 +420,20 @@ netdata_names <- nefsc_netdata %>%
   str_split(., pattern = ",")
 
 nefsc_netdata <- nefsc_netdata %>%
-  separate(1, into = netdata_names[[1]], sep = ",")
+  separate(1, into = netdata_names[[1]], sep = ",") 
+
+nefsc_netdata <- nefsc_netdata %>%
+  mutate(CRUISE6 = as.numeric(as.character(CRUISE6))) %>%
+  mutate(STATION = as.numeric(STATION)) %>%
+  mutate(STRATUM = as.numeric(STRATUM)) %>%
+  mutate(TOW = as.numeric(TOW)) %>%
+  mutate(AREA_SWEPT_DOORS_MEAN_KM2 = as.numeric(AREA_SWEPT_DOORS_MEAN_KM2)) %>%
+  mutate(AREA_SWEPT_WINGS_MEAN_KM2 = as.numeric(AREA_SWEPT_WINGS_MEAN_KM2)) %>%
+  select(CRUISE6, STATION, STRATUM, TOW, AREA_SWEPT_DOORS_MEAN_KM2, AREA_SWEPT_WINGS_MEAN_KM2)
+
+#joining the net mensuration data with the full nefsc data 
+nefsc <- left_join(nefsc, nefsc_netdata, by = c("CRUISE6", "STRATUM", "TOW", "STATION"))
+  
 
 
 
