@@ -411,6 +411,20 @@ nefsc <- rbind(nefsc_spring_updated, nefsc_fall_updated)
 
 
 
+#reading in the NEFSC survey swept area data
+nefsc_netdata <- read_csv("./data/Hankowksy_tow_eval_data_2009_2022.csv")
+
+#clean the NEFSC survey net data 
+netdata_names <- nefsc_netdata %>%
+  names() %>%
+  str_split(., pattern = ",")
+
+nefsc_netdata <- nefsc_netdata %>%
+  separate(1, into = netdata_names[[1]], sep = ",")
+
+
+
+#removing unnessacary datasets 
 rm(nefsc_station_spring)
 rm(nefsc_catch_spring)
 rm(nefsc_spring)
