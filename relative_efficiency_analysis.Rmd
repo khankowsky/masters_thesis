@@ -50,6 +50,10 @@ paired_tows_1mi_24hr %>%
     
          SVSPP == 197 & SPECIES_ITIS == 164499 | #goosefish
          SVSPP == 15 & SPECIES_ITIS == 160617    #spiny dogfish
-        )
+        ) %>%
+  mutate(relative_efficiency = sf_species_cpua/nefsc_species_cpua)
+  filter(SVSPP == 73)
+  
+
 ```
 
