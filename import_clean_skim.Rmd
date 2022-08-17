@@ -768,11 +768,20 @@ observer_trawl <- observer_trawl %>%
 
 ## Calculating catch per swept area
 ```{r}
+#calculating the catch per swept area (this keeps the kept and discarded separate)
+# sf_trawl <- sf_trawl %>% 
+#   # filter(DISPOSITION_CODE == 011) %>% #this uses just the kept catch
+#   mutate(CATCH_per_SWEPT_AREA = HAIL_AMOUNT_LB/swept_area)
+
+#calculates the catch per swept area with the discard and kept catch combined
 sf_trawl <- sf_trawl %>% 
-  mutate(CATCH_per_SWEPT_AREA = HAIL_AMOUNT_LB/swept_area)
+  group_by(EFFORT_ID, COMMON_NAME) %>%
+  mutate(Tow_Catch_LB = sum(HAIL_AMOUNT_LB)) %>%
+  ungroup() %>%
+  mutate(CATCH_per_SWEPT_AREA = Tow_Catch_LB/swept_area)
   
 
-
+#calculates the catch per swept area for the nefsc bottom trawl survey 
 nefsc <- nefsc %>%
   rename(SWEPT_AREA = AREA_SWEPT_DOORS_MEAN_KM2) %>%
   mutate(CATCH_per_SWEPT_AREA = CATCHWT_updated/SWEPT_AREA)
