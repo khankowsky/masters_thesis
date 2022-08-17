@@ -15,6 +15,7 @@ library(data.table)
 library(fuzzyjoin)
 library(lubridate)
 library(kableExtra)
+library(geosphere)
 
 library(maps) # land masses
 library(rgdal) # read OGR vector maps into Spatial objects
@@ -445,6 +446,13 @@ sf_trawl <- study_fleet %>%
   drop_na(END_TOW_LAT) %>%
   drop_na(END_TOW_LON)
 
+#calculating haul duration and distance becuase the ones from NOAA have NAs and don't seem acurate
+sf_trawl <- sf_trawl %>% 
+  mutate(haul_dur = START_TOW_DATE_GMT - END_TOW_DATE_GMT) %>%
+  mutate(haul_dur_hr = (as.numeric(haul_dur)/60)/60) %>%
+  mutate(haul_dist_nm = (distHaversine(cbind(START_TOW_LON, START_TOW_LAT), cbind(END_TOW_LON, END_TOW_LAT)))/1852)
+  
+  
 
 #filter the observer data set to include only trawl gears and only after 2009
 observer_trawl <- observer %>%
@@ -607,7 +615,7 @@ rm(ob_points_sf)
 ###############################################################################################################
 ####################################Swept area for Study Fleet Hauls ########################################
 # DISTANCE
-sf_trawl$d_t <- sf_trawl$CALC_DIST_NM * 1.852 # Distance towed (kilometers)
+sf_trawl$d_t <- sf_trawl$haul_dist_nm * 1.852 # Distance towed (kilometers)
 
 
 
@@ -776,15 +784,15 @@ observer_trawl <- observer_trawl %>%
 #calculates the catch per swept area with the discard and kept catch combined
 sf_trawl <- sf_trawl %>% 
   group_by(EFFORT_ID, COMMON_NAME) %>%
-  mutate(Tow_Catch_LB = sum(HAIL_AMOUNT_LB)) %>%
+  mutate(sf_species_catch = sum(HAIL_AMOUNT_LB)) %>%
   ungroup() %>%
-  mutate(CATCH_per_SWEPT_AREA = Tow_Catch_LB/swept_area)
+  mutate(sf_species_cpua = sf_species_catch/swept_area)
   
 
 #calculates the catch per swept area for the nefsc bottom trawl survey 
 nefsc <- nefsc %>%
-  rename(SWEPT_AREA = AREA_SWEPT_DOORS_MEAN_KM2) %>%
-  mutate(CATCH_per_SWEPT_AREA = CATCHWT_updated/SWEPT_AREA)
+  rename(SWEPT_AREA = AREA_SWEPT_DOORS_MEAN_KM2) %>% 
+  mutate(nefsc_species_cpua = CATCHWT_updated/SWEPT_AREA)
 
 ```
 
@@ -799,9 +807,9 @@ sf_trawl_slim <- sf_trawl %>%
            "START_TOW_DATE_GMT", "END_TOW_DATE_GMT", "START_TOW_LAT",
            "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", "DEPTH_FTH", 
            "GEAR_QUANTITY", "GEAR_SIZE", "MESH_SIZE", "MESH_TYPE", 
-           "HAIL_AMOUNT", "HAIL_AMOUNT_LB", "CALC_DUR_HR", "CALC_DIST_NM", 
-           "MEAN_DPTH_M", "survey_comercial_ID", "strata", "swept_area", 
-           "CATCH_per_SWEPT_AREA"))
+           "HAIL_AMOUNT", "HAIL_AMOUNT_LB", "haul_dur_hr", "haul_dist_nm", 
+           "MEAN_DPTH_M", "survey_comercial_ID", "strata", "swept_area",
+           "sf_species_catch", "sf_species_cpua"))
   # select(-c("VES_NAME", "HULL_ID", "PPORT", "HPORT", "ACCSP_GEAR_CODE", 
   #           "PPST", "SAIL_PORT_NAME", "SAIL_STATE_POSTAL", "LAND_PORT_NAME", 
   #           "LAND_STATE_POSTAL", "START_SET_DATE_GMT", "START_SET_LAT", "START_SET_LON", 
@@ -830,7 +838,7 @@ nefsc_slim <- nefsc %>%
            "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", 
            "TOWDUR", "AVGDEPTH", "LOGGED_SPECIES_NAME", "SVSPP", 
            "EXPCATCHNUM", "EXPCATCHWT", "undersized_fish_WT", "CATCHWT_updated", 
-           "SWEPT_AREA", "CATCH_per_SWEPT_AREA"))
+           "SWEPT_AREA", "nefsc_species_cpua"))
   # select(-c("EST_MONTH","EST_DAY", "EST_JULIAN_DAY", "BEGLAT", "BEGLON", "ENDLAT", 
   #           "ENDLON", "COURSE", "RPM", "DOPDISTW", "...11", "...12", 
   #           "BEGIN_EST_TOWDATE", "END_EST_TOWDATE", "SURFSALIN", "SURFTEMP", 
