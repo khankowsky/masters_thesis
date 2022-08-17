@@ -1,0 +1,55 @@
+---
+title: "relative_efficiency_analysis"
+output: html_document
+date: "2022-08-17"
+---
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(skimr)
+library(data.table)
+library(fuzzyjoin)
+library(lubridate)
+library(kableExtra)
+
+library(maps) # land masses
+library(rgdal) # read OGR vector maps into Spatial objects
+library(viridis) # for customizing scale bars
+library(mapproj)
+library(hexbin)
+library(sf)
+library(scales)
+library(beepr)
+```
+
+
+```{r}
+paired_tows_1mi_24hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
+         SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
+         SVSPP == 75 & SPECIES_ITIS == 164727 | #pollock
+         SVSPP == 105 & SPECIES_ITIS == 172909 | #yellowtail flounder
+         SVSPP == 102 & SPECIES_ITIS == 172877 | #american plaice
+         SVSPP == 107 & SPECIES_ITIS == 172873 | #witch flounder
+         SVSPP == 76 & SPECIES_ITIS == 164732  | #white hake
+         SVSPP == 108 & SPECIES_ITIS == 172746 | #windowpane
+         SVSPP == 106 & SPECIES_ITIS == 172905 | #winter flounder
+         SVSPP == 155 & SPECIES_ITIS == 166774 | #acadian redfish
+         SVSPP == 101 & SPECIES_ITIS == 172933 | #atlantic halibut   #NE Groundfish spp
+
+    
+         SVSPP == 72 & SPECIES_ITIS == 164791 | #silver hake
+         SVSPP == 77 & SPECIES_ITIS == 164730 | #red hake
+         SVSPP == 78 & SPECIES_ITIS == 164731 | #spotted hake
+           
+         SVSPP == 103 & SPECIES_ITIS == 172735 | #summer flounder
+         SVSPP == 104 & SPECIES_ITIS == 172739 | #fourspot flounder
+    
+         SVSPP == 197 & SPECIES_ITIS == 164499 | #goosefish
+         SVSPP == 15 & SPECIES_ITIS == 160617    #spiny dogfish
+        )
+```
+
