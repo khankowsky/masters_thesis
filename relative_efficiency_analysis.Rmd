@@ -22,12 +22,13 @@ library(mapproj)
 library(hexbin)
 library(sf)
 library(scales)
+library(gridExtra)
 library(beepr)
 ```
 
 
 ```{r}
-paired_tows_1mi_24hr %>%
+p1<- paired_tows_1mi_24hr %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
          SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
          SVSPP == 75 & SPECIES_ITIS == 164727 | #pollock
@@ -54,6 +55,186 @@ paired_tows_1mi_24hr %>%
   mutate(relative_efficiency = sf_species_cpua/nefsc_species_cpua)
   filter(SVSPP == 73)
   
+
+  
+p1 %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 73) %>%
+  ggplot() + 
+  geom_histogram(aes(x = nefsc_species_cpua, fill = "blue", alpha=0.4, bins = 30)) + 
+  geom_histogram(aes(x = sf_species_cpua, fill = "red", alpha=0.4, bins = 30)) + 
+  xlim(0, 2000)
+  
+  
+paired_tows_1mi_24hr %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 73) %>%
+  ggplot() + 
+  geom_density(aes(x = nefsc_species_cpua)) + 
+  geom_density(aes(x = sf_species_cpua)) + 
+  xlim(0, 2000)
+
+```
+
+
+
+```{r}
+p2<- paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
+         SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
+         SVSPP == 75 & SPECIES_ITIS == 164727 | #pollock
+         SVSPP == 105 & SPECIES_ITIS == 172909 | #yellowtail flounder
+         SVSPP == 102 & SPECIES_ITIS == 172877 | #american plaice
+         SVSPP == 107 & SPECIES_ITIS == 172873 | #witch flounder
+         SVSPP == 76 & SPECIES_ITIS == 164732  | #white hake
+         SVSPP == 108 & SPECIES_ITIS == 172746 | #windowpane
+         SVSPP == 106 & SPECIES_ITIS == 172905 | #winter flounder
+         SVSPP == 155 & SPECIES_ITIS == 166774 | #acadian redfish
+         SVSPP == 101 & SPECIES_ITIS == 172933 | #atlantic halibut   #NE Groundfish spp
+
+    
+         SVSPP == 72 & SPECIES_ITIS == 164791 | #silver hake
+         SVSPP == 77 & SPECIES_ITIS == 164730 | #red hake
+         SVSPP == 78 & SPECIES_ITIS == 164731 | #spotted hake
+           
+         SVSPP == 103 & SPECIES_ITIS == 172735 | #summer flounder
+         SVSPP == 104 & SPECIES_ITIS == 172739 | #fourspot flounder
+    
+         SVSPP == 197 & SPECIES_ITIS == 164499 | #goosefish
+         SVSPP == 15 & SPECIES_ITIS == 160617    #spiny dogfish
+        ) %>%
+  mutate(relative_efficiency = sf_species_cpua/nefsc_species_cpua)
+
+
+p2 %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 73) %>%
+  ggplot() + 
+  geom_histogram(aes(x = nefsc_species_cpua, fill = "blue", alpha=0.4, bins = 30)) + 
+  geom_histogram(aes(x = sf_species_cpua, fill = "red", alpha=0.4, bins = 30)) + 
+  xlim(0, 2000)
+
+
+
+
+
+
+#looking at the differences in efficiency between the bigelow and the stuff fleet
+#COD
+g1 <- p2 %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 73) %>%
+  ggplot() + 
+  geom_histogram(aes(x = nefsc_species_cpua, fill = "blue")) + 
+  xlim(0,2000)
+  
+  
+g2 <-  p2 %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 73) %>%
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, fill = "red")) + 
+  xlim(0,2000)
+
+grid.arrange(g1, g2)
+
+
+#HADDOCK 
+g1 <- p2 %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 74) %>%
+  ggplot() + 
+  geom_histogram(aes(x = nefsc_species_cpua, fill = "blue")) + 
+  xlim(0,2000)
+  
+  
+g2 <-  p2 %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 74) %>%
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, fill = "red")) + 
+  xlim(0,2000)
+
+grid.arrange(g1, g2)
+
+
+
+#YELLOWTAIL
+g1 <- p2 %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 74) %>%
+  ggplot() + 
+  geom_histogram(aes(x = nefsc_species_cpua, fill = "blue")) + 
+  xlim(0,2000)
+  
+  
+g2 <-  p2 %>%
+  drop_na(nefsc_species_cpua, sf_species_cpua) %>%
+  filter(SVSPP == 74) %>%
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, fill = "red")) + 
+  xlim(0,2000)
+
+grid.arrange(g1, g2)
+
+
+
+
+#COD
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% #cod
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 50) + 
+  # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
+  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 50) + 
+  # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
+  labs(x = "CPUA (lb/min)", y = "Density", 
+       title = "Histogram of CPUE for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  xlim(0,2000)
+
+
+#HADDOCK
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% #cod
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 50) + 
+  # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
+  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 50) + 
+  # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
+  labs(x = "CPUA (lb / km2)", y = "Density", 
+       title = "Histogram of CPUE for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  xlim(0,2000)
+
+
+#YELLOWTAIL
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% #cod
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 50) + 
+  # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
+  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 50) + 
+  # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
+  labs(x = "CPUA (lb / km2)", y = "Density", 
+       title = "Histogram of CPUE for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  xlim(0,2000)
+
+#WINTER FLOUNDER
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% #cod
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 100) + 
+  # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
+  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 100) + 
+  # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
+  labs(x = "CPUA (lb / km2)", y = "Density", 
+       title = "Histogram of CPUE for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  xlim(0,2000)
+
+
 
 ```
 
