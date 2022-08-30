@@ -446,7 +446,7 @@ sf_trawl <- study_fleet %>%
   drop_na(END_TOW_LAT) %>%
   drop_na(END_TOW_LON)
 
-#calculating haul duration and distance becuase the ones from NOAA have NAs and don't seem acurate
+#calculating haul duration and distance because the ones from NOAA have NAs and don't seem accurate
 sf_trawl <- sf_trawl %>% 
   mutate(haul_dur = START_TOW_DATE_GMT - END_TOW_DATE_GMT) %>%
   mutate(haul_dur_hr = (as.numeric(haul_dur)/60)/60) %>%
@@ -526,7 +526,7 @@ rm(observer)
 
 
 
-## Assigning NEFSC Survey Strata to Commercial/VW Tows 
+## Assigning NEFSC Survey Strata to Commercial Tows 
 ```{r}
 #Assigning NEFSC survey strata to commercial Study Fleet tows 
 #read in the nefsc survey strata data
@@ -551,7 +551,7 @@ sf_points <- sf_trawl %>%
 sf_points_sf <- st_as_sf(sf_points, coords = c("midpoint_long", "midpoint_lat"), 
                              crs = st_crs(nefsc_strata))
 
-#running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occured in 
+#running the actual intersection of the tows in the strata and creating a column in the points dataset specifying which stratum the tows occurred in 
 sf_points$strata <- apply(st_contains(nefsc_strata, sf_points_sf, sparse = FALSE), 2, 
                function(col) { 
                   nefsc_strata[which(col), ]$STRATA
