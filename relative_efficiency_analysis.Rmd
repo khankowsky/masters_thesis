@@ -53,7 +53,7 @@ p1<- paired_tows_1mi_24hr %>%
          SVSPP == 15 & SPECIES_ITIS == 160617    #spiny dogfish
         ) %>%
   mutate(relative_efficiency = sf_species_cpua/nefsc_species_cpua)
-  filter(SVSPP == 73)
+  # filter(SVSPP == 73)
   
 
   
@@ -184,57 +184,150 @@ grid.arrange(g1, g2)
 paired_tows_5mi_72hr %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% #cod
   ggplot() + 
-  geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 50) + 
+  geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 100) + 
   # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
-  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 50) + 
+  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 100) + 
   # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
   labs(x = "CPUA (lb/min)", y = "Density", 
        title = "Histogram of CPUE for Atlantic Cod", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
   xlim(0,2000)
 
+#COD but log(CPUA)
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% #cod
+  mutate(log_sf_species_cpua = log(sf_species_cpua)) %>%
+  mutate(log_nefsc_species_cpua = log(nefsc_species_cpua)) %>%
+  ggplot() + 
+  geom_histogram(aes(x = log_sf_species_cpua, y = ..density..), fill = "red", bins = 100) + 
+  # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
+  geom_histogram(aes(x = log_nefsc_species_cpua, y = -..density..), fill = "blue", bins = 100) + 
+  # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
+  labs(x = "CPUA (lb/min)", y = "Density", 
+       title = "Histogram of ln(CPUE) for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+
+
+
 
 #HADDOCK
 paired_tows_5mi_72hr %>%
-  filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% #cod
+  filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% #haddock
   ggplot() + 
   geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 50) + 
   # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
   geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 50) + 
   # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
   labs(x = "CPUA (lb / km2)", y = "Density", 
-       title = "Histogram of CPUE for Atlantic Cod", 
+       title = "Histogram of CPUE for Haddock", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
   xlim(0,2000)
 
 
 #YELLOWTAIL
 paired_tows_5mi_72hr %>%
-  filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% #cod
+  filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% #yellowtail
   ggplot() + 
   geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 50) + 
   # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
   geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 50) + 
   # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
   labs(x = "CPUA (lb / km2)", y = "Density", 
-       title = "Histogram of CPUE for Atlantic Cod", 
+       title = "Histogram of CPUE for Yellowtail", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
   xlim(0,2000)
 
 #WINTER FLOUNDER
 paired_tows_5mi_72hr %>%
-  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% #cod
+  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% #winter flounder
   ggplot() + 
   geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 100) + 
   # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
   geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 100) + 
   # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
   labs(x = "CPUA (lb / km2)", y = "Density", 
-       title = "Histogram of CPUE for Atlantic Cod", 
+       title = "Histogram of CPUE for Winter Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
   xlim(0,2000)
 
 
+#MONKFISH
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% #monkfish
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red", bins = 100) + 
+  # geom_label(aes(x = 7, y = 0.4, label = "Study Fleet CPUE"), color = "red") + 
+  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue", bins = 100) + 
+  # geom_label(aes(x = 7, y = -0.4, label = "NEFSC CPUE"), color = "blue") + 
+  labs(x = "CPUA (lb/min)", y = "Density", 
+       title = "Histogram of CPUE for Monkfish", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  xlim(0,2000)
 
+
+#AMERICAN PLAICE
+
+
+
+
+
+
+###############################################################################
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% #cod
+  ggplot(aes(y = log(sf_species_cpua))) + 
+  geom_bar(stat = "identity", position = "identity")
+
+
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
+  select(sf_species_cpua, )
+
+
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
+  filter(sf_species_cpua < 2000) %>%
+  filter(nefsc_species_cpua < 2000) %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue")
+
+
+
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
+  drop_na(sf_species_cpua, nefsc_species_cpua) %>%
+  mutate(relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua)) %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  xlim(0, 4) + 
+  geom_vline(aes(xintercept=1),
+            color="red", linetype="dashed", size=1)
+
+
+
+
+paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  select(nefsc_species_cpua, sf_species_cpua) %>%
+  pivot_longer(cols = c("nefsc_species_cpua", "sf_species_cpua"), 
+               names_to = "trawl_type", 
+               values_to = "cpua")
+
+  
+
+
+
+
+
+
+  count(sf_species_cpua)
+  
+
+  
+  
+  
 ```
 
