@@ -55,9 +55,9 @@ nefsc_strata <- st_read(dsn = "./data/strata") %>%
 
 
 
-
-# 1m and 24hr Paired Tows 
-## Comparing CPUA and Relative Efficiency 
+# Study Fleet and NEFSC Pairs
+## 1m and 24hr Paired Tows 
+### Comparing CPUA and Relative Efficiency 
 ```{r}
 #filtering for just the species of interest and creating a relative efficiency variable 
 paired_tows_1mi_24hr_logre <- paired_tows_1mi_24hr %>%
@@ -234,7 +234,7 @@ paired_tows_1mi_24hr_logre %>%
 ```
 
 
-## Maps of Matched Tows 
+### Maps of Matched Tows 
 ```{r}
 #plotting the matches for 1 mile and 24 hrs w Stat Areas
 paired_tows_1mi_24hr %>%
@@ -255,8 +255,8 @@ paired_tows_1mi_24hr %>%
 
 
 
-# 5m and 72hr Paired Tows
-## Comparing CPUA and Relative Efficiency 
+## 5m and 72hr Paired Tows
+### Comparing CPUA and Relative Efficiency 
 ```{r}
 #filtering for just the species of interest and creating a relative efficiency variable 
 paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr %>%
@@ -495,7 +495,7 @@ paired_tows_5mi_72hr_logre %>%
 ```
 
 
-## Maps of Matched Tows 
+### Maps of Matched Tows 
 ```{r}
 #plotting the matches for 5 mi and 3 days 
 paired_tows_5mi_72hr %>%
@@ -641,6 +641,14 @@ paired_tows_5mi_72hr %>%
   scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue"))
 # labs(title = "Study Fleet tows Matched to NEFSC tows", subtitle = "within 5 mi and 72 hrs")
 ```
+
+
+# Observer and NEFSC Pairs
+```{r}
+
+```
+
+
 
 
 
