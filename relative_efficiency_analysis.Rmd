@@ -86,6 +86,11 @@ paired_tows_1mi_24hr_logre <- paired_tows_1mi_24hr %>%
         ) %>%
   drop_na(sf_species_cpua, nefsc_species_cpua) %>%
   mutate(relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
   distinct()
   # filter(SVSPP == 73)
   
@@ -285,8 +290,12 @@ paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr %>%
         ) %>%
   drop_na(sf_species_cpua, nefsc_species_cpua) %>%
   mutate(relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua)) %>%
-  distinct()
-
+  mutate(mgmt_area = case_when(
+    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  distinct() 
 
 
 
@@ -304,15 +313,17 @@ paired_tows_5mi_72hr_logre %>%
        title = "Comparison of CPUA for Atlantic Cod", 
        subtitle = "Pairs within 5 mi and 72 hrs")
 
-#Looking at the reactivate efficiency of the study fleet tows compared to the nefsc survey 
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Atlantic Cod", 
        subtitle = "Pairs within 5 mi and 72 hrs")
@@ -333,15 +344,17 @@ paired_tows_5mi_72hr_logre %>%
        title = "Comparison of CPUA for Haddock", 
        subtitle = "Pairs within 5 mi and 72 hrs")
 
-#Looking at the reactivate efficiency of the study fleet tows compared to the nefsc survey 
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Haddock", 
        subtitle = "Pairs within 5 mi and 72 hrs")
@@ -362,15 +375,17 @@ paired_tows_5mi_72hr_logre %>%
        title = "Comparison of CPUA for Witch Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs")
 
-#Looking at the reactivate efficiency of the study fleet tows compared to the nefsc survey 
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Witch Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs")
@@ -391,15 +406,17 @@ paired_tows_5mi_72hr_logre %>%
        title = "Comparison of CPUA for Yellowtail Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs")
 
-#Looking at the reactivate efficiency of the study fleet tows compared to the nefsc survey 
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Yellowtail Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs")
@@ -420,15 +437,17 @@ paired_tows_5mi_72hr_logre %>%
        title = "Comparison of CPUA for American Plaice", 
        subtitle = "Pairs within 5 mi and 72 hrs")
 
-#Looking at the reactivate efficiency of the study fleet tows compared to the nefsc survey 
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for American Plaice", 
        subtitle = "Pairs within 5 mi and 72 hrs")
@@ -449,15 +468,17 @@ paired_tows_5mi_72hr_logre %>%
        title = "Comparison of CPUA for Winter Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs")
 
-#Looking at the reactivate efficiency of the study fleet tows compared to the nefsc survey 
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Winter Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs")
@@ -476,17 +497,19 @@ paired_tows_5mi_72hr_logre %>%
   geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
   labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
        title = "Comparison of CPUA for Monkfish", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
+       subtitle = "Pairs within 5 mi and 72 hrs") 
 
-#Looking at the reactivate efficiency of the study fleet tows compared to the nefsc survey 
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Monkfish", 
        subtitle = "Pairs within 5 mi and 72 hrs")
