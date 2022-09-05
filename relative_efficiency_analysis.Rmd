@@ -23,6 +23,7 @@ library(hexbin)
 library(sf)
 library(scales)
 library(gridExtra)
+library(openxlsx)
 library(beepr)
 ```
 
@@ -672,6 +673,52 @@ paired_tows_5mi_72hr %>%
 ```
 
 
+# Trip ID for Study Fleet for Andy Jones 
+```{r}
+#Pulling out the study fleet trips to see if Andy Jones can talk to the captains 
+#and figure out what kind of trawl net they were using 
+
+#pulling out the unique effort ID and selecting the variables of interest 
+SF_trips_1_24 <- paired_tows_1mi_24hr_logre %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  select(TRIP_ID, VESSEL_NAME, TARGET_SPECIES, VTR_GEAR_CODE, EFFORT_ID, AREA_CODE, 
+         START_TOW_DATE_GMT.y, END_TOW_DATE_GMT.y, START_TOW_LAT.y, START_TOW_LON.y, 
+         END_TOW_LAT.y, END_TOW_LON.y, DEPTH_FTH, GEAR_QUANTITY, GEAR_SIZE, MESH_SIZE) %>%
+  rename(START_TOW_DATE_GMT = START_TOW_DATE_GMT.y, 
+         END_TOW_DATE_GMT = END_TOW_DATE_GMT.y, 
+         START_TOW_LAT = START_TOW_LAT.y, 
+         START_TOW_LON = START_TOW_LON.y, 
+         END_TOW_LAT = END_TOW_LAT.y, 
+         END_TOW_LON = END_TOW_LON.y
+         )
+
+#doing the same thing for the 5mi and 72hr matches 
+SF_trips_5_72 <- paired_tows_5mi_72hr_logre %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  select(TRIP_ID, VESSEL_NAME, TARGET_SPECIES, VTR_GEAR_CODE, EFFORT_ID, AREA_CODE, 
+         START_TOW_DATE_GMT.y, END_TOW_DATE_GMT.y, START_TOW_LAT.y, START_TOW_LON.y, 
+         END_TOW_LAT.y, END_TOW_LON.y, DEPTH_FTH, GEAR_QUANTITY, GEAR_SIZE, MESH_SIZE) %>%
+  rename(START_TOW_DATE_GMT = START_TOW_DATE_GMT.y, 
+         END_TOW_DATE_GMT = END_TOW_DATE_GMT.y, 
+         START_TOW_LAT = START_TOW_LAT.y, 
+         START_TOW_LON = START_TOW_LON.y, 
+         END_TOW_LAT = END_TOW_LAT.y, 
+         END_TOW_LON = END_TOW_LON.y
+         )
+
+
+
+#Getting ready to export the study fleet trip data
+
+#define sheets name for each dataframe
+#only included species that had more than 5 observations 
+dataset_names <- list("Trips_1mi_24hr" = SF_trips_1_24, 
+                      "Trips_5mi_72hr" = SF_trips_5_72)
+
+#export each data frame to separate sheets in same Excel file
+openxlsx::write.xlsx(dataset_names, file = 'StudyFleet_Trips.xlsx', rowNames = FALSE)
+
+```
 
 
 
