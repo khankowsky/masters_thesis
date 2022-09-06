@@ -118,8 +118,10 @@ paired_tows_1mi_24hr_logre %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Atlantic Cod", 
        subtitle = "Pairs within 1 mi and 24 hrs")
@@ -146,8 +148,10 @@ paired_tows_1mi_24hr_logre %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Haddock", 
        subtitle = "Pairs within 1 mi and 24 hrs")
@@ -174,8 +178,10 @@ paired_tows_1mi_24hr_logre %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Yellowtail Flounder", 
        subtitle = "Pairs within 1 mi and 24 hrs")
@@ -202,8 +208,10 @@ paired_tows_1mi_24hr_logre %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Winter Flounder", 
        subtitle = "Pairs within 1 mi and 24 hrs")
@@ -230,8 +238,10 @@ paired_tows_1mi_24hr_logre %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
-  geom_vline(aes(xintercept=1),
-            color="red", linetype="dashed", size=1) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
   labs(x = "Relative Efficiency", y = "Count", 
        title = "Histogram of Relative Efficiency for Monkfish", 
        subtitle = "Pairs within 1 mi and 24 hrs")
@@ -243,7 +253,7 @@ paired_tows_1mi_24hr_logre %>%
 ### Maps of Matched Tows 
 ```{r}
 #plotting the matches for 1 mile and 24 hrs w Stat Areas
-paired_tows_1mi_24hr %>%
+paired_tows_1mi_24hr_logre %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -306,7 +316,8 @@ paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 2000) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() + 
   geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
   geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
@@ -318,6 +329,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
@@ -337,7 +350,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 2000) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() + 
   geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
   geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
@@ -349,6 +363,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
@@ -368,7 +384,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 2000) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() + 
   geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
   geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
@@ -380,6 +397,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
@@ -399,7 +418,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 2000) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() + 
   geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
   geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
@@ -411,6 +431,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
@@ -430,7 +452,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 2000) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() + 
   geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
   geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
@@ -442,6 +465,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
@@ -461,7 +486,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 2000) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() + 
   geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
   geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
@@ -473,6 +499,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
@@ -492,7 +520,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 2000) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() + 
   geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
   geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
@@ -504,6 +533,8 @@ paired_tows_5mi_72hr_logre %>%
 paired_tows_5mi_72hr_logre %>%
   filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
   xlim(0, 4) + 
@@ -522,7 +553,7 @@ paired_tows_5mi_72hr_logre %>%
 ### Maps of Matched Tows 
 ```{r}
 #plotting the matches for 5 mi and 3 days 
-paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_logre %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -539,7 +570,7 @@ paired_tows_5mi_72hr %>%
 
 
 #Zooming in on the GOM and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_logre %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -557,7 +588,7 @@ paired_tows_5mi_72hr %>%
 
 
 #Zooming in on the GB and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_logre %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -575,7 +606,7 @@ paired_tows_5mi_72hr %>%
 
 
 #Zooming in on the SNE and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_logre %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -597,7 +628,7 @@ paired_tows_5mi_72hr %>%
 ################################################################################
 #Same plots but with nefsc survey strata instead of stat atea 
 
-paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_logre %>%
   ggplot() + 
   geom_sf(data = nefsc_strata, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -614,7 +645,7 @@ paired_tows_5mi_72hr %>%
 
 
 #Zooming in on the GOM and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_logre %>%
   ggplot() + 
   geom_sf(data = nefsc_strata, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -632,7 +663,7 @@ paired_tows_5mi_72hr %>%
 
 
 #Zooming in on the GB and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_logre %>%
   ggplot() + 
   geom_sf(data = nefsc_strata, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -650,7 +681,7 @@ paired_tows_5mi_72hr %>%
 
 
 #Zooming in on the SNE and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_logre %>%
   ggplot() + 
   geom_sf(data = nefsc_strata, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -665,6 +696,19 @@ paired_tows_5mi_72hr %>%
   scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue"))
 # labs(title = "Study Fleet tows Matched to NEFSC tows", subtitle = "within 5 mi and 72 hrs")
 ```
+
+
+## GLM for relative efficiency
+```{r}
+glm.null <- glm(relative_efficiency ~ 1. data = paired_tows_5mi_72hr_logre, family = )
+glm.seas <- glm(relative_efficiency ~ season, data = paired_tows_5mi_72hr_logre)
+glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = paired_tows_5mi_72hr_logre)
+glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = paired_tows_5mi_72hr_logre)
+
+
+
+```
+
 
 
 # Observer and NEFSC Pairs
