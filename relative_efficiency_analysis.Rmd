@@ -26,6 +26,8 @@ library(scales)
 library(gridExtra)
 library(openxlsx)
 library(beepr)
+library(purrr)
+library(broom)
 ```
 
 
@@ -61,7 +63,7 @@ nefsc_strata <- st_read(dsn = "./data/strata") %>%
 ## 1m and 24hr Paired Tows 
 ### Comparing CPUA and Relative Efficiency 
 ```{r}
-#filtering for just the species of interest and creating a relative efficiency variable 
+#filtering for just the species of interest and creating a relative efficiency variable and creating variables for modeling 
 paired_tows_1mi_24hr_logre <- paired_tows_1mi_24hr %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
          SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
@@ -279,7 +281,7 @@ paired_tows_1mi_24hr_logre %>%
 ## 5m and 72hr Paired Tows
 ### Comparing CPUA and Relative Efficiency 
 ```{r}
-#filtering for just the species of interest and creating a relative efficiency variable 
+#filtering for just the species of interest and creating a relative efficiency variable and creating variables for modeling 
 paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
          SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
@@ -715,6 +717,366 @@ paired_tows_5mi_72hr_logre %>%
 ```
 
 
+
+
+# GLMs
+## Species Datasets
+```{r}
+#creating a separate dataset for each species 
+#COD
+cod_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#HADDOCK
+haddock_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+  filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#WITCH FLOUNDER
+witchfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+  filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#YELLLOWTAIL FLOUNDER
+yellowtailfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+  filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#AMERICAN PLAICE
+plaice_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+  filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#WINTER FLOUNDER
+winterfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#MONKFISH
+monkfish_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+  filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+```
+
+
+## Function Creation 
+```{r}
+#trying to  create functions because I will be running the same models for every species dataset 
+#creating a formula for the models (never got this to work)
+mlist1 <- c("glm.null", "glm.seas", "glm.mgmt", "glm.seas.mgmt")
+
+covars <- c("season", "mgmt_area", "trawl_type")
+
+combos1 <- as.data.frame(t(combn(covars, 1)))
+combos2 <- as.data.frame(t(combn(covars, 2)))
+combos3 <- as.data.frame(t(combn(covars, 3)))
+
+combos <- list(combos1, combos2, combos3)
+
+formulae <- combos %>%
+  map_dfr(unite, col="formula", sep = " + ") %>%
+  mutate(formula = paste0("relative_efficiency ~  ", formula))
+
+
+
+
+# fit models (takes dataset)
+fit.models <- function(x) {
+  formulae$formula %>% map(~lm(.x, data=x))
+}
+
+
+
+compare.models <- function(x) {
+  formulae %>%
+  mutate(aic = map_dbl(x, AIC)) %>%
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[35]) %>%
+  mutate(rsq = map_dbl(x, rsq)) %>% 
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE)
+}
+
+
+# fit models (takes dataset) -> never got this to work either 
+# fit.models <- function(x) {
+#   #Running GLM models
+#   c(
+#   glm.null <- glm(relative_efficiency ~ 1, data = x),
+#   glm.seas <- glm(relative_efficiency ~ season, data = x),
+#   glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = x),
+#   glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = x))
+# }
+
+
+# Compare models (takes list of models created by fit.models())
+compare.models <- function(x) {
+  #Model selection criteria for GLMs
+d1 <- AIC(glm.null, 
+          glm.seas, 
+          glm.mgmt, 
+          glm.seas.mgmt)
+
+mlist <- c("Null Model", 
+           "Season", 
+           "Region", 
+           "Season + Region")
+
+tabledf <- data.frame(mlist, d1)
+row.names(tabledf) <- NULL
+
+tabledf <- tabledf %>%
+  mutate(rsq = c(Dsquared(glm.null),
+                 Dsquared(glm.seas),
+                 Dsquared(glm.mgmt),
+                 Dsquared(glm.seas.mgmt)))
+
+tabledf <- tabledf %>%
+  arrange(desc(AIC)) %>%
+  mutate(deltaAIC = AIC - AIC[4]) %>%
+  relocate(rsq, .after = last_col())
+
+tabledf %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(AIC = sprintf("%1.0f", AIC)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "df", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE)
+}
+
+
+
+```
+
+## Model Runs 
+### Cod
+```{r}
+#COD
+codm <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = cod_paired_tows_5mi_72hr_logre),
+  glm.seas <- glm(relative_efficiency ~ season, data = cod_paired_tows_5mi_72hr_logre),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = cod_paired_tows_5mi_72hr_logre),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = cod_paired_tows_5mi_72hr_logre))
+
+compare.models(codm)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+#removing the outliers 
+cod_paired_tows_5mi_72hr_logre1 <- cod_paired_tows_5mi_72hr_logre %>%
+slice(-6, -85, -86)
+
+#rerunning the models and looking at the results 
+codm1 <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = cod_paired_tows_5mi_72hr_logre1),
+  glm.seas <- glm(relative_efficiency ~ season, data = cod_paired_tows_5mi_72hr_logre1),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = cod_paired_tows_5mi_72hr_logre1),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = cod_paired_tows_5mi_72hr_logre1))
+
+compare.models(codm1)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+
+
+
+
+###############################################################################
+#trying lucys method
+
+cod_models <- fit.models(cod_paired_tows_5mi_72hr_logre)
+
+compare.models(cod_models)
+
+
+```
+
+
+### Haddock
+```{r}
+#HADDOCK
+haddockm <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = haddock_paired_tows_5mi_72hr_logre),
+  glm.seas <- glm(relative_efficiency ~ season, data = haddock_paired_tows_5mi_72hr_logre),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = haddock_paired_tows_5mi_72hr_logre),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = haddock_paired_tows_5mi_72hr_logre))
+
+compare.models(haddockm)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+
+#removing the outliers 
+haddock_paired_tows_5mi_72hr_logre1 <- haddock_paired_tows_5mi_72hr_logre %>%
+slice(-80, -19, -1)
+
+#rerunning the models and looking at the results 
+haddockm1 <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = haddock_paired_tows_5mi_72hr_logre1),
+  glm.seas <- glm(relative_efficiency ~ season, data = haddock_paired_tows_5mi_72hr_logre1),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = haddock_paired_tows_5mi_72hr_logre1),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = haddock_paired_tows_5mi_72hr_logre1))
+
+compare.models(haddockm1)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+```
+
+
+
+### Witch Flounder
+```{r}
+#WITCH FLOUNDER 
+witchflm <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = witchfl_paired_tows_5mi_72hr_logre),
+  glm.seas <- glm(relative_efficiency ~ season, data = witchfl_paired_tows_5mi_72hr_logre),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = witchfl_paired_tows_5mi_72hr_logre),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = witchfl_paired_tows_5mi_72hr_logre))
+
+compare.models(witchflm)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+
+#removing the outliers 
+witchfl_paired_tows_5mi_72hr_logre1 <- witchfl_paired_tows_5mi_72hr_logre %>%
+slice(-31, -8)
+
+#rerunning the models and looking at the results 
+witchflm1 <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = witchfl_paired_tows_5mi_72hr_logre1),
+  glm.seas <- glm(relative_efficiency ~ season, data = witchfl_paired_tows_5mi_72hr_logre1),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = witchfl_paired_tows_5mi_72hr_logre1),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = witchfl_paired_tows_5mi_72hr_logre1))
+
+compare.models(witchflm1)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+
+```
+
+
+### Yewllowtail Flounder
+```{r}
+#YELLOWTAIL FLOUNDER
+yellowtailflm <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = yellowtailfl_paired_tows_5mi_72hr_logre),
+  glm.seas <- glm(relative_efficiency ~ season, data = yellowtailfl_paired_tows_5mi_72hr_logre),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = yellowtailfl_paired_tows_5mi_72hr_logre),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = yellowtailfl_paired_tows_5mi_72hr_logre))
+
+compare.models(yellowtailflm)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+
+#removing the outliers 
+yellowtailfl_paired_tows_5mi_72hr_logre1 <- yellowtailfl_paired_tows_5mi_72hr_logre %>%
+slice(-46, -105, -108)
+
+#rerunning the models and looking at the results 
+yellowtailflm1 <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = yellowtailfl_paired_tows_5mi_72hr_logre1),
+  glm.seas <- glm(relative_efficiency ~ season, data = yellowtailfl_paired_tows_5mi_72hr_logre1),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = yellowtailfl_paired_tows_5mi_72hr_logre1),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = yellowtailfl_paired_tows_5mi_72hr_logre1))
+
+compare.models(yellowtailflm1)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+```
+
+### American Plaice
+```{r}
+#AMERICAN PLAICE 
+plaicem <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = plaice_paired_tows_5mi_72hr_logre),
+  glm.seas <- glm(relative_efficiency ~ season, data = plaice_paired_tows_5mi_72hr_logre),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = plaice_paired_tows_5mi_72hr_logre),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = plaice_paired_tows_5mi_72hr_logre))
+
+compare.models(plaicem)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+
+#removing the outliers 
+plaice_paired_tows_5mi_72hr_logre1 <- plaice_paired_tows_5mi_72hr_logre %>%
+slice(-52, -1)
+
+#rerunning the models and looking at the results 
+plaicem1 <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = plaice_paired_tows_5mi_72hr_logre1),
+  glm.seas <- glm(relative_efficiency ~ season, data = plaice_paired_tows_5mi_72hr_logre1),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = plaice_paired_tows_5mi_72hr_logre1),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = plaice_paired_tows_5mi_72hr_logre1))
+
+compare.models(plaicem1)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+```
+
+
+### Winter Flounder
+```{r}
+#WINTER FLOUNDER 
+winterflm <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = winterfl_paired_tows_5mi_72hr_logre),
+  glm.seas <- glm(relative_efficiency ~ season, data = winterfl_paired_tows_5mi_72hr_logre),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = winterfl_paired_tows_5mi_72hr_logre),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = winterfl_paired_tows_5mi_72hr_logre))
+
+compare.models(winterflm)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+
+#removing the outliers 
+winterfl_paired_tows_5mi_72hr_logre1 <- winterfl_paired_tows_5mi_72hr_logre %>%
+slice(-38)
+
+#rerunning the models and looking at the results 
+winterflm1 <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = winterfl_paired_tows_5mi_72hr_logre1),
+  glm.seas <- glm(relative_efficiency ~ season, data = winterfl_paired_tows_5mi_72hr_logre1),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = winterfl_paired_tows_5mi_72hr_logre1),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = winterfl_paired_tows_5mi_72hr_logre1))
+
+compare.models(winterflm1)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+```
+
+
+### Monkfish 
+```{r}
+#MONKFISH 
+monkfishm <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = monkfish_paired_tows_5mi_72hr_logre),
+  glm.seas <- glm(relative_efficiency ~ season, data = monkfish_paired_tows_5mi_72hr_logre),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = monkfish_paired_tows_5mi_72hr_logre),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = monkfish_paired_tows_5mi_72hr_logre))
+
+compare.models(monkfishm)
+par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
+
+
+#removing the outliers 
+monkfish_paired_tows_5mi_72hr_logre1 <- monkfish_paired_tows_5mi_72hr_logre %>%
+  slice(-16, -17)
+
+#rerunning the models and looking at the results 
+monkfishm1 <- c(
+  glm.null <- glm(relative_efficiency ~ 1, data = monkfish_paired_tows_5mi_72hr_logre1),
+  glm.seas <- glm(relative_efficiency ~ season, data = monkfish_paired_tows_5mi_72hr_logre1),
+  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = monkfish_paired_tows_5mi_72hr_logre1),
+  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = monkfish_paired_tows_5mi_72hr_logre1))
+
+compare.models(monkfishm1)
+par(mfrow = c(2 , 2)); plot(glm.mgmt)
+
+```
+
+
+
+
+
+
 # Trip ID for Study Fleet for Andy Jones 
 ```{r}
 #Pulling out the study fleet trips to see if Andy Jones can talk to the captains 
@@ -763,312 +1125,10 @@ openxlsx::write.xlsx(dataset_names, file = 'StudyFleet_Trips.xlsx', rowNames = F
 ```
 
 
-# GLMs
-## Species Datasets
+# Trash 
 ```{r}
-#creating a separate dataset for each species 
-#COD
-cod_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
-  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE)
-
-#HADDOCK
-haddock_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
-  filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE)
-
-#WITCH FLOUNDER
-witchfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
-  filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE)
-
-#YELLLOWTAIL FLOUNDER
-yellowtailfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
-  filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE)
-
-#AMERICAN PLAICE
-plaice_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
-  filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE)
-
-#WINTER FLOUNDER
-winterfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
-  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE)
-
-#MONKFISH
-monkfish_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
-  filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE)
-
-```
-
-
-## Function Creation 
-```{r}
-
-mlist1 <- c("glm.null", "glm.seas", "glm.mgmt", "glm.seas.mgmt")
-
-covars1 <- c("season", "mgmt_area")
-combos1 <- map(1:3, ~as.data.frame(t(combn(covars1, .x))))
-formulae1 <- combos1 %>% 
-  map_dfr(unite, col="formula", sep = " + ") %>% 
-  mutate(formula = paste0("relative_efficiecny ~  ", formula))
-
-
-
-
-# fit models (takes dataset)
-fit.models <- function(x) {
-  #Running GLM models
-  c(
-  glm.null <- glm(relative_efficiency ~ 1, data = x),
-  glm.seas <- glm(relative_efficiency ~ season, data = x),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = x),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = x))
-}
-
-
-# Compare models (takes list of models created by fit.models())
-compare.models <- function(x) {
-  #Model selection criteria for GLMs
-d1 <- AIC(glm.null, 
-          glm.seas, 
-          glm.mgmt, 
-          glm.seas.mgmt)
-
-mlist <- c("Null Model", 
-           "Season", 
-           "Region", 
-           "Season + Region")
-
-tabledf <- data.frame(mlist, d1)
-row.names(tabledf) <- NULL
-
-tabledf <- tabledf %>%
-  mutate(rsq = c(Dsquared(glm.null),
-                 Dsquared(glm.seas),
-                 Dsquared(glm.mgmt),
-                 Dsquared(glm.seas.mgmt)))
-
-tabledf <- tabledf %>%
-  arrange(desc(AIC)) %>%
-  mutate(deltaAIC = AIC - AIC[4]) %>%
-  relocate(rsq, .after = last_col())
-
-tabledf %>%
-  mutate(rsq = sprintf("%0.2f", rsq)) %>%
-  mutate(AIC = sprintf("%1.0f", AIC)) %>%
-  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
-  kbl(col.names = (c("Model", "df", "AIC", "deltaAIC","Deviance Explained"))) %>%
-  kable_classic("striped", full_width = FALSE)
-}
-
-
-
-```
-
-## Model Runs 
-```{r}
-#COD
-codm <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = cod_paired_tows_5mi_72hr_logre),
-  glm.seas <- glm(relative_efficiency ~ season, data = cod_paired_tows_5mi_72hr_logre),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = cod_paired_tows_5mi_72hr_logre),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = cod_paired_tows_5mi_72hr_logre))
-
-compare.models(codm)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-#removing the outliers 
-cod_paired_tows_5mi_72hr_logre1 <- cod_paired_tows_5mi_72hr_logre
-slice()
-
-#rerunning the models and looking at the results 
-codm1 <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = cod_paired_tows_5mi_72hr_logre1),
-  glm.seas <- glm(relative_efficiency ~ season, data = cod_paired_tows_5mi_72hr_logre1),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = cod_paired_tows_5mi_72hr_logre1),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = cod_paired_tows_5mi_72hr_logre1))
-
-compare.models(codm1)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-###############################################################################
-#HADDOCK
-haddockm <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = haddock_paired_tows_5mi_72hr_logre),
-  glm.seas <- glm(relative_efficiency ~ season, data = haddock_paired_tows_5mi_72hr_logre),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = haddock_paired_tows_5mi_72hr_logre),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = haddock_paired_tows_5mi_72hr_logre))
-
-compare.models(haddockm)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-#removing the outliers 
-haddock_paired_tows_5mi_72hr_logre1 <- haddock_paired_tows_5mi_72hr_logre
-slice()
-
-#rerunning the models and looking at the results 
-haddockm1 <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = haddock_paired_tows_5mi_72hr_logre1),
-  glm.seas <- glm(relative_efficiency ~ season, data = haddock_paired_tows_5mi_72hr_logre1),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = haddock_paired_tows_5mi_72hr_logre1),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = haddock_paired_tows_5mi_72hr_logre1))
-
-compare.models(haddockm1)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-###############################################################################
-#WITCH FLOUNDER 
-witchflm <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = witchfl_paired_tows_5mi_72hr_logre),
-  glm.seas <- glm(relative_efficiency ~ season, data = witchfl_paired_tows_5mi_72hr_logre),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = witchfl_paired_tows_5mi_72hr_logre),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = witchfl_paired_tows_5mi_72hr_logre))
-
-compare.models(witchflm)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-#removing the outliers 
-witchfl_paired_tows_5mi_72hr_logre1 <- witchfl_paired_tows_5mi_72hr_logre
-slice()
-
-#rerunning the models and looking at the results 
-witchflm1 <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = witchfl_paired_tows_5mi_72hr_logre1),
-  glm.seas <- glm(relative_efficiency ~ season, data = witchfl_paired_tows_5mi_72hr_logre1),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = witchfl_paired_tows_5mi_72hr_logre1),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = witchfl_paired_tows_5mi_72hr_logre1))
-
-compare.models(witchflm1)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-###############################################################################
-#YELLOWTAIL FLOUNDER
-yellowtailflm <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = yellowtailfl_paired_tows_5mi_72hr_logre),
-  glm.seas <- glm(relative_efficiency ~ season, data = yellowtailfl_paired_tows_5mi_72hr_logre),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = yellowtailfl_paired_tows_5mi_72hr_logre),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = yellowtailfl_paired_tows_5mi_72hr_logre))
-
-compare.models(yellowtailflm)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-#removing the outliers 
-yellowtailfl_paired_tows_5mi_72hr_logre1 <- yellowtailfl_paired_tows_5mi_72hr_logre
-slice()
-
-#rerunning the models and looking at the results 
-yellowtailflm1 <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = yellowtailfl_paired_tows_5mi_72hr_logre1),
-  glm.seas <- glm(relative_efficiency ~ season, data = yellowtailfl_paired_tows_5mi_72hr_logre1),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = yellowtailfl_paired_tows_5mi_72hr_logre1),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = yellowtailfl_paired_tows_5mi_72hr_logre1))
-
-compare.models(yellowtailflm1)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-###############################################################################
-#AMERICAN PLAICE 
-plaicem <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = plaice_paired_tows_5mi_72hr_logre),
-  glm.seas <- glm(relative_efficiency ~ season, data = plaice_paired_tows_5mi_72hr_logre),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = plaice_paired_tows_5mi_72hr_logre),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = plaice_paired_tows_5mi_72hr_logre))
-
-compare.models(plaicem)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-#removing the outliers 
-plaice_paired_tows_5mi_72hr_logre1 <- plaice_paired_tows_5mi_72hr_logre
-slice()
-
-#rerunning the models and looking at the results 
-plaicem1 <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = plaice_paired_tows_5mi_72hr_logre1),
-  glm.seas <- glm(relative_efficiency ~ season, data = plaice_paired_tows_5mi_72hr_logre1),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = plaice_paired_tows_5mi_72hr_logre1),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = plaice_paired_tows_5mi_72hr_logre1))
-
-compare.models(plaicem1)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-
-###############################################################################
-#WINTER FLOUNDER 
-winterflm <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = winterfl_paired_tows_5mi_72hr_logre),
-  glm.seas <- glm(relative_efficiency ~ season, data = winterfl_paired_tows_5mi_72hr_logre),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = winterfl_paired_tows_5mi_72hr_logre),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = winterfl_paired_tows_5mi_72hr_logre))
-
-compare.models(winterflm)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-#removing the outliers 
-winterfl_paired_tows_5mi_72hr_logre1 <- winterfl_paired_tows_5mi_72hr_logre
-slice()
-
-#rerunning the models and looking at the results 
-winterflm1 <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = winterfl_paired_tows_5mi_72hr_logre1),
-  glm.seas <- glm(relative_efficiency ~ season, data = winterfl_paired_tows_5mi_72hr_logre1),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = winterfl_paired_tows_5mi_72hr_logre1),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = winterfl_paired_tows_5mi_72hr_logre1))
-
-compare.models(winterflm1)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-###############################################################################
-#MONKFISH 
-monkfishm <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = monkfish_paired_tows_5mi_72hr_logre),
-  glm.seas <- glm(relative_efficiency ~ season, data = monkfish_paired_tows_5mi_72hr_logre),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = monkfish_paired_tows_5mi_72hr_logre),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = monkfish_paired_tows_5mi_72hr_logre))
-
-compare.models(monkfishm)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-#removing the outliers 
-monkfish_paired_tows_5mi_72hr_logre1 <- monkfish_paired_tows_5mi_72hr_logre
-slice()
-
-#rerunning the models and looking at the results 
-monkfishm1 <- c(
-  glm.null <- glm(relative_efficiency ~ 1, data = monkfish_paired_tows_5mi_72hr_logre1),
-  glm.seas <- glm(relative_efficiency ~ season, data = monkfish_paired_tows_5mi_72hr_logre1),
-  glm.mgmt <- glm(relative_efficiency ~ mgmt_area, data = monkfish_paired_tows_5mi_72hr_logre1),
-  glm.seas.mgmt <- glm(relative_efficiency ~ season + mgmt_area, data = monkfish_paired_tows_5mi_72hr_logre1))
-
-compare.models(monkfishm1)
-par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
-
-
-```
-
-
-
-
-
-
-
-```{r}
-##just me trying out different code
+##just me trying out different code 
+#basically it's all trash 
 
 
 
