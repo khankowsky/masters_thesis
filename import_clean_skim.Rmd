@@ -443,6 +443,7 @@ sf_trawl <- study_fleet %>%
   rename(START_TOW_LON = START_HAUL_LON) %>%
   rename(END_TOW_LAT = END_SET_LAT) %>%
   rename(END_TOW_LON = END_SET_LON) %>%
+  rename(trawl_type = VTR_GEAR_CODE) %>%
   drop_na(END_TOW_LAT) %>%
   drop_na(END_TOW_LON)
 
@@ -801,7 +802,7 @@ nefsc <- nefsc %>%
 ```{r}
 #selecting just the variables of interest for study fleet dataset 
 sf_trawl_slim <- sf_trawl %>%
-  select(c("TRIP_ID", "VESSEL_NAME", "TARGET_SPECIES", "VTR_GEAR_CODE", 
+  select(c("TRIP_ID", "VESSEL_NAME", "TARGET_SPECIES", "trawl_type", 
            "EFFORT_ID", "COMMON_NAME", "NESPP4", "SPECIES_ITIS",
            "DISPOSITION_DESCR", "AREA_CODE", "SOAK_DUR_HRS", "EFFORT_NUM",
            "START_TOW_DATE_GMT", "END_TOW_DATE_GMT", "START_TOW_LAT",
