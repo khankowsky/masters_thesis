@@ -887,9 +887,9 @@ par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
 ###############################################################################
 #trying lucys method
 
-cod_models <- fit.models(cod_paired_tows_5mi_72hr_logre)
-
-compare.models(cod_models)
+# cod_models <- fit.models(cod_paired_tows_5mi_72hr_logre)
+# 
+# compare.models(cod_models)
 
 
 ```
@@ -1078,7 +1078,7 @@ par(mfrow = c(2 , 2)); plot(glm.mgmt)
 
 
 # Trip ID for Study Fleet for Andy Jones 
-```{r}
+```{r, eval = FALSE}
 #Pulling out the study fleet trips to see if Andy Jones can talk to the captains 
 #and figure out what kind of trawl net they were using 
 
@@ -1126,7 +1126,7 @@ openxlsx::write.xlsx(dataset_names, file = 'StudyFleet_Trips.xlsx', rowNames = F
 
 
 # Trash 
-```{r}
+```{r, include = FALSE, eval=FALSE}
 ##just me trying out different code 
 #basically it's all trash 
 
