@@ -782,12 +782,14 @@ observer_trawl <- observer_trawl %>%
 #   # filter(DISPOSITION_CODE == 011) %>% #this uses just the kept catch
 #   mutate(CATCH_per_SWEPT_AREA = HAIL_AMOUNT_LB/swept_area)
 
-#calculates the catch per swept area with the discard and kept catch combined
+#calculates the catch per swept area with just kept catch
 sf_trawl <- sf_trawl %>% 
   group_by(EFFORT_ID, COMMON_NAME) %>%
+  filter(DISPOSITION_CODE == "011") %>%
   mutate(sf_species_catch = sum(HAIL_AMOUNT_LB)) %>%
   ungroup() %>%
   mutate(sf_species_cpua = sf_species_catch/swept_area)
+  
   
 
 #calculates the catch per swept area for the nefsc bottom trawl survey 
