@@ -38,6 +38,18 @@ study_fleet <- read_csv('./data/STUDY_FLEET_GROUNFISH_DATA_PULL_V1.csv')
 
 ## Observer data
 ```{r}
+#Figuring out the new observer pull - 10/2/2022
+observer1 <- read_excel("./data/22-029_Cadrin_OB.xlsx", sheet = 2)
+
+observer2 <- read_excel("./data/22-029_Cadrin_OB.xlsx", sheet = 3)
+
+
+#just making sure github is wokring correctly 
+
+
+
+#########
+
 observer1 <- read_csv('./data/result1.csv')
 observer2 <- read_csv('./data/result2.csv')
 
