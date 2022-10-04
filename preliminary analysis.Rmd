@@ -32,6 +32,7 @@ library(beepr)
 ```{r}
 #importing the study fleet data
 study_fleet <- read_csv('./data/STUDY_FLEET_GROUNFISH_DATA_PULL_V1.csv')
+
 ```
 
 
@@ -39,16 +40,63 @@ study_fleet <- read_csv('./data/STUDY_FLEET_GROUNFISH_DATA_PULL_V1.csv')
 ## Observer data
 ```{r}
 #Figuring out the new observer pull - 10/2/2022
-observer1 <- read_excel("./data/22-029_Cadrin_OB.xlsx", sheet = 2)
+observer1 <- read_excel("./data/22-029_Cadrin_OB.xlsx", sheet = 2, guess_max = 1048576)
 
-observer2 <- read_excel("./data/22-029_Cadrin_OB.xlsx", sheet = 3)
+observer2 <- read_excel("./data/22-029_Cadrin_OB.xlsx", sheet = 3, 
+                        col_names = FALSE, guess_max = 1048576)
+
+observer_colnames <- as.vector(colnames(observer1))
+
+names(observer2) <- observer_colnames
 
 
-#just making sure github is wokring correctly 
+observer <- bind_rows(observer1, observer2)
+
+observer <- observer %>%
+  mutate(PROGRAM = as.numeric(PROGRAM), 
+         PERMIT1 = as.numeric(PERMIT1), 
+         HAULNUM = as.numeric(HAULNUM), 
+         OBSRFLAG = as.numeric(OBSRFLAG), 
+         YEARHBEG = as.numeric(YEARHBEG), 
+         MONTHHBEG = as.numeric(MONTHHBEG), 
+         DAYHBEG = as.numeric(DAYHBEG), 
+         TIMEHBEG = as.numeric(TIMEHBEG), 
+         TIMEHEND = as.numeric(TIMEHEND), 
+         AREA = as.numeric(AREA), 
+         NEGEAR = as.numeric(NEGEAR), 
+         NETNAME = as.numeric(NETNAME), 
+         NETTYPE = as.numeric(NETTYPE), 
+         CODHUNG = as.numeric(CODHUNG), 
+         LINERHUNG = as.numeric(LINERHUNG), 
+         EXCLUSD = as.numeric(EXCLUSD), 
+         EXCLTYP = as.numeric(EXCLTYP), 
+         GRCABTYP = as.numeric(GRCABTYP), 
+         BRDLGTYP = as.numeric(BRDLGTYP), 
+         FTROPTYP = as.numeric(FTROPTYP), 
+         CODLINERUSD = as.numeric(CODLINERUSD), 
+         NESPP4 = as.numeric(NESPP4), 
+         DRFLAG = as.numeric(DRFLAG), 
+         CATDISP = as.numeric(CATDISP) , 
+         FISHDISP = as.numeric(FISHDISP))
 
 
 
-#########
+#fixing the issue with common_names 
+observerA <- observer %>% slice_head(n = 1180571)
+observerB <- observer %>% slice_tail(n = -1180571)
+
+
+observerB <- observerB %>%
+  mutate(COMNAME2 = MARKET, 
+         MARKET = COMNAME, 
+         COMNAME = COMNAME2) %>%
+  select(-COMNAME2)
+
+
+observer <- bind_rows(observerA, observerB)
+
+
+###############################################################################
 
 observer1 <- read_csv('./data/result1.csv')
 observer2 <- read_csv('./data/result2.csv')
