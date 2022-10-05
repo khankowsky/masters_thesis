@@ -24,6 +24,12 @@ library(scales)
 library(beepr)
 ```
 
+# Read-In the Data
+```{r}
+sf_trawl_slim <- read_csv('./data/sf_trawl_slim.csv')
+ob_trawl_slim <- read_csv('./data/ob_trawl_slim.csv')
+nefsc_slim <- read_csv('./data/nefsc_slim.csv')
+```
 
 
 # Matchcing Tows
@@ -2295,3 +2301,15 @@ paired_tows_8mi_192hr_ob %>%
   count(trip_haul_ID)
 
 ```
+
+
+# Save the Datasets to CSV
+```{r}
+write.csv(paired_tows_1mi_24hr, './data/paired_tows_1mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_72hr, './data/paired_tows_5mi_72hr.csv', row.names = FALSE)
+
+write.csv(paired_tows_1mi_24hr_ob, './data/paired_tows_1mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_72hr_ob, './data/paired_tows_5mi_72hr_ob.csv', row.names = FALSE)
+
+```
+
