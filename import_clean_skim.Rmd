@@ -505,7 +505,7 @@ sf_trawl <- sf_trawl %>%
 
 #filter the observer data set to include only trawl gears and only after 2009
 observer_trawl <- observer %>%
-  filter(NEGEAR %in% c("050", "057", "150")) %>%
+  filter(NEGEAR %in% c(050, 057, 150)) %>%
       #050 - Trawl, Otter, Bottom, Fish
       #057 - Trawl, Otter, Bottom, Haddock Separator
       #150 - Trawl, Otter, Bottom, Large Mesh Belly Panel
@@ -712,53 +712,58 @@ sf_trawl$swept_area <- sf_trawl$d_t * (0.001 * sf_trawl$lin_eff_width) # SA with
 
 ###############################################################################################################
 ####################################Swept area for Observer Hauls ########################################
-# # DISTANCE
-# observer_trawl$towspeed <- 3 # Towspeed (Nautical Miles/Hr)
-# observer_trawl$hours_fished <- observer_trawl$HAULDUR # Total hours fished
-# observer_trawl$d_nm <- observer_trawl$towspeed * observer_trawl$hours_fished # Distance (Nautical Miles)
-# observer_trawl$d_t <- observer_trawl$d_nm * 1.852 # Distance towed (kilometers)
+# DISTANCE
+    #Using the towspeed from the observer dataset. however if there is an NA in the observer datasets, setting the towspeed to 3 in accordance with the 'FISHING EFFECTS MODEL NORTHEAST REGION - NEFMC (2019)'
+observer_trawl$towspeed <- ifelse(is.na(observer_trawl$TOWSPEED), 3, observer_trawl$TOWSPEED) # Towspeed (Nautical Miles/Hr)
+observer_trawl$hours_fished <- observer_trawl$HAULDUR # Total hours fished
+observer_trawl$d_nm <- observer_trawl$towspeed * observer_trawl$hours_fished # Distance (Nautical Miles)
+observer_trawl$d_t <- observer_trawl$d_nm * 1.852 # Distance towed (kilometers)
+
+
+
+# BOARDS Weight of otter trawl doors estimated by regression
+    #Using the doorweight from the observer dataset. However if there is an NA in the observer dataset, calculating the doorweight based on the tonnange and vessel horsepower from the permit data in accordance with the FISHING EFFECTS MODEL NORTHEAST REGION - NEFMC (2019)'
+observer_trawl$weight <- ifelse(is.na(observer_trawl$DOORWGT), 70.848 + (1.844 * observer_trawl$GTONS) + (0.5344 * observer_trawl$VHP), observer_trawl$DOORWGT)
+# Width trawl doors (meters) estimated by regression
+observer_trawl$width_o <- 0.001 * (1223 + (observer_trawl$weight * 0.8333))
+# Angle of attack (radians)
+observer_trawl$rad_o <- (2 * pi * 40)/360
+# Effective Width of otter board (meters)
+observer_trawl$w_o <- observer_trawl$width_o * sin(observer_trawl$rad_o)
+# Contact index for otter boards is constant
+observer_trawl$c_o <- 1
 # 
 # 
 # 
-# # BOARDS Weight of otter trawl doors estimated by regression
-# observer_trawl$weight <- 70.848 + (1.844 * observer_trawl$GTONS) + (0.5344 * observer_trawl$VHP)
-# # Width trawl doors (meters) estimated by regression
-# observer_trawl$width_o <- 0.001 * (1223 + (observer_trawl$weight * 0.8333))
-# # Angle of attack (radians)
-# observer_trawl$rad_o <- (2 * pi * 40)/360
-# # Effective Width of otter board (meters)
-# observer_trawl$w_o <- observer_trawl$width_o * sin(observer_trawl$rad_o)
-# # Contact index for otter boards is constant
-# observer_trawl$c_o <- 1
-# 
-# 
-# 
-# # CABLES (contact index set below) Width of ground cable (meters) based on regression
-# observer_trawl$width_c <- 0.3048 * (137.54 + (observer_trawl$LENGTH * 1.823))
-# # Angle of attack (radians) of ground cable
-# observer_trawl$rad_c <- (2 * pi * 15)/360
-# # Effective width of ground cable (meters)
-# observer_trawl$w_c <- observer_trawl$width_c * sin(observer_trawl$rad_c)
-# 
-# 
-# 
-# # SWEEP (contact index set below)
-# observer_trawl$raw_sweep <- observer_trawl$GEAR_SIZE
-# observer_trawl$w_s <- 0.43 * observer_trawl$raw_sweep # Effective width of sweep (meters)
-# 
-# 
-# 
-# # CONTACT INDECIES 
-# observer_trawl$c_c <- 0.95 #CABLES
-# observer_trawl$c_s <- 0.9  #SWEEP
-# 
-# 
-# 
-# observer_trawl$boards <- 2 * observer_trawl$w_o * observer_trawl$c_o # Width of both boards (meters)
-# observer_trawl$cables <- 2 * observer_trawl$w_c * observer_trawl$c_c # Width of both cables (meters)
-# observer_trawl$sweep <- observer_trawl$w_s * observer_trawl$c_s # Width of the sweep (meters)
-# observer_trawl$lin_eff_width <- observer_trawl$boards + observer_trawl$cables + observer_trawl$sweep
-# observer_trawl$swept_area <- observer_trawl$d_t * (0.001 * observer_trawl$lin_eff_width) # SA without sensitivity (km)
+# CABLES (contact index set below) Width of ground cable (meters) based on regression
+    #Using the ground_cable_length from the observer dataset. However if there is an NA in the observer dataset, calculating the ground_cable_length based on the vessel length from the permit data in accordance with the FISHING EFFECTS MODEL NORTHEAST REGION - NEFMC (2019)'
+observer_trawl$length_c <- ifelse(is.na(observer_trawl$GRCABLEN), (23.3 + (0.4*(observer_trawl$LENGTH*0.3048))), (observer_trawl$GRCABLEN))
+#Going from ground cable length to ground cable width
+observer_trawl$width_c <- 0.3048 * (137.54 + (observer_trawl$length_c * 1.823))
+# Angle of attack (radians) of ground cable
+observer_trawl$rad_c <- (2 * pi * 15)/360
+# Effective width of ground cable (meters)
+observer_trawl$w_c <- observer_trawl$length_c * sin(observer_trawl$rad_c)
+
+
+
+# SWEEP (contact index set below)
+observer_trawl$raw_sweep <- observer_trawl$FTROPLEN
+observer_trawl$w_s <- 0.43 * observer_trawl$raw_sweep # Effective width of sweep (meters)
+
+
+
+# CONTACT INDECIES
+observer_trawl$c_c <- 0.95 #CABLES
+observer_trawl$c_s <- 0.9  #SWEEP
+
+
+
+observer_trawl$boards <- 2 * observer_trawl$w_o * observer_trawl$c_o # Width of both boards (meters)
+observer_trawl$cables <- 2 * observer_trawl$w_c * observer_trawl$c_c # Width of both cables (meters)
+observer_trawl$sweep <- observer_trawl$w_s * observer_trawl$c_s # Width of the sweep (meters)
+observer_trawl$lin_eff_width <- observer_trawl$boards + observer_trawl$cables + observer_trawl$sweep
+observer_trawl$swept_area <- observer_trawl$d_t * (0.001 * observer_trawl$lin_eff_width) # SA without sensitivity (km)
 
 ```
 
@@ -825,10 +830,6 @@ observer_trawl <- observer_trawl %>%
 
 ## Calculating catch per swept area
 ```{r}
-#calculating the catch per swept area (this keeps the kept and discarded separate)
-# sf_trawl <- sf_trawl %>% 
-#   # filter(DISPOSITION_CODE == 011) %>% #this uses just the kept catch
-#   mutate(CATCH_per_SWEPT_AREA = HAIL_AMOUNT_LB/swept_area)
 
 #calculates the catch per swept area with just kept catch
 sf_trawl <- sf_trawl %>% 
@@ -837,8 +838,16 @@ sf_trawl <- sf_trawl %>%
   mutate(sf_species_catch = sum(HAIL_AMOUNT_LB)) %>%
   ungroup() %>%
   mutate(sf_species_cpua = sf_species_catch/swept_area)
-  
-  
+
+
+#calculates the catch per swept area for the observer data with just kept catch 
+observer_trawl <- observer_trawl %>%
+  filter(FISHDISP == 100) %>%
+  group_by(trip_haul_ID, COMNAME) %>%
+  mutate(ob_species_catch = sum(LIVE_WT)) %>%
+  ungroup() %>%
+  mutate(ob_species_cpua = ob_species_catch/swept_area)
+
 
 #calculates the catch per swept area for the nefsc bottom trawl survey 
 nefsc <- nefsc %>%
@@ -876,7 +885,8 @@ ob_trawl_slim <- observer_trawl %>%
          "GRCABTYP", "BRDLGTYP", "BRDLGTYP", "FTROPTYP", "CODLINERUSD", "NESPP4", 
          "COMNAME", "CATDISP", "FISHDISP", "FISHDISPDESC", "START_TOW_LAT", 
          "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", "HAULDUR", "HAILWT", 
-         "LIVE_WT", "survey_comercial_ID", "strata", "trawl_type"))
+         "LIVE_WT", "survey_comercial_ID", "strata", "trawl_type", "swept_area", 
+         "ob_species_catch", "ob_species_cpua"))
          # "swept_area"))
 
 
