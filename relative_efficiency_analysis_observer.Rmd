@@ -1,0 +1,372 @@
+---
+title: "relative_efficiency_analysis_observer"
+output: html_document
+date: "2022-10-05"
+---
+
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(skimr)
+library(data.table)
+library(fuzzyjoin)
+library(lubridate)
+library(kableExtra)
+library(modEvA)
+
+library(maps) # land masses
+library(rgdal) # read OGR vector maps into Spatial objects
+library(viridis) # for customizing scale bars
+library(mapproj)
+library(hexbin)
+library(sf)
+library(scales)
+library(gridExtra)
+library(openxlsx)
+library(beepr)
+library(purrr)
+library(broom)
+```
+
+
+# Data for Maps 
+```{r}
+#Additional Data for Maps
+#Statistical Areas
+sareas <- st_read(dsn = "./data/Statistical_Areas_2010_withNames") %>%
+  st_set_crs(4269)
+sareas <- sareas %>% filter(Id %in% c("464", "465", "511", "512", "513", "514", "515", "521", "522", "525", "526", "537", "538", "539", "551", "561", "562", "611", "612", "613", "543", "542", "541", "534", "533", "616", "615", "614", "621", "622", "623", "624"))  
+centroids <- sf::st_coordinates(st_centroid(sareas)) 
+areas <- cbind(sareas, centroids)
+
+
+#Land Mass
+states <- map_data("state")
+NEUS <- subset(states, region %in% c("Maine", "massachusetts", "new hampshire", "vermont", "maine", "rhode island",
+                "connecticut","new york","new jersey","delaware","pennsylvania",
+                            "maryland","virginia","north carolina","west virginia"))
+
+
+#NEFSC Survey Strata
+sf::sf_use_s2(FALSE)
+nefsc_strata <- st_read(dsn = "./data/strata") %>%
+  st_set_crs(4269)
+
+
+```
+
+
+
+
+
+# Observer and NEFSC Pairs
+## 1m and 24hr Paired Tows 
+### Comparing CPUA and Relative Efficiency 
+```{r}
+paired_tows_1mi_24hr_ob_logre <- paired_tows_1mi_24hr_ob %>%
+  filter(SVSPP == 73 & NESPP4 == 818 | #cod 
+         SVSPP == 74 & NESPP4 == 1477 | #haddock
+         SVSPP == 75 & NESPP4 == 2695 | #pollock
+         SVSPP == 105 & NESPP4 == 1230 | #yellowtail flounder
+         SVSPP == 102 & NESPP4 == 1240 | #american plaice
+         SVSPP == 107 & NESPP4 == 1220 | #witch flounder
+         SVSPP == 108 & NESPP4 == 1250 | #windowpane
+         SVSPP == 106 & NESPP4 == 1200 | #winter flounder
+         SVSPP == 155 & NESPP4 == 2400 | #acadian redfish
+         SVSPP == 197 & NESPP4 == 124    #monkfish
+        ) %>%
+  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
+  filter(CATCHWT_updated > 0) %>%
+  mutate(relative_efficiency = log(ob_species_cpua + 1)/log(nefsc_species_cpua + 1)) %>%
+  mutate(mgmt_area = case_when(
+    AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA.x %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  distinct()
+
+
+
+```
+
+
+## 5m and 72hr Paired Tows
+### Comparing CPUA and Relative Efficiency 
+```{r}
+paired_tows_5mi_72hr_ob_logre <- paired_tows_5mi_72hr_ob %>%
+  filter(SVSPP == 73 & NESPP4 == 818 | #cod 
+         SVSPP == 74 & NESPP4 == 1477 | #haddock
+         SVSPP == 75 & NESPP4 == 2695 | #pollock
+         SVSPP == 105 & NESPP4 == 1230 | #yellowtail flounder
+         SVSPP == 102 & NESPP4 == 1240 | #american plaice
+         SVSPP == 107 & NESPP4 == 1220 | #witch flounder
+         SVSPP == 108 & NESPP4 == 1250 | #windowpane
+         SVSPP == 106 & NESPP4 == 1200 | #winter flounder
+         SVSPP == 155 & NESPP4 == 2400 | #acadian redfish
+         SVSPP == 197 & NESPP4 == 124    #monkfish
+        ) %>%
+  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
+  filter(CATCHWT_updated > 0) %>%
+  mutate(relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA.x %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  distinct()
+
+
+
+
+
+
+#COD
+#Looking at the cpua for the paired tows for each species 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 73 & NESPP4 == 818) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
+  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
+       title = "Comparison of CPUA for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 73 & NESPP4 == 818) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  xlim(0, 4) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+
+
+#HADDOCK
+#Looking at the cpua for the paired tows for each species 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 74 & NESPP4 == 1477) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
+  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
+       title = "Comparison of CPUA for Haddock", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 74 & NESPP4 == 1477) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  xlim(0, 4) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Haddock", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+
+
+#WITCH FLOUNDER 
+#Looking at the cpua for the paired tows for each species 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 107 & NESPP4 == 1220) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
+  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
+       title = "Comparison of CPUA for Witch Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 107 & NESPP4 == 1220) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  xlim(0, 4) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Witch Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+
+
+#YELLOWTAIL FLOUNDER
+#Looking at the cpua for the paired tows for each species 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 105 & NESPP4 == 1230) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
+  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
+       title = "Comparison of CPUA for Yellowtail Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 105 & NESPP4 == 1230) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  xlim(0, 4) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Yellowtail Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+
+
+#AMERICAN PLAICE
+#Looking at the cpua for the paired tows for each species 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 102 & NESPP4 == 1240) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
+  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
+       title = "Comparison of CPUA for American Plaice", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 102 & NESPP4 == 1240) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  xlim(0, 4) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for American Plaice", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+
+
+#WINTER FLOUNDER
+#Looking at the cpua for the paired tows for each species 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 106 & NESPP4 == 1200) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
+  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
+       title = "Comparison of CPUA for Winter Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 106 & NESPP4 == 1200) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  xlim(0, 4) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Winter Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+
+
+#MONKFISH
+#Looking at the cpua for the paired tows for each species 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 197 & NESPP4 == 124) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
+  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
+       title = "Comparison of CPUA for Monkfish", 
+       subtitle = "Pairs within 5 mi and 72 hrs") 
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+paired_tows_5mi_72hr_ob_logre %>%
+  filter(SVSPP == 197 & NESPP4 == 124) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  xlim(0, 4) + 
+  geom_vline(aes(xintercept = 1),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Monkfish", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+  
+
+```
+
