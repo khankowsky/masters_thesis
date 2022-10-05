@@ -31,6 +31,12 @@ library(purrr)
 library(broom)
 ```
 
+# Read-In the Data
+```{r}
+paired_tows_1mi_24hr_ob <- read.csv('./data/paired_tows_1mi_24hr_ob.csv')
+paired_tows_5mi_72hr_ob <- read.csv('./data/paired_tows_5mi_72hr_ob.csv')
+```
+
 
 # Data for Maps 
 ```{r}
@@ -80,7 +86,7 @@ paired_tows_1mi_24hr_ob_logre <- paired_tows_1mi_24hr_ob %>%
         ) %>%
   drop_na(ob_species_cpua, nefsc_species_cpua) %>%
   filter(CATCHWT_updated > 0) %>%
-  mutate(relative_efficiency = log(ob_species_cpua + 1)/log(nefsc_species_cpua + 1)) %>%
+  mutate(relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
   mutate(mgmt_area = case_when(
     AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
     AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
@@ -367,6 +373,5 @@ paired_tows_5mi_72hr_ob_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
   
-
 ```
 
