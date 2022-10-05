@@ -30,6 +30,13 @@ library(purrr)
 library(broom)
 ```
 
+# Read- In the Data
+```{r}
+paired_tows_1mi_24hr <- read.csv('./data/paired_tows_1mi_24hr.csv')
+paired_tows_5mi_72hr <- read.csv('./data/paired_tows_5mi_72hr.csv')
+```
+
+
 
 # Data for Maps 
 ```{r}
@@ -90,7 +97,7 @@ paired_tows_1mi_24hr_logre <- paired_tows_1mi_24hr %>%
         ) %>%
   drop_na(sf_species_cpua, nefsc_species_cpua) %>%
   filter(CATCHWT_updated > 0) %>%
-  mutate(relative_efficiency = log(sf_species_cpua + 1)/log(nefsc_species_cpua + 1)) %>%
+  mutate(relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua)) %>%
   mutate(mgmt_area = case_when(
     AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
     AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
@@ -309,7 +316,7 @@ paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr %>%
         ) %>%
   drop_na(sf_species_cpua, nefsc_species_cpua) %>%
   filter(CATCHWT_updated > 0) %>%
-  mutate(relative_efficiency = log(sf_species_cpua + 1)/log(nefsc_species_cpua + 1)) %>%
+  mutate(relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua)) %>%
   mutate(mgmt_area = case_when(
     AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
     AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
@@ -712,44 +719,6 @@ paired_tows_5mi_72hr_logre %>%
 
 
 
-
-# Observer and NEFSC Pairs
-## 1m and 24hr Paired Tows 
-### Comparing CPUA and Relative Efficiency 
-```{r}
-paired_tows_1mi_24hr_ob_logre <- paired_tows_1mi_24hr_ob %>%
-  filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
-         SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
-         SVSPP == 75 & SPECIES_ITIS == 164727 | #pollock
-         SVSPP == 105 & SPECIES_ITIS == 172909 | #yellowtail flounder
-         SVSPP == 102 & SPECIES_ITIS == 172877 | #american plaice
-         SVSPP == 107 & SPECIES_ITIS == 172873 | #witch flounder
-         SVSPP == 76 & SPECIES_ITIS == 164732  | #white hake
-         SVSPP == 108 & SPECIES_ITIS == 172746 | #windowpane
-         SVSPP == 106 & SPECIES_ITIS == 172905 | #winter flounder
-         SVSPP == 155 & SPECIES_ITIS == 166774   #acadian redfish
-        ) %>%
-  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
-  filter(CATCHWT_updated > 0) %>%
-  mutate(relative_efficiency = log(ob_species_cpua + 1)/log(nefsc_species_cpua + 1)) %>%
-  mutate(mgmt_area = case_when(
-    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
-    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
-    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
-  )) %>%
-  mutate(season = case_when(
-    month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
-    month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
-  )) %>%
-  distinct()
-
-paired_tows_1mi_24hr_ob %>%
-  count(COMNAME)
-```
-
-
-
-
 # GLMs
 ## Species Datasets
 ```{r}
@@ -883,6 +852,37 @@ tabledf %>%
 
 
 ```
+
+## Paired T Tests
+```{r}
+cod_ttest <- t.test(cod_paired_tows_5mi_72hr_logre$sf_species_cpua, cod_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+cod_ttest
+
+
+haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_logre$sf_species_cpua, haddock_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+haddock_ttest
+
+
+witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_logre$sf_species_cpua, witchfl_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+witchfl_ttest
+
+
+yellowtail_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_logre$sf_species_cpua, yellowtailfl_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+yellowtail_ttest
+
+
+plaice_ttest <- t.test(plaice_paired_tows_5mi_72hr_logre$sf_species_cpua, plaice_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+plaice_ttest
+
+
+winterfl_ttest <- t.test(winterfl_paired_tows_5mi_72hr_logre$sf_species_cpua, winterfl_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+winterfl_ttest
+
+
+monkfish_ttest <- t.test(monkfish_paired_tows_5mi_72hr_logre$sf_species_cpua, monkfish_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+monkfish_ttest
+```
+
 
 ## Model Runs 
 ### Cod
