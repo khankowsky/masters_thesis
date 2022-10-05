@@ -963,9 +963,9 @@ rm(nefsc)
 
 # Saving the Slimmed Down Datasets 
 ```{r}
-# write.csv(sf_trawl_slim, './data/sf_trawl_slim.csv', row.names = FALSE)
-# write.csv(ob_trawl_slim, './data/ob_trawl_slim.csv', row.names = FALSE)
-# write.csv(nefsc_slim, './data/nefsc_slim.csv', row.names = FALSE)
+write.csv(sf_trawl_slim, './data/sf_trawl_slim.csv', row.names = FALSE)
+write.csv(ob_trawl_slim, './data/ob_trawl_slim.csv', row.names = FALSE)
+write.csv(nefsc_slim, './data/nefsc_slim.csv', row.names = FALSE)
 # write.csv(vw_slim, './data/vw_slim.csv', row.names = FALSE)
 ```
 
