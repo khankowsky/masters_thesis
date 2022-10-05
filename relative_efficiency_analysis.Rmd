@@ -714,8 +714,37 @@ paired_tows_5mi_72hr_logre %>%
 
 
 # Observer and NEFSC Pairs
+## 1m and 24hr Paired Tows 
+### Comparing CPUA and Relative Efficiency 
 ```{r}
+paired_tows_1mi_24hr_ob_logre <- paired_tows_1mi_24hr_ob %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
+         SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
+         SVSPP == 75 & SPECIES_ITIS == 164727 | #pollock
+         SVSPP == 105 & SPECIES_ITIS == 172909 | #yellowtail flounder
+         SVSPP == 102 & SPECIES_ITIS == 172877 | #american plaice
+         SVSPP == 107 & SPECIES_ITIS == 172873 | #witch flounder
+         SVSPP == 76 & SPECIES_ITIS == 164732  | #white hake
+         SVSPP == 108 & SPECIES_ITIS == 172746 | #windowpane
+         SVSPP == 106 & SPECIES_ITIS == 172905 | #winter flounder
+         SVSPP == 155 & SPECIES_ITIS == 166774   #acadian redfish
+        ) %>%
+  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
+  filter(CATCHWT_updated > 0) %>%
+  mutate(relative_efficiency = log(ob_species_cpua + 1)/log(nefsc_species_cpua + 1)) %>%
+  mutate(mgmt_area = case_when(
+    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  distinct()
 
+paired_tows_1mi_24hr_ob %>%
+  count(COMNAME)
 ```
 
 
