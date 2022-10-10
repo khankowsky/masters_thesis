@@ -53,8 +53,10 @@ paired_tows_1mi_24hr <- nefsc_slim %>%
 
 #confirming that I have 6 matches 
 paired_tows_1mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 view(paired_tows_1mi_24hr)
@@ -73,8 +75,10 @@ paired_tows_5mi_72hr <- nefsc_slim %>%
 
 
 paired_tows_5mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_5mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 
@@ -118,8 +122,10 @@ paired_tows_1mi_24hr <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 gc()
@@ -136,8 +142,10 @@ paired_tows_1mi_48hr <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 gc()
@@ -154,8 +162,10 @@ paired_tows_1mi_72hr <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 gc()
@@ -172,8 +182,10 @@ paired_tows_1mi_96hr <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 gc()
@@ -191,8 +203,10 @@ paired_tows_1mi_120hr <- nefsc_slim %>%
 
 
 paired_tows_1mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 gc()
@@ -209,8 +223,10 @@ paired_tows_1mi_144hr <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID) 
 
 gc()
@@ -227,8 +243,10 @@ paired_tows_1mi_168hr <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID) 
 
 gc()
@@ -245,8 +263,10 @@ paired_tows_1mi_192hr <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 gc()
@@ -362,27 +382,35 @@ paired_tows_2mi_192hr <- nefsc_slim %>%
 gc()
 
 paired_tows_2mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_2mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_2mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_2mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_2mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_2mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_2mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_2mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 beep(8)
@@ -496,27 +524,35 @@ paired_tows_3mi_192hr <- nefsc_slim %>%
 gc()
 
 paired_tows_3mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_3mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_3mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_3mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_3mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_3mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_3mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_3mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 beep(8)
@@ -630,27 +666,35 @@ paired_tows_4mi_192hr <- nefsc_slim %>%
 gc()
 
 paired_tows_4mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_4mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_4mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_4mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_4mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_4mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_4mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_4mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 beep(8)
@@ -764,27 +808,35 @@ paired_tows_5mi_192hr <- nefsc_slim %>%
 gc()
 
 paired_tows_5mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_5mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_5mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_5mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_5mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_5mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_5mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_5mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 beep(8)
@@ -898,27 +950,35 @@ paired_tows_6mi_192hr <- nefsc_slim %>%
 gc()
 
 paired_tows_6mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_6mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_6mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_6mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_6mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_6mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_6mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_6mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 beep(8)
@@ -1032,27 +1092,35 @@ paired_tows_7mi_192hr <- nefsc_slim %>%
 gc()
 
 paired_tows_7mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_7mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_7mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_7mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_7mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_7mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_7mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_7mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 beep(8)
@@ -1166,27 +1234,35 @@ paired_tows_8mi_192hr <- nefsc_slim %>%
 gc()
 
 paired_tows_8mi_24hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_8mi_48hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_8mi_72hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_8mi_96hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_8mi_120hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_8mi_144hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_8mi_168hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 paired_tows_8mi_192hr %>%
+  filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
 beep(8)
@@ -1207,8 +1283,10 @@ paired_tows_1mi_24hr_ob <- nefsc_slim %>%
 
 
 paired_tows_1mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 
@@ -1220,6 +1298,14 @@ paired_tows_5mi_72hr_ob <- nefsc_slim %>%
   mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
   filter(time_dif > -3 & time_dif < 3) %>%
   filter(STRATUM == strata)
+
+
+paired_tows_5mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
+  count(cruise_station_ID)
+paired_tows_5mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
+  count(trip_haul_ID)
 
 ```
 
@@ -1241,8 +1327,10 @@ paired_tows_1mi_24hr_ob <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 gc()
@@ -1259,8 +1347,10 @@ paired_tows_1mi_48hr_ob <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 gc()
@@ -1277,8 +1367,10 @@ paired_tows_1mi_72hr_ob <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 gc()
@@ -1295,8 +1387,10 @@ paired_tows_1mi_96hr_ob <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 gc()
@@ -1313,8 +1407,10 @@ paired_tows_1mi_120hr_ob <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 gc()
@@ -1331,8 +1427,10 @@ paired_tows_1mi_144hr_ob <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID) 
 
 gc()
@@ -1349,8 +1447,10 @@ paired_tows_1mi_168hr_ob <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID) 
 
 gc()
@@ -1367,8 +1467,10 @@ paired_tows_1mi_192hr_ob <- nefsc_slim %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(cruise_station_ID)
 paired_tows_1mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 gc()
@@ -1484,27 +1586,35 @@ gc()
 
 
 paired_tows_2mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_2mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_2mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_2mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_2mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_2mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_2mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_2mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 ```
@@ -1616,27 +1726,35 @@ gc()
 
 
 paired_tows_3mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_3mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_3mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_3mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_3mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_3mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_3mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_3mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 ```
@@ -1748,27 +1866,35 @@ gc()
 
 
 paired_tows_4mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_4mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_4mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_4mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_4mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_4mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_4mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_4mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 ```
@@ -1880,27 +2006,35 @@ gc()
 
 
 paired_tows_5mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_5mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_5mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_5mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_5mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_5mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_5mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_5mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 ```
@@ -2012,27 +2146,35 @@ gc()
 
 
 paired_tows_6mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_6mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_6mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_6mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_6mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_6mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_6mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_6mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 ```
@@ -2144,27 +2286,35 @@ gc()
 
 
 paired_tows_7mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_7mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_7mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_7mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_7mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_7mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_7mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_7mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 ```
@@ -2277,27 +2427,35 @@ gc()
 
 
 paired_tows_8mi_24hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_8mi_48hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_8mi_72hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_8mi_96hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_8mi_120hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_8mi_144hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_8mi_168hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 paired_tows_8mi_192hr_ob %>%
+  filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
 ```
