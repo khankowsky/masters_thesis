@@ -43,7 +43,7 @@ observer1 <- read_excel("./data/22-029_Cadrin_OB.xlsx", sheet = 2, guess_max = 1
 observer2 <- read_excel("./data/22-029_Cadrin_OB.xlsx", sheet = 3, 
                         col_names = FALSE, guess_max = 1048576)
 
-#tkaing the column titles from observer1 and applying them to observer2
+#taking the column titles from observer1 and applying them to observer2
 observer_colnames <- as.vector(colnames(observer1))
 names(observer2) <- observer_colnames
 
@@ -187,8 +187,7 @@ nefsc_length_spring_select <- nefsc_length_spring %>%
            SVSPP == 101 & LENGTH < 104.14 | #atlantic halibut, minimum size 41in (104.14cm)
            SVSPP == 106 & LENGTH < 30.38 | #winter flounder, minimum size 12in (30.48cm)
            SVSPP == 155 & LENGTH < 17.78 | #acadian redfish, minimum size 7in (17.78cm)   #NE Groundfish spp
-           SVSPP == 197 & LENGTH < 43.81 #goosefish, minimum size 17in (43.81cm) for whole fish or 11in 
-                                                    #for tails only 
+           SVSPP == 197 & LENGTH < 43.81 #goosefish, minimum size 17in (43.81cm) for whole fish or 11in for tails only 
            )
 
 
@@ -614,7 +613,7 @@ sf_points <- sf_points %>%
 sf_trawl <- left_join(sf_trawl, sf_points, by = c("midpoint_lat", "midpoint_long"))
 
 
-
+################################################################################
 
 
 #Assigning NEFSC survey strata to commercial Observer tows 
