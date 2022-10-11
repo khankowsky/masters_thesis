@@ -767,13 +767,10 @@ monkfish_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
 #creating a formula for the models (never got this to work)
 mlist1 <- c("glm.null", "glm.seas", "glm.mgmt", "glm.seas.mgmt")
 
-covars <- c("season", "mgmt_area", "trawl_type")
 
-combos1 <- as.data.frame(t(combn(covars, 1)))
-combos2 <- as.data.frame(t(combn(covars, 2)))
-combos3 <- as.data.frame(t(combn(covars, 3)))
+covars <- c("season", "mgmt_area", "trawl_type", "Vessel_Name", "AVGDEPTH", "SURFTEMP", "BOTTEMP")
 
-combos <- list(combos1, combos2, combos3)
+combos <- purrr::map(1:7, ~as.data.frame(t(combn(covars, .x))))
 
 formulae <- combos %>%
   map_dfr(unite, col="formula", sep = " + ") %>%
