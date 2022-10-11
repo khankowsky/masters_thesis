@@ -27,7 +27,7 @@ library(gridExtra)
 library(openxlsx)
 library(beepr)
 library(purrr)
-library(broom)
+library(rsq)
 ```
 
 # Read- In the Data
@@ -768,9 +768,9 @@ monkfish_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
 mlist1 <- c("glm.null", "glm.seas", "glm.mgmt", "glm.seas.mgmt")
 
 
-covars <- c("season", "mgmt_area", "trawl_type", "Vessel_Name", "AVGDEPTH", "SURFTEMP", "BOTTEMP")
+covars <- c("season", "mgmt_area", "VESSEL_NAME", "AVGDEPTH", "SURFTEMP", "BOTTEMP")
 
-combos <- purrr::map(1:7, ~as.data.frame(t(combn(covars, .x))))
+combos <- purrr::map(1:6, ~as.data.frame(t(combn(covars, .x))))
 
 formulae <- combos %>%
   map_dfr(unite, col="formula", sep = " + ") %>%
@@ -781,17 +781,17 @@ formulae <- combos %>%
 
 # fit models (takes dataset)
 fit.models <- function(x) {
-  formulae$formula %>% map(~lm(.x, data=x))
+  formulae$formula %>% purrr::map( ~glm(.x, data=x))
 }
 
 
 
 compare.models <- function(x) {
   formulae %>%
-  mutate(aic = map_dbl(x, AIC)) %>%
+  mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[35]) %>%
-  mutate(rsq = map_dbl(x, rsq)) %>% 
+  mutate(deltaAIC = aic - aic[63]) %>%
+  mutate(rsq =  purrr::map_dbl(x, rsq)) %>% 
   mutate(rsq = sprintf("%0.2f", rsq)) %>%
   mutate(aic = sprintf("%1.0f", aic)) %>%
   mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
@@ -885,6 +885,9 @@ monkfish_ttest
 ### Cod
 ```{r}
 #COD
+codm <- fit.models(cod_paired_tows_5mi_72hr_logre)
+
+
 codm <- c(
   glm.null <- glm(relative_efficiency ~ 1, data = cod_paired_tows_5mi_72hr_logre),
   glm.seas <- glm(relative_efficiency ~ season, data = cod_paired_tows_5mi_72hr_logre),
@@ -919,6 +922,17 @@ par(mfrow = c(2 , 2)); plot(glm.seas.mgmt)
 # 
 # compare.models(cod_models)
 
+
+#trying the dredge method
+library(MuMIn)
+
+cod_paired_tows_5mi_72hr_logre <- cod_paired_tows_5mi_72hr_logre %>%
+  drop_na(BOTTEMP, AVGDEPTH) %>%
+  select(-c(AIRTEMP, BAROPRESS, WINDDIR, WINDSP, WEATHER))
+
+codm1 <- glm(relative_efficiency ~ season + mgmt_area  + VESSEL_NAME + AVGDEPTH + SURFTEMP + BOTTEMP, data = cod_paired_tows_5mi_72hr_logre) 
+
+dredge(codm1)
 
 ```
 
