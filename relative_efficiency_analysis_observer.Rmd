@@ -106,7 +106,7 @@ paired_tows_1mi_24hr_ob_logre <- paired_tows_1mi_24hr_ob %>%
 ## 5m and 72hr Paired Tows
 ### Comparing CPUA and Relative Efficiency 
 ```{r}
-paired_tows_5mi_72hr_ob_logre <- paired_tows_5mi_72hr_ob %>%
+paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
   filter(SVSPP == 73 & NESPP4 == 818 | #cod 
          SVSPP == 74 & NESPP4 == 1477 | #haddock
          SVSPP == 75 & NESPP4 == 2695 | #pollock
@@ -120,7 +120,8 @@ paired_tows_5mi_72hr_ob_logre <- paired_tows_5mi_72hr_ob %>%
         ) %>%
   drop_na(ob_species_cpua, nefsc_species_cpua) %>%
   filter(CATCHWT_updated > 0) %>%
-  mutate(relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
+  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
+  mutate(relative_efficiency = nefsc_species_cpua/(nefsc_species_cpua + ob_species_cpua)) %>%
   mutate(mgmt_area = case_when(
     AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
     AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
@@ -139,7 +140,7 @@ paired_tows_5mi_72hr_ob_logre <- paired_tows_5mi_72hr_ob %>%
 
 #COD
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 73 & NESPP4 == 818) %>% 
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
@@ -152,15 +153,14 @@ paired_tows_5mi_72hr_ob_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 73 & NESPP4 == 818) %>%
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -173,7 +173,7 @@ paired_tows_5mi_72hr_ob_logre %>%
 
 #HADDOCK
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 74 & NESPP4 == 1477) %>% 
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
@@ -186,15 +186,14 @@ paired_tows_5mi_72hr_ob_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 74 & NESPP4 == 1477) %>%
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -207,7 +206,7 @@ paired_tows_5mi_72hr_ob_logre %>%
 
 #WITCH FLOUNDER 
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 107 & NESPP4 == 1220) %>% 
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
@@ -220,15 +219,14 @@ paired_tows_5mi_72hr_ob_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 107 & NESPP4 == 1220) %>%
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -241,7 +239,7 @@ paired_tows_5mi_72hr_ob_logre %>%
 
 #YELLOWTAIL FLOUNDER
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 105 & NESPP4 == 1230) %>% 
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
@@ -254,15 +252,14 @@ paired_tows_5mi_72hr_ob_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 105 & NESPP4 == 1230) %>%
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -275,7 +272,7 @@ paired_tows_5mi_72hr_ob_logre %>%
 
 #AMERICAN PLAICE
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 102 & NESPP4 == 1240) %>% 
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
@@ -288,15 +285,14 @@ paired_tows_5mi_72hr_ob_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 102 & NESPP4 == 1240) %>%
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -309,7 +305,7 @@ paired_tows_5mi_72hr_ob_logre %>%
 
 #WINTER FLOUNDER
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 106 & NESPP4 == 1200) %>% 
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
@@ -322,15 +318,14 @@ paired_tows_5mi_72hr_ob_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 106 & NESPP4 == 1200) %>%
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -343,7 +338,7 @@ paired_tows_5mi_72hr_ob_logre %>%
 
 #MONKFISH
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 197 & NESPP4 == 124) %>% 
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
@@ -356,15 +351,14 @@ paired_tows_5mi_72hr_ob_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs") 
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_logre %>%
+paired_tows_5mi_72hr_ob_re %>%
   filter(SVSPP == 197 & NESPP4 == 124) %>%
   distinct(trip_haul_ID, .keep_all = TRUE) %>%
   filter(ob_species_cpua < 10000) %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -374,4 +368,188 @@ paired_tows_5mi_72hr_ob_logre %>%
 
   
 ```
+
+
+### Maps of Matched Tows 
+```{r}
+
+```
+
+
+
+
+
+
+# GLMs
+## Species Datasets
+```{r}
+#creating a separate dataset for each species 
+#COD
+cod_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 73 & NESPP4 == 818) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#HADDOCK
+haddock_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 74 & NESPP4 == 1477) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#WITCH FLOUNDER
+witchfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 107 & NESPP4 == 1220) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#YELLLOWTAIL FLOUNDER
+yellowtailfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 105 & NESPP4 == 1230) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#AMERICAN PLAICE
+plaice_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 102 & NESPP4 == 1240) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#WINTER FLOUNDER
+winterfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 106 & NESPP4 == 1200) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#MONKFISH
+monkfish_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 197 & NESPP4 == 124) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+```
+
+
+## Function Creation 
+```{r}
+#trying to  create functions because I will be running the same models for every species dataset 
+covars <- c("season", "mgmt_area", "trawl_type",  "VESSELNAME", "AVGDEPTH", "SURFTEMP", "BOTTEMP")
+combos <- purrr::map(1:7, ~as.data.frame(t(combn(covars, .x))))
+
+formulae <- combos %>%
+  map_dfr(unite, col="formula", sep = " + ") %>%
+  mutate(formula = paste0("relative_efficiency ~  ", formula))
+
+
+#fit models (takes dataset)
+fit.models <- function(x) {
+  formulae$formula %>% purrr::map( ~glm(.x, data=x))
+}
+
+
+#compare models (takes list of models created by fit.models())
+compare.models <- function(x) {
+  formulae %>%
+  mutate(aic =  purrr::map_dbl(x, AIC)) %>%
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[127]) %>%
+  mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE)
+}
+
+
+```
+
+
+
+
+## Paired T Tests
+```{r}
+cod_ttest <- t.test(cod_paired_tows_5mi_72hr_ob_re$ob_species_cpua, cod_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, paired = TRUE)
+cod_ttest
+
+
+haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_ob_re$ob_species_cpua, haddock_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, paired = TRUE)
+haddock_ttest
+
+
+witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_ob_re$ob_species_cpua, witchfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, paired = TRUE)
+witchfl_ttest
+
+
+yellowtail_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_ob_re$ob_species_cpua, yellowtailfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, paired = TRUE)
+yellowtail_ttest
+
+
+plaice_ttest <- t.test(plaice_paired_tows_5mi_72hr_ob_re$ob_species_cpua, plaice_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, paired = TRUE)
+plaice_ttest
+
+
+winterfl_ttest <- t.test(winterfl_paired_tows_5mi_72hr_ob_re$ob_species_cpua, winterfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, paired = TRUE)
+winterfl_ttest
+
+
+monkfish_ttest <- t.test(monkfish_paired_tows_5mi_72hr_ob_re$ob_species_cpua, monkfish_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, paired = TRUE)
+monkfish_ttest
+```
+
+
+
+## Model Runs 
+### Cod
+```{r}
+#COD
+codm <- fit.models(cod_paired_tows_5mi_72hr_ob_re)
+
+compare.models(codm)
+
+```
+
+### Haddock
+```{r}
+#HADDOCK
+haddockm <- fit.models(haddock_paired_tows_5mi_72hr_ob_re)
+
+compare.models(haddockm)
+
+```
+
+### Witch Flounder
+```{r}
+#WITCH FLOUNDER 
+witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_ob_re)
+
+compare.models(witchflm)
+
+```
+
+### Yewllowtail Flounder
+```{r}
+#YELLOWTAIL FLOUNDER
+yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_ob_re)
+
+compare.models(yellowtailflm)
+
+```
+
+### American Plaice
+```{r}
+#AMERICAN PLAICE 
+plaicem <- fit.models(plaice_paired_tows_5mi_72hr_ob_re)
+
+compare.models(plaicem)
+
+```
+
+### Winter Flounder
+```{r}
+#WINTER FLOUNDER 
+winterflm <- fit.models(winterfl_paired_tows_5mi_72hr_ob_re)
+
+compare.models(winterflm)
+```
+
+### Monkfish 
+```{r}
+#MONKFISH 
+monkfishm <- fit.models(monkfish_paired_tows_5mi_72hr_ob_re)
+
+compare.models(monkfishm)
+```
+
 
