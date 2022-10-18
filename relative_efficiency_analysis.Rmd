@@ -133,8 +133,7 @@ paired_tows_1mi_24hr_logre %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -163,8 +162,7 @@ paired_tows_1mi_24hr_logre %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -193,8 +191,7 @@ paired_tows_1mi_24hr_logre %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -223,8 +220,7 @@ paired_tows_1mi_24hr_logre %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -253,8 +249,7 @@ paired_tows_1mi_24hr_logre %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -355,8 +350,7 @@ paired_tows_5mi_72hr_logre %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -389,8 +383,7 @@ paired_tows_5mi_72hr_logre %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -423,8 +416,7 @@ paired_tows_5mi_72hr_logre %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -457,8 +449,7 @@ paired_tows_5mi_72hr_logre %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -491,8 +482,7 @@ paired_tows_5mi_72hr_logre %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -525,8 +515,7 @@ paired_tows_5mi_72hr_logre %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -559,8 +548,7 @@ paired_tows_5mi_72hr_logre %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() +
   geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  xlim(0, 4) + 
-  geom_vline(aes(xintercept = 1),
+  geom_vline(aes(xintercept = 0.5),
             color = "black", linetype = "dashed", size = 1) + 
   geom_vline(aes(xintercept = mean(relative_efficiency)),
             color = "red", linetype = "dashed", size = 1) + 
@@ -845,7 +833,6 @@ compare.models(codm)
 haddockm <- fit.models(haddock_paired_tows_5mi_72hr_logre)
 
 compare.models(haddockm)
-
 
 ```
 
