@@ -751,6 +751,14 @@ monkfish_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
 ```
 
 
+## Exploring Collinearrity Among Explanatory Variables 
+```{r}
+ggpairs(cod_paired_tows_5mi_72hr_re, 
+        columns = c("relative_efficiency", "season", "mgmt_area", "VESSEL_NAME", "AVGDEPTH", "SURFTEMP", "BOTTEMP"), 
+        cardinality_threshold = 17)
+```
+
+
 ## Function Creation 
 ```{r}
 #trying to  create functions because I will be running the same models for every species dataset 
