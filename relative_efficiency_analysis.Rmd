@@ -71,7 +71,7 @@ nefsc_strata <- st_read(dsn = "./data/strata") %>%
 ### Comparing CPUA and Relative Efficiency 
 ```{r}
 #filtering for just the species of interest and creating a relative efficiency variable and creating variables for modeling 
-paired_tows_1mi_24hr_logre <- paired_tows_1mi_24hr %>%
+paired_tows_1mi_24hr_re <- paired_tows_1mi_24hr %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
          SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
          SVSPP == 75 & SPECIES_ITIS == 164727 | #pollock
@@ -117,7 +117,7 @@ paired_tows_1mi_24hr_logre <- paired_tows_1mi_24hr %>%
 
 #COD
 #Looking at the cpua for the paired tows
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() + 
@@ -128,7 +128,7 @@ paired_tows_1mi_24hr_logre %>%
        subtitle = "Pairs within 1 mi and 24 hrs")
 
 #Looking at the relative efficiency of the study fleet catch to the science center survey 
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
@@ -146,7 +146,7 @@ paired_tows_1mi_24hr_logre %>%
 
 #HADDOCK
 #Looking at the cpua for the paired tows
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() + 
@@ -157,7 +157,7 @@ paired_tows_1mi_24hr_logre %>%
        subtitle = "Pairs within 1 mi and 24 hrs")
 
 #Looking at the relative efficiency of the study fleet catch to the science center survey 
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
@@ -175,7 +175,7 @@ paired_tows_1mi_24hr_logre %>%
 
 #YELLOWTAIL FLOUNDER
 #Looking at the cpua for the paired tows
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() + 
@@ -186,7 +186,7 @@ paired_tows_1mi_24hr_logre %>%
        subtitle = "Pairs within 1 mi and 24 hrs")
 
 #Looking at the relative efficiency of the study fleet catch to the science center survey 
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
@@ -204,7 +204,7 @@ paired_tows_1mi_24hr_logre %>%
 
 #WINTER FLOUNDER
 #Looking at the cpua for the paired tows
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() + 
@@ -215,7 +215,7 @@ paired_tows_1mi_24hr_logre %>%
        subtitle = "Pairs within 1 mi and 24 hrs")
 
 #Looking at the relative efficiency of the study fleet catch to the science center survey 
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
@@ -233,7 +233,7 @@ paired_tows_1mi_24hr_logre %>%
 
 #MONKFISH
 #Looking at the cpua for the paired tows
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() + 
@@ -244,7 +244,7 @@ paired_tows_1mi_24hr_logre %>%
        subtitle = "Pairs within 1 mi and 24 hrs")
 
 #Looking at the relative efficiency of the study fleet catch to the science center survey 
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   ggplot() +
@@ -264,7 +264,7 @@ paired_tows_1mi_24hr_logre %>%
 ### Maps of Matched Tows 
 ```{r}
 #plotting the matches for 1 mile and 24 hrs w Stat Areas
-paired_tows_1mi_24hr_logre %>%
+paired_tows_1mi_24hr_re %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -286,7 +286,7 @@ paired_tows_1mi_24hr_logre %>%
 ### Comparing CPUA and Relative Efficiency 
 ```{r}
 #filtering for just the species of interest and creating a relative efficiency variable and creating variables for modeling 
-paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr %>%
+paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
          SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
          SVSPP == 75 & SPECIES_ITIS == 164727 | #pollock
@@ -330,7 +330,7 @@ paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr %>%
 
 #COD
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -343,7 +343,7 @@ paired_tows_5mi_72hr_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -363,7 +363,7 @@ paired_tows_5mi_72hr_logre %>%
 
 #HADDOCK
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -376,7 +376,7 @@ paired_tows_5mi_72hr_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -396,7 +396,7 @@ paired_tows_5mi_72hr_logre %>%
 
 #WITCH FLOUNDER 
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -409,7 +409,7 @@ paired_tows_5mi_72hr_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -429,7 +429,7 @@ paired_tows_5mi_72hr_logre %>%
 
 #YELLOWTAIL FLOUNDER
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -442,7 +442,7 @@ paired_tows_5mi_72hr_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -462,7 +462,7 @@ paired_tows_5mi_72hr_logre %>%
 
 #AMERICAN PLAICE
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -475,7 +475,7 @@ paired_tows_5mi_72hr_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -495,7 +495,7 @@ paired_tows_5mi_72hr_logre %>%
 
 #WINTER FLOUNDER
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -508,7 +508,7 @@ paired_tows_5mi_72hr_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs")
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -528,7 +528,7 @@ paired_tows_5mi_72hr_logre %>%
 
 #MONKFISH
 #Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -541,7 +541,7 @@ paired_tows_5mi_72hr_logre %>%
        subtitle = "Pairs within 5 mi and 72 hrs") 
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>%
   distinct(EFFORT_ID, .keep_all = TRUE) %>%
   filter(sf_species_cpua < 10000) %>%
@@ -563,7 +563,7 @@ paired_tows_5mi_72hr_logre %>%
 ### Maps of Matched Tows 
 ```{r}
 #plotting the matches for 5 mi and 3 days 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -580,7 +580,7 @@ paired_tows_5mi_72hr_logre %>%
 
 
 #Zooming in on the GOM and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -598,7 +598,7 @@ paired_tows_5mi_72hr_logre %>%
 
 
 #Zooming in on the GB and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -616,7 +616,7 @@ paired_tows_5mi_72hr_logre %>%
 
 
 #Zooming in on the SNE and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   ggplot() + 
   geom_sf(data = areas, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -638,7 +638,7 @@ paired_tows_5mi_72hr_logre %>%
 ################################################################################
 #Same plots but with nefsc survey strata instead of stat atea 
 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   ggplot() + 
   geom_sf(data = nefsc_strata, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -655,7 +655,7 @@ paired_tows_5mi_72hr_logre %>%
 
 
 #Zooming in on the GOM and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   ggplot() + 
   geom_sf(data = nefsc_strata, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -673,7 +673,7 @@ paired_tows_5mi_72hr_logre %>%
 
 
 #Zooming in on the GB and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   ggplot() + 
   geom_sf(data = nefsc_strata, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -691,7 +691,7 @@ paired_tows_5mi_72hr_logre %>%
 
 
 #Zooming in on the SNE and looking at tow length for 5mi and 3 day matches 
-paired_tows_5mi_72hr_logre %>%
+paired_tows_5mi_72hr_re %>%
   ggplot() + 
   geom_sf(data = nefsc_strata, fill = "grey") +
   geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
@@ -714,37 +714,37 @@ paired_tows_5mi_72hr_logre %>%
 ```{r}
 #creating a separate dataset for each species 
 #COD
-cod_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+cod_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
 #HADDOCK
-haddock_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+haddock_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
 #WITCH FLOUNDER
-witchfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+witchfl_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
 #YELLLOWTAIL FLOUNDER
-yellowtailfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+yellowtailfl_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
 #AMERICAN PLAICE
-plaice_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+plaice_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
 #WINTER FLOUNDER
-winterfl_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+winterfl_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
 #MONKFISH
-monkfish_paired_tows_5mi_72hr_logre <- paired_tows_5mi_72hr_logre %>%
+monkfish_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
   filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
@@ -764,7 +764,7 @@ formulae <- combos %>%
 
 #fit models (takes dataset)
 fit.models <- function(x) {
-  formulae$formula %>% purrr::map( ~glm(.x, data=x))
+  formulae$formula %>% purrr::map( ~glm(.x, family = binomial, data=x))
 }
 
 
@@ -787,31 +787,31 @@ compare.models <- function(x) {
 
 ## Paired T Tests
 ```{r}
-cod_ttest <- t.test(cod_paired_tows_5mi_72hr_logre$sf_species_cpua, cod_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+cod_ttest <- t.test(cod_paired_tows_5mi_72hr_re$sf_species_cpua, cod_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
 cod_ttest
 
 
-haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_logre$sf_species_cpua, haddock_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_re$sf_species_cpua, haddock_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
 haddock_ttest
 
 
-witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_logre$sf_species_cpua, witchfl_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_re$sf_species_cpua, witchfl_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
 witchfl_ttest
 
 
-yellowtail_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_logre$sf_species_cpua, yellowtailfl_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+yellowtail_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_re$sf_species_cpua, yellowtailfl_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
 yellowtail_ttest
 
 
-plaice_ttest <- t.test(plaice_paired_tows_5mi_72hr_logre$sf_species_cpua, plaice_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+plaice_ttest <- t.test(plaice_paired_tows_5mi_72hr_re$sf_species_cpua, plaice_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
 plaice_ttest
 
 
-winterfl_ttest <- t.test(winterfl_paired_tows_5mi_72hr_logre$sf_species_cpua, winterfl_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+winterfl_ttest <- t.test(winterfl_paired_tows_5mi_72hr_re$sf_species_cpua, winterfl_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
 winterfl_ttest
 
 
-monkfish_ttest <- t.test(monkfish_paired_tows_5mi_72hr_logre$sf_species_cpua, monkfish_paired_tows_5mi_72hr_logre$nefsc_species_cpua, paired = TRUE)
+monkfish_ttest <- t.test(monkfish_paired_tows_5mi_72hr_re$sf_species_cpua, monkfish_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
 monkfish_ttest
 ```
 
@@ -820,20 +820,31 @@ monkfish_ttest
 ### Cod
 ```{r}
 #COD
-codm <- fit.models(cod_paired_tows_5mi_72hr_logre)
+codm <- fit.models(cod_paired_tows_5mi_72hr_re)
 
 compare.models(codm)
 
+#storing the optimal model and plotting the diagnostics
+codm_optimal <- glm(relative_efficiency ~ season + SURFTEMP, family = binomial, data = cod_paired_tows_5mi_72hr_re)
+
+par(mfrow=c(2,2))
+plot(codm_optimal)
 ```
 
 
 ### Haddock
 ```{r}
 #HADDOCK
-haddockm <- fit.models(haddock_paired_tows_5mi_72hr_logre)
+haddockm <- fit.models(haddock_paired_tows_5mi_72hr_re)
 
 compare.models(haddockm)
 
+
+#storing the optimal model and plotting the diagnostics
+haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + SURFTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_re)
+
+par(mfrow=c(2,2))
+plot(haddockm_optimal)
 ```
 
 
@@ -841,28 +852,48 @@ compare.models(haddockm)
 ### Witch Flounder
 ```{r}
 #WITCH FLOUNDER 
-witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_logre)
+witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_re)
 
 compare.models(witchflm)
 
+
+#storing the optimal model and plotting the diagnostics
+witchflm_optimal <- glm(relative_efficiency ~ mgmt_area + SURFTEMP, family = binomial, data = witchfl_paired_tows_5mi_72hr_re)
+
+par(mfrow=c(2,2))
+plot(witchflm_optimal)
 ```
 
 
 ### Yewllowtail Flounder
 ```{r}
 #YELLOWTAIL FLOUNDER
-yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_logre)
+yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_re)
 
 compare.models(yellowtailflm)
+
+
+#storing the optimal model and plotting the diagnostics
+yellowtailflm_optimal <- glm(relative_efficiency ~ mgmt_area + AVGDEPTH + SURFTEMP + BOTTEMP, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re)
+
+par(mfrow=c(2,2))
+plot(yellowtailflm_optimal)
 
 ```
 
 ### American Plaice
 ```{r}
 #AMERICAN PLAICE 
-plaicem <- fit.models(plaice_paired_tows_5mi_72hr_logre)
+plaicem <- fit.models(plaice_paired_tows_5mi_72hr_re)
 
 compare.models(plaicem)
+
+
+#storing the optimal model and plotting the diagnostics
+plaicem_optimal <- glm(relative_efficiency ~ season + SURFTEMP, family = binomial, data = plaice_paired_tows_5mi_72hr_re)
+
+par(mfrow=c(2,2))
+plot(plaicem_optimal)
 
 ```
 
@@ -870,18 +901,34 @@ compare.models(plaicem)
 ### Winter Flounder
 ```{r}
 #WINTER FLOUNDER 
-winterflm <- fit.models(winterfl_paired_tows_5mi_72hr_logre)
+winterflm <- fit.models(winterfl_paired_tows_5mi_72hr_re)
 
 compare.models(winterflm)
+
+
+#storing the optimal model and plotting the diagnostics
+winterflm_optimal <- glm(relative_efficiency ~ mgmt_area + AVGDEPTH + SURFTEMP + BOTTEMP, family = binomial, data = winterfl_paired_tows_5mi_72hr_re)
+
+par(mfrow=c(2,2))
+plot(winterflm_optimal)
+
 ```
 
 
 ### Monkfish 
 ```{r}
 #MONKFISH 
-monkfishm <- fit.models(monkfish_paired_tows_5mi_72hr_logre)
+monkfishm <- fit.models(monkfish_paired_tows_5mi_72hr_re)
 
 compare.models(monkfishm)
+
+
+#storing the optimal model and plotting the diagnostics
+monkfishm_optimal <- glm(relative_efficiency ~ AVGDEPTH + SURFTEMP + BOTTEMP, family = binomial, data = monkfish_paired_tows_5mi_72hr_re)
+
+par(mfrow=c(2,2))
+plot(monkfishm_optimal)
+
 ```
 
 
