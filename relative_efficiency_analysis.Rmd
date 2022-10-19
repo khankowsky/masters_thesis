@@ -931,6 +931,126 @@ plot(monkfishm_optimal)
 
 ```
 
+# Plotting the Matches for each Species 
+```{r}
+#COD
+cod_paired_tows_5mi_72hr_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = cod_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = cod_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Study Fleet")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue")) +
+  labs(title = "Study Fleet tows Matched to NEFSC tows - Cod", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#HADDOCK
+haddock_paired_tows_5mi_72hr_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = haddock_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = haddock_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Study Fleet")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue")) +
+  labs(title = "Study Fleet tows Matched to NEFSC tows - Haddock", subtitle = "within 5 mi and 72 hrs")
+
+
+
+
+#WITCH FLOUNDER 
+witchfl_paired_tows_5mi_72hr_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = witchfl_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = witchfl_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Study Fleet")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue")) +
+  labs(title = "Study Fleet tows Matched to NEFSC tows - Witch Flounder", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#YELLOWTAIL FLOUNDER
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = yellowtailfl_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = yellowtailfl_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Study Fleet")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue")) +
+  labs(title = "Study Fleet tows Matched to NEFSC tows - Yellowtail", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#AMERICAN PLAICE 
+plaice_paired_tows_5mi_72hr_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = plaice_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = plaice_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Study Fleet")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue")) +
+  labs(title = "Study Fleet tows Matched to NEFSC tows - Plaice", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#WINTER FLOUNDER 
+winterfl_paired_tows_5mi_72hr_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = winterfl_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = winterfl_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Study Fleet")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue")) +
+  labs(title = "Study Fleet tows Matched to NEFSC tows - Winter Flounder", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#MONKFISH
+monkfish_paired_tows_5mi_72hr_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = monkfish_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = monkfish_paired_tows_5mi_72hr_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Study Fleet")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Study Fleet"), values = c("red", "blue")) +
+  labs(title = "Study Fleet tows Matched to NEFSC tows - Monkfish", subtitle = "within 5 mi and 72 hrs")
+```
 
 
 
