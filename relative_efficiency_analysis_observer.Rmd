@@ -434,7 +434,7 @@ formulae <- combos %>%
 
 #fit models (takes dataset)
 fit.models <- function(x) {
-  formulae$formula %>% purrr::map( ~glm(.x, data=x))
+  formulae$formula %>% purrr::map( ~glm(.x, family = binomial, data=x))
 }
 
 
