@@ -772,6 +772,7 @@ observer_trawl$swept_area <- observer_trawl$d_t * (0.001 * observer_trawl$lin_ef
 ```{r}
 observer_trawl <- observer_trawl %>%
   mutate(NETTYPE = as.numeric(NETTYPE)) %>% 
+  mutate(NETTYPE = replace_na(NETTYPE, 00)) %>%
   filter(!NETTYPE %in% c(76, 77, 75, 74, 78, 73, 61, 62, 60, 26, 27, 25)) %>%
       #filtering out net types that don't belong (pelagic, scallop, shrimp trawls)
       #76 - 2-seam pelagic pair trawl
@@ -795,7 +796,7 @@ observer_trawl <- observer_trawl %>%
       #86 - 2-seam groundfish trawl 
       #87 - 4-seam groundfish trawl 
       #85 - groundfish trawl, seams unknown 
-    NETTYPE %in% c(10, 11, 12, 13, 01, 02, 08, 66, 67, 65) ~ 2, #Flatfish Trawls
+    NETTYPE %in% c(10, 11, 12, 13, 1, 2, 08, 66, 67, 65) ~ 2, #Flatfish Trawls
       #10 - flatfish trawl, seams unknown 
       #11 - 2-seam flatfish trawl 
       #12 - 4-seam flatfish trawl 
@@ -806,7 +807,7 @@ observer_trawl <- observer_trawl %>%
       #66 - 2-seam monkfish trawl
       #67 - 4-seam monkfish trawl
       #65 - monkfish trawl, seams unknown 
-    NETTYPE %in% c(3, 4, 9, 16, 06, 07, 05) ~ 3, #Separator Trawls
+    NETTYPE %in% c(3, 4, 9, 16, 6, 7, 5) ~ 3, #Separator Trawls
       #03 - 2-seam haddock separator trawl 
       #04 - 4-seam haddock separator trawl 
       #09 - haddock separator trawl, seams unknown 
@@ -824,7 +825,10 @@ observer_trawl <- observer_trawl %>%
       #81 - 2-seam shuman trawl
       #82 - 4-seam shuman trawl
       #80 - shuman trawl, seams unknown
+    NETTYPE %in% c(91, 92, 00, 99) ~ 5, #Other/Unknown Trawls
+
   ))
+
 ```
 
 ## Calculating catch per swept area
