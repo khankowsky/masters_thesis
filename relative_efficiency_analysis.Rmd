@@ -15,6 +15,7 @@ library(fuzzyjoin)
 library(lubridate)
 library(kableExtra)
 library(modEvA)
+library(GGally)
 
 library(maps) # land masses
 library(rgdal) # read OGR vector maps into Spatial objects
