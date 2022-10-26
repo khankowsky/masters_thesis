@@ -313,6 +313,7 @@ paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr %>%
         ) %>%
   drop_na(sf_species_cpua, nefsc_species_cpua) %>%
   filter(CATCHWT_updated > 0) %>%
+  filter(sf_species_cpua > 0) %>%
   mutate(old_relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua)) %>%
   mutate(relative_efficiency = nefsc_species_cpua/(nefsc_species_cpua + sf_species_cpua)) %>%
   mutate(mgmt_area = case_when(
@@ -710,7 +711,7 @@ paired_tows_5mi_72hr_re %>%
 
 
 
-# GLMs
+# Statistical Analysis  
 ## Species Datasets
 ```{r}
 #creating a separate dataset for each species 
@@ -762,6 +763,72 @@ ggpairs(cod_paired_tows_5mi_72hr_re,
 
 ## Function Creation 
 ```{r}
+#################### FUNCTIONS FOR T-TESTS ####################################
+#plots to check for normality before t-tests 
+#boxplot of catch per unit area
+box.plot <- function(x) {
+  x %>% 
+  pivot_longer(cols = c(sf_species_cpua, nefsc_species_cpua), 
+               names_to = "Trawl", 
+               values_to = "CPUA") %>%
+  filter(CPUA < 10000) %>%
+  ggplot() + 
+  geom_boxplot(aes(x = Trawl, y = CPUA)) + 
+  labs(x = "Trawl Type") + 
+  scale_x_discrete(labels = c("nefsc_species_cpua" = "NEFSC", 
+                              "sf_species_cpua" = "Study Fleet")) + 
+  theme_classic()
+}
+
+#histogram of catch per unit area
+hist_kh <- function(x) {
+  x %>%  
+  ggplot() + 
+  geom_histogram(aes(x = sf_species_cpua, y = ..density..), fill = "red") + 
+  geom_label(aes(x = Inf, y = Inf, label = "Study Fleet CPUE", vjust =1 , hjust = 1), color = "red") +
+  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue") + 
+  geom_label(aes(x = Inf, y = -Inf, label = "NEFSC CPUE", vjust = -1, hjust = 1), color = "blue") +
+  labs(x = "CPUA (lb/min)", y = "Density", 
+       title = "Histogram of CPUE for x", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  xlim(0,2000) + 
+  theme_classic()
+
+  
+
+#boxplot with log-transformed data 
+box.log.plot <- function(x) {
+  x %>% 
+  pivot_longer(cols = c(log_sf_species_cpua, log_nefsc_species_cpua), 
+               names_to = "Trawl", 
+               values_to = "CPUA") %>%
+  filter(CPUA < 10000) %>%
+  ggplot() + 
+  geom_boxplot(aes(x = Trawl, y = CPUA)) + 
+  labs(x = "Trawl Type", y = "Log(CPUA)") + 
+  scale_x_discrete(labels = c("log_nefsc_species_cpua" = "NEFSC", 
+                              "log_sf_species_cpua" = "Study Fleet")) + 
+  theme_classic()
+}
+
+#histogram with log-transformed data 
+hist_log_kh <- function(x) {
+  x %>%  
+  ggplot() + 
+  geom_histogram(aes(x = log_sf_species_cpua, y = ..density..), fill = "red") + 
+  # geom_label(aes(x = Inf, y = Inf, label = "Study Fleet CPUE", vjust =1 , hjust = 1), color = "red") +
+  geom_histogram(aes(x = log_nefsc_species_cpua, y = -..density..), fill = "blue") + 
+  # geom_label(aes(x = Inf, y = -Inf, label = "NEFSC CPUE", vjust = -1, hjust = 1), color = "blue") +
+  labs(x = "Log(CPUA (lb/min))", y = "Density", 
+       title = "Histogram of CPUE for x", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  theme_classic()
+}
+
+
+
+######################## FUNCTIONS FOR MODELLING #############################
+
 #trying to  create functions because I will be running the same models for every species dataset 
 covars <- c("season", "mgmt_area", "VESSEL_NAME", "AVGDEPTH", "SURFTEMP", "BOTTEMP")
 combos <- purrr::map(1:6, ~as.data.frame(t(combn(covars, .x))))
@@ -794,39 +861,40 @@ compare.models <- function(x) {
 
 ```
 
-## Paired T Tests
+
+
+# Statistical Analysis by Species 
+## Cod 
+#### T-test
 ```{r}
-cod_ttest <- t.test(cod_paired_tows_5mi_72hr_re$sf_species_cpua, cod_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
+#looking at the boxplot and histograms of the catch per unit area 
+box.plot(cod_paired_tows_5mi_72hr_re)
+hist_kh(cod_paired_tows_5mi_72hr_re)
+
+#log-transforming the data
+cod_paired_tows_5mi_72hr_re <- cod_paired_tows_5mi_72hr_re %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua))
+
+#looking at the boxplot and histograms of the log(catch per unit area)
+box.log.plot(cod_paired_tows_5mi_72hr_re)
+hist_log_kh(cod_paired_tows_5mi_72hr_re)
+
+#assumptions of normality and equal variance are met with the log transformed data, 
+#so the t-test was conducted with the log-transformed data
+
+
+#running t-test
+cod_ttest <- t.test(cod_paired_tows_5mi_72hr_re$log_sf_species_cpua, cod_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE)
 cod_ttest
 
 
-haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_re$sf_species_cpua, haddock_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
-haddock_ttest
+#back transform the estimate
 
-
-witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_re$sf_species_cpua, witchfl_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
-witchfl_ttest
-
-
-yellowtail_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_re$sf_species_cpua, yellowtailfl_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
-yellowtail_ttest
-
-
-plaice_ttest <- t.test(plaice_paired_tows_5mi_72hr_re$sf_species_cpua, plaice_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
-plaice_ttest
-
-
-winterfl_ttest <- t.test(winterfl_paired_tows_5mi_72hr_re$sf_species_cpua, winterfl_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
-winterfl_ttest
-
-
-monkfish_ttest <- t.test(monkfish_paired_tows_5mi_72hr_re$sf_species_cpua, monkfish_paired_tows_5mi_72hr_re$nefsc_species_cpua, paired = TRUE)
-monkfish_ttest
 ```
 
 
-## Model Runs 
-### Cod
+#### Model Runs
 ```{r}
 #COD
 codm <- fit.models(cod_paired_tows_5mi_72hr_re)
@@ -841,7 +909,35 @@ plot(codm_optimal)
 ```
 
 
-### Haddock
+## Haddock
+#### T-test 
+```{r}
+#looking at the boxplot and histograms of the catch per unit area 
+box.plot(haddock_paired_tows_5mi_72hr_re)
+hist_kh(haddock_paired_tows_5mi_72hr_re)
+
+#log-transforming the data
+haddock_paired_tows_5mi_72hr_re <- haddock_paired_tows_5mi_72hr_re %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua))
+
+#looking at the boxplot and histograms of the log(catch per unit area)
+box.log.plot(haddock_paired_tows_5mi_72hr_re)
+hist_log_kh(haddock_paired_tows_5mi_72hr_re)
+
+#assumptions of normality and equal variance are reasonably met with the log transformed data, 
+#so the t-test was conducted with the log-transformed data
+
+haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_re$log_sf_species_cpua, haddock_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE)
+haddock_ttest
+
+
+#back transform the estimate
+
+```
+
+
+#### Model Runs 
 ```{r}
 #HADDOCK
 haddockm <- fit.models(haddock_paired_tows_5mi_72hr_re)
@@ -858,7 +954,35 @@ plot(haddockm_optimal)
 
 
 
-### Witch Flounder
+## Witch Flounder
+#### T-test
+```{r}
+#looking at the boxplot and histograms of the catch per unit area 
+box.plot(witchfl_paired_tows_5mi_72hr_re)
+hist_kh(witchfl_paired_tows_5mi_72hr_re)
+
+#log-transforming the data
+witchfl_paired_tows_5mi_72hr_re <- witchfl_paired_tows_5mi_72hr_re %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua))
+
+#looking at the boxplot and histograms of the log(catch per unit area)
+box.log.plot(witchfl_paired_tows_5mi_72hr_re)
+hist_log_kh(witchfl_paired_tows_5mi_72hr_re)
+
+#assumptions of normality and equal variance are not met with the log transformed data, 
+#so the non-parametric t-test alternative was conducted
+
+witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_re$log_sf_species_cpua, witchfl_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE, var.equal = FALSE)
+witchfl_ttest
+
+
+#back transform the estimate
+
+```
+
+
+#### Model Runs
 ```{r}
 #WITCH FLOUNDER 
 witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_re)
@@ -874,7 +998,36 @@ plot(witchflm_optimal)
 ```
 
 
-### Yewllowtail Flounder
+## Yewllowtail Flounder
+#### T-test
+```{r}
+#looking at the boxplot and histograms of the catch per unit area 
+box.plot(yellowtailfl_paired_tows_5mi_72hr_re)
+hist_kh(yellowtailfl_paired_tows_5mi_72hr_re)
+
+#log-transforming the data
+yellowtailfl_paired_tows_5mi_72hr_re <- yellowtailfl_paired_tows_5mi_72hr_re %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua))
+
+#looking at the boxplot and histograms of the log(catch per unit area)
+box.log.plot(yellowtailfl_paired_tows_5mi_72hr_re)
+hist_log_kh(yellowtailfl_paired_tows_5mi_72hr_re)
+
+#assumptions of normality and equal variance are not met with the log transformed data, 
+#so the t-test was conducted with the log-transformed data
+
+
+yellowtail_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_re$log_sf_species_cpua, yellowtailfl_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE)
+yellowtail_ttest
+
+
+#back transform the estimate
+
+```
+
+
+#### Model Runs
 ```{r}
 #YELLOWTAIL FLOUNDER
 yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_re)
@@ -890,7 +1043,35 @@ plot(yellowtailflm_optimal)
 
 ```
 
-### American Plaice
+## American Plaice
+#### T-test
+```{r}
+#looking at the boxplot and histograms of the catch per unit area 
+box.plot(plaice_paired_tows_5mi_72hr_re)
+hist_kh(plaice_paired_tows_5mi_72hr_re)
+
+#log-transforming the data
+plaice_paired_tows_5mi_72hr_re <- plaice_paired_tows_5mi_72hr_re %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua))
+
+#looking at the boxplot and histograms of the log(catch per unit area)
+box.log.plot(plaice_paired_tows_5mi_72hr_re)
+hist_log_kh(plaice_paired_tows_5mi_72hr_re)
+
+#assumptions of normality and equal variance are not met with the log transformed data, 
+#so the t-test was conducted with the log-transformed data
+
+plaice_ttest <- t.test(plaice_paired_tows_5mi_72hr_re$log_sf_species_cpua, plaice_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE)
+plaice_ttest
+
+
+#back transform the estimate
+
+```
+
+
+#### Model Runs 
 ```{r}
 #AMERICAN PLAICE 
 plaicem <- fit.models(plaice_paired_tows_5mi_72hr_re)
@@ -907,7 +1088,35 @@ plot(plaicem_optimal)
 ```
 
 
-### Winter Flounder
+## Winter Flounder
+####T-test
+```{r}
+#looking at the boxplot and histograms of the catch per unit area 
+box.plot(winterfl_paired_tows_5mi_72hr_re)
+hist_kh(winterfl_paired_tows_5mi_72hr_re)
+
+#log-transforming the data
+winterfl_paired_tows_5mi_72hr_re <- winterfl_paired_tows_5mi_72hr_re %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua))
+
+#looking at the boxplot and histograms of the log(catch per unit area)
+box.log.plot(winterfl_paired_tows_5mi_72hr_re)
+hist_log_kh(winterfl_paired_tows_5mi_72hr_re)
+
+#assumptions of normality and equal variance are not met with the log transformed data, 
+#so the t-test was conducted with the log-transformed data
+
+winterfl_ttest <- t.test(winterfl_paired_tows_5mi_72hr_re$log_sf_species_cpua, winterfl_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE)
+winterfl_ttest
+
+
+#back transform the estimate
+
+```
+
+
+#### Model Runs
 ```{r}
 #WINTER FLOUNDER 
 winterflm <- fit.models(winterfl_paired_tows_5mi_72hr_re)
@@ -924,7 +1133,36 @@ plot(winterflm_optimal)
 ```
 
 
-### Monkfish 
+## Monkfish 
+#### T-test
+```{r}
+#looking at the boxplot and histograms of the catch per unit area 
+box.plot(monkfish_paired_tows_5mi_72hr_re)
+hist_kh(monkfish_paired_tows_5mi_72hr_re)
+
+#log-transforming the data
+monkfish_paired_tows_5mi_72hr_re <- monkfish_paired_tows_5mi_72hr_re %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua))
+
+#looking at the boxplot and histograms of the log(catch per unit area)
+box.log.plot(monkfish_paired_tows_5mi_72hr_re)
+hist_log_kh(monkfish_paired_tows_5mi_72hr_re)
+
+#assumptions of normality and equal variance are not met with the log transformed data, 
+#so the t-test was conducted with the log-transformed data
+
+monkfish_ttest <- t.test(monkfish_paired_tows_5mi_72hr_re$log_sf_species_cpua, monkfish_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE)
+monkfish_ttest
+
+
+#back transform the estimate
+
+```
+
+
+
+#### Model Run
 ```{r}
 #MONKFISH 
 monkfishm <- fit.models(monkfish_paired_tows_5mi_72hr_re)
