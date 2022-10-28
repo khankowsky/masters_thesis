@@ -793,7 +793,7 @@ hist_kh <- function(x) {
        subtitle = "Pairs within 5 mi and 72 hrs") + 
   xlim(0,2000) + 
   theme_classic()
-
+}
   
 
 #boxplot with log-transformed data 
@@ -906,6 +906,7 @@ codm_optimal <- glm(relative_efficiency ~ season + SURFTEMP, family = binomial, 
 
 par(mfrow=c(2,2))
 plot(codm_optimal)
+
 ```
 
 
@@ -950,6 +951,7 @@ haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + SURFTEMP, family = b
 
 par(mfrow=c(2,2))
 plot(haddockm_optimal)
+
 ```
 
 
