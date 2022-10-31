@@ -131,6 +131,7 @@ paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
     month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
     month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
   )) %>%
+  mutate(trawl_type = as.factor(trawl_type)) %>%
   distinct()
 
 
