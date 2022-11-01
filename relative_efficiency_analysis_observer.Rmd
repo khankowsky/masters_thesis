@@ -599,6 +599,13 @@ haddockm <- fit.models(haddock_paired_tows_5mi_72hr_ob_re)
 
 compare.models(haddockm)
 
+
+#storing the optimal model and plotting the diagnostics
+haddockm_ob_optimal <- glm(relative_efficiency ~ mgmt_area + trawl_type + AVGDEPTH + BOTTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_ob_re)
+
+par(mfrow=c(2,2))
+plot(haddockm_ob_optimal)
+
 ```
 
 ## Witch Flounder
@@ -633,6 +640,13 @@ witchfl_ttest
 witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_ob_re)
 
 compare.models(witchflm)
+
+
+#storing the optimal model and plotting the diagnostics
+witchflm_ob_optimal <- glm(relative_efficiency ~ trawl_type, family = binomial, data = witchfl_paired_tows_5mi_72hr_ob_re)
+
+par(mfrow=c(2,2))
+plot(witchflm_ob_optimal)
 
 ```
 
@@ -670,6 +684,14 @@ yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_ob_re)
 
 compare.models(yellowtailflm)
 
+
+#storing the optimal model and plotting the diagnostics
+yellowtailflm_ob_optimal <- glm(relative_efficiency ~ season + trawl_type, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_ob_re)
+
+par(mfrow=c(2,2))
+plot(yellowtailflm_ob_optimal)
+
+
 ```
 
 ## American Plaice
@@ -706,6 +728,13 @@ plaicem <- fit.models(plaice_paired_tows_5mi_72hr_ob_re)
 
 compare.models(plaicem)
 
+
+#storing the optimal model and plotting the diagnostics
+plaicem_ob_optimal <- glm(relative_efficiency ~ trawl_type, family = binomial, data = plaice_paired_tows_5mi_72hr_ob_re)
+
+par(mfrow=c(2,2))
+plot(plaicem_ob_optimal)
+
 ```
 
 ## Winter Flounder
@@ -741,6 +770,13 @@ winterfl_ttest
 winterflm <- fit.models(winterfl_paired_tows_5mi_72hr_ob_re)
 
 compare.models(winterflm)
+
+
+#storing the optimal model and plotting the diagnostics
+winterflm_ob_optimal <- glm(relative_efficiency ~ season + trawl_type + SURFTEMP, family = binomial, data = winterfl_paired_tows_5mi_72hr_ob_re)
+
+par(mfrow=c(2,2))
+plot(winterflm_ob_optimal)
 ```
 
 ## Monkfish 
@@ -776,6 +812,15 @@ monkfish_ttest
 monkfishm <- fit.models(monkfish_paired_tows_5mi_72hr_ob_re)
 
 compare.models(monkfishm)
+
+
+#storing the optimal model and plotting the diagnostics
+monkfishm_ob_optimal <- glm(relative_efficiency ~ trawl_type + AVGDEPTH, family = binomial, data = monkfish_paired_tows_5mi_72hr_ob_re)
+
+par(mfrow=c(2,2))
+plot(monkfishm_ob_optimal)
+
+summary(monkfishm_ob_optimal)
 ```
 
 
