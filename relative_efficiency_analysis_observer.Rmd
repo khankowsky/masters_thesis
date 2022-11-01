@@ -778,4 +778,20 @@ monkfishm <- fit.models(monkfish_paired_tows_5mi_72hr_ob_re)
 compare.models(monkfishm)
 ```
 
+# Playing Around 
+```{r, eval=FALSE}
+#COD
+cod_paired_tows_5mi_72hr_ob_re
+codm_ob_optimal
+
+
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_boxplot(aes(y = relative_efficiency, x = trawl_type))
+
+summary(codm_ob_optimal)
+
+
+
+```
 
