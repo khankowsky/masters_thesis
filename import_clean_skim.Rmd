@@ -825,7 +825,7 @@ observer_trawl <- observer_trawl %>%
       #81 - 2-seam shuman trawl
       #82 - 4-seam shuman trawl
       #80 - shuman trawl, seams unknown
-    NETTYPE %in% c(91, 92, 00, 99) ~ 5, #Other/Unknown Trawls
+    # NETTYPE %in% c(91, 92, 00, 99) ~ 5, #Other/Unknown Trawls
 
   ))
 
