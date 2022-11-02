@@ -29,6 +29,7 @@ library(openxlsx)
 library(beepr)
 library(purrr)
 library(broom)
+library(aod)
 ```
 
 # Read-In the Data
@@ -563,6 +564,10 @@ codm_ob_optimal <- glm(relative_efficiency ~ trawl_type + AVGDEPTH, family = bin
 par(mfrow=c(2,2))
 plot(codm_ob_optimal)
 
+summary(codm_ob_optimal)
+
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(codm_ob_optimal), confint(codm_ob_optimal)))
 ```
 
 ## Haddock
@@ -606,6 +611,10 @@ haddockm_ob_optimal <- glm(relative_efficiency ~ mgmt_area + trawl_type + AVGDEP
 par(mfrow=c(2,2))
 plot(haddockm_ob_optimal)
 
+summary(haddockm_ob_optimal)
+
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(haddockm_ob_optimal), confint(haddockm_ob_optimal)))
 ```
 
 ## Witch Flounder
@@ -648,6 +657,11 @@ witchflm_ob_optimal <- glm(relative_efficiency ~ trawl_type, family = binomial, 
 par(mfrow=c(2,2))
 plot(witchflm_ob_optimal)
 
+summary(witchflm_ob_optimal)
+
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(witchflm_ob_optimal), confint(witchflm_ob_optimal)))
+
 ```
 
 ## Yewllowtail Flounder
@@ -686,12 +700,15 @@ compare.models(yellowtailflm)
 
 
 #storing the optimal model and plotting the diagnostics
-yellowtailflm_ob_optimal <- glm(relative_efficiency ~ season + trawl_type, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_ob_re)
+yellowtailflm_ob_optimal <- glm(relative_efficiency ~ trawl_type, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(yellowtailflm_ob_optimal)
 
+summary(yellowtailflm_ob_optimal)
 
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(yellowtailflm_ob_optimal), confint(yellowtailflm_ob_optimal)))
 ```
 
 ## American Plaice
@@ -735,6 +752,11 @@ plaicem_ob_optimal <- glm(relative_efficiency ~ trawl_type, family = binomial, d
 par(mfrow=c(2,2))
 plot(plaicem_ob_optimal)
 
+summary(plaicem_ob_optimal)
+
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(plaicem_ob_optimal), confint(plaicem_ob_optimal)))
+
 ```
 
 ## Winter Flounder
@@ -777,6 +799,12 @@ winterflm_ob_optimal <- glm(relative_efficiency ~ season + trawl_type + SURFTEMP
 
 par(mfrow=c(2,2))
 plot(winterflm_ob_optimal)
+
+summary(winterflm_ob_optimal)
+
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(winterflm_ob_optimal), confint(winterflm_ob_optimal)))
+
 ```
 
 ## Monkfish 
@@ -821,6 +849,10 @@ par(mfrow=c(2,2))
 plot(monkfishm_ob_optimal)
 
 summary(monkfishm_ob_optimal)
+
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(monkfishm_ob_optimal), confint(monkfishm_ob_optimal)))
+
 ```
 
 # Playing Around 
@@ -834,9 +866,44 @@ cod_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_boxplot(aes(y = relative_efficiency, x = trawl_type))
 
-summary(codm_ob_optimal)
+
+codm_ob_optimal_p <- predict.glm(codm_ob_optimal)
+
+effect_plot(codm_ob_optimal, pred = trawl_type, interval = TRUE, 
+            plot.points = TRUE, jitter = 0.05)
 
 
+
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_point(aes(x = cod_paired_tows_5mi_72hr_ob_re$relative_efficiency,
+                 y = predict(codm_ob_optimal), shape = trawl_type)) + 
+  scale_shape_discrete(name = "Trawl Category", 
+                       labels = c("Generic Groundfish Trawls", 
+                                  "Flatfish Trawls", 
+                                  "Separator Trawls",
+                                  "Other/Unknown Trawls")) + 
+  labs(x = "Actual Values", y = "Predicted Values") + 
+  theme_classic()
+  
+
+
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_point(aes(x = relative_efficiency,
+                 y = predict(codm_ob_optimal), shape = trawl_type)) + 
+  labs(title = "Predicted v Actual Values", 
+       subtitle = "Cod - Pairs within 5 mi and 72 hrs",
+       x = "Actual Values", y = "Predicted Values") + 
+  facet_wrap(~ trawl_type, 
+             labeller = as_labeller(c("1" = "Generic Groundfish Trawls", 
+                                      "2" = "Flatfish Trawls", 
+                                      "3" = "Separator Trawls",
+                                      "5" = "Other/Unknown Trawls"))) + 
+  guides(shape = FALSE) + 
+  theme_classic() 
+
+  
 
 ```
 
