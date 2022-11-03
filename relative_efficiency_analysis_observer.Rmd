@@ -903,7 +903,71 @@ cod_paired_tows_5mi_72hr_ob_re %>%
   guides(shape = FALSE) + 
   theme_classic() 
 
-  
+
+
+
+
+
+
+
+
+
+
+
+
+######### looking at haddock cause it's results don't make any sense
+haddockm_ob_optimal <- glm(relative_efficiency ~ mgmt_area + trawl_type + AVGDEPTH + BOTTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_ob_re)
+
+par(mfrow=c(2,2))
+plot(haddockm_ob_optimal)
+
+summary(haddockm_ob_optimal)
+
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(haddockm_ob_optimal), confint(haddockm_ob_optimal)))
+
+
+
+#creating a model with just trawl type
+haddockm_ob_optimal1 <- glm(relative_efficiency ~ trawl_type + BOT, family = binomial, data = haddock_paired_tows_5mi_72hr_ob_re)
+
+par(mfrow=c(2,2))
+plot(haddockm_ob_optimal1)
+
+summary(haddockm_ob_optimal1)
+
+#back transform the estimates into an odds-ratio 
+exp(cbind(OR = coef(haddockm_ob_optimal1), confint(haddockm_ob_optimal1)))
+
+
+
+#predicted v actual for haddock
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_point(aes(x = relative_efficiency,
+                 y = predict(haddockm_ob_optimal), shape = trawl_type)) + 
+  labs(title = "Predicted v Actual Values", 
+       subtitle = "Haddock - Pairs within 5 mi and 72 hrs",
+       x = "Actual Values", y = "Predicted Values") + 
+  facet_wrap(~ trawl_type, 
+             labeller = as_labeller(c("1" = "Generic Groundfish Trawls", 
+                                      "2" = "Flatfish Trawls", 
+                                      "3" = "Separator Trawls",
+                                      "5" = "Other/Unknown Trawls"))) + 
+  guides(shape = FALSE) + 
+  theme_classic() 
+
+
+
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  select(trawl_type, relative_efficiency, nefsc_species_cpua, ob_species_cpua)
+
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_point(aes(x = trawl_type, y = relative_efficiency))
+
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  count(trawl_type)
 
 ```
 
