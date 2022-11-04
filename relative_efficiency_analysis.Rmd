@@ -830,12 +830,12 @@ hist_log_kh <- function(x) {
 ######################## FUNCTIONS FOR MODELLING #############################
 
 #trying to  create functions because I will be running the same models for every species dataset 
-covars <- c("season", "mgmt_area", "VESSEL_NAME", "AVGDEPTH", "SURFTEMP", "BOTTEMP")
-combos <- purrr::map(1:6, ~as.data.frame(t(combn(covars, .x))))
+covars <- c("season", "mgmt_area", "AVGDEPTH", "BOTTEMP")
+combos <- purrr::map(1:4, ~as.data.frame(t(combn(covars, .x))))
 
 formulae <- combos %>%
   map_dfr(unite, col="formula", sep = " + ") %>%
-  mutate(formula = paste0("relative_efficiency ~  ", formula))
+  mutate(formula = paste0("relative_efficiency ~  VESSEL_NAME +", formula))
 
 
 #fit models (takes dataset)
@@ -849,7 +849,7 @@ compare.models <- function(x) {
   formulae %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[63]) %>%
+  mutate(deltaAIC = aic - aic[15]) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   mutate(rsq = sprintf("%0.2f", rsq)) %>%
   mutate(aic = sprintf("%1.0f", aic)) %>%
@@ -902,7 +902,7 @@ codm <- fit.models(cod_paired_tows_5mi_72hr_re)
 compare.models(codm)
 
 #storing the optimal model and plotting the diagnostics
-codm_optimal <- glm(relative_efficiency ~ season + SURFTEMP, family = binomial, data = cod_paired_tows_5mi_72hr_re)
+codm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +season + BOTTEMP, family = binomial, data = cod_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(codm_optimal)
@@ -947,7 +947,7 @@ compare.models(haddockm)
 
 
 #storing the optimal model and plotting the diagnostics
-haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + SURFTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_re)
+haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + BOTTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(haddockm_optimal)
@@ -993,7 +993,7 @@ compare.models(witchflm)
 
 
 #storing the optimal model and plotting the diagnostics
-witchflm_optimal <- glm(relative_efficiency ~ mgmt_area + SURFTEMP, family = binomial, data = witchfl_paired_tows_5mi_72hr_re)
+witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +BOTTEMP, family = binomial, data = witchfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(witchflm_optimal)
@@ -1038,7 +1038,7 @@ compare.models(yellowtailflm)
 
 
 #storing the optimal model and plotting the diagnostics
-yellowtailflm_optimal <- glm(relative_efficiency ~ mgmt_area + AVGDEPTH + SURFTEMP + BOTTEMP, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re)
+yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(yellowtailflm_optimal)
@@ -1082,7 +1082,7 @@ compare.models(plaicem)
 
 
 #storing the optimal model and plotting the diagnostics
-plaicem_optimal <- glm(relative_efficiency ~ season + SURFTEMP, family = binomial, data = plaice_paired_tows_5mi_72hr_re)
+plaicem_optimal <- glm(relative_efficiency ~ VESSEL_NAME +BOTTEMP, family = binomial, data = plaice_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(plaicem_optimal)
@@ -1127,7 +1127,7 @@ compare.models(winterflm)
 
 
 #storing the optimal model and plotting the diagnostics
-winterflm_optimal <- glm(relative_efficiency ~ mgmt_area + AVGDEPTH + SURFTEMP + BOTTEMP, family = binomial, data = winterfl_paired_tows_5mi_72hr_re)
+winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP, family = binomial, data = winterfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(winterflm_optimal)
@@ -1173,7 +1173,7 @@ compare.models(monkfishm)
 
 
 #storing the optimal model and plotting the diagnostics
-monkfishm_optimal <- glm(relative_efficiency ~ AVGDEPTH + SURFTEMP + BOTTEMP, family = binomial, data = monkfish_paired_tows_5mi_72hr_re)
+monkfishm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +BOTTEMP, family = binomial, data = monkfish_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(monkfishm_optimal)
