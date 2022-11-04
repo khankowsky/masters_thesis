@@ -490,12 +490,12 @@ hist_log_kh <- function(x) {
 
 ######################## FUNCTIONS FOR MODELLING #############################
 #trying to  create functions because I will be running the same models for every species dataset 
-covars <- c("season", "mgmt_area", "trawl_type",  "VESSELNAME", "AVGDEPTH", "SURFTEMP", "BOTTEMP")
-combos <- purrr::map(1:7, ~as.data.frame(t(combn(covars, .x))))
+covars <- c("season", "mgmt_area",  "VESSELNAME", "AVGDEPTH", "BOTTEMP")
+combos <- purrr::map(1:5, ~as.data.frame(t(combn(covars, .x))))
 
 formulae <- combos %>%
   map_dfr(unite, col="formula", sep = " + ") %>%
-  mutate(formula = paste0("relative_efficiency ~  ", formula))
+  mutate(formula = paste0("relative_efficiency ~  trawl_type + ", formula))
 
 
 #fit models (takes dataset)
@@ -509,13 +509,31 @@ compare.models <- function(x) {
   formulae %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[127]) %>%
+  mutate(deltaAIC = aic - aic[31]) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   mutate(rsq = sprintf("%0.2f", rsq)) %>%
   mutate(aic = sprintf("%1.0f", aic)) %>%
   mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
   kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
   kable_classic("striped", full_width = FALSE)
+}
+
+#predicted v actual plots 
+predict.plot <- function(x,y) {
+  x %>%
+  ggplot() + 
+  geom_point(aes(x = relative_efficiency,
+                 y = predict(y), shape = trawl_type)) + 
+  labs(title = "Predicted v Actual Values", 
+       subtitle = "Pairs within 5 mi and 72 hrs",
+       x = "Actual Values", y = "Predicted Values") + 
+  facet_wrap(~ trawl_type, 
+             labeller = as_labeller(c("1" = "Generic Groundfish Trawls", 
+                                      "2" = "Flatfish Trawls", 
+                                      "3" = "Separator Trawls",
+                                      "5" = "Other/Unknown Trawls"))) + 
+  guides(shape = FALSE) + 
+  theme_classic() 
 }
 
 
@@ -568,6 +586,7 @@ summary(codm_ob_optimal)
 
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(codm_ob_optimal), confint(codm_ob_optimal)))
+
 ```
 
 ## Haddock
@@ -615,6 +634,7 @@ summary(haddockm_ob_optimal)
 
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(haddockm_ob_optimal), confint(haddockm_ob_optimal)))
+
 ```
 
 ## Witch Flounder
@@ -860,6 +880,8 @@ exp(cbind(OR = coef(monkfishm_ob_optimal), confint(monkfishm_ob_optimal)))
 #COD
 cod_paired_tows_5mi_72hr_ob_re
 codm_ob_optimal
+
+hist(cod_paired_tows_5mi_72hr_ob_re$relative_efficiency)
 
 
 cod_paired_tows_5mi_72hr_ob_re %>%
