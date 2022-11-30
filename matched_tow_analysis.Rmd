@@ -1277,8 +1277,8 @@ paired_tows_1mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "hours")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 
@@ -1295,8 +1295,8 @@ paired_tows_5mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "hours")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 
@@ -1322,8 +1322,8 @@ paired_tows_1mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_24hr_ob %>%
@@ -1342,8 +1342,8 @@ paired_tows_1mi_48hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_48hr_ob %>%
@@ -1362,8 +1362,8 @@ paired_tows_1mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_72hr_ob %>%
@@ -1382,8 +1382,8 @@ paired_tows_1mi_96hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_96hr_ob %>%
@@ -1402,8 +1402,8 @@ paired_tows_1mi_120hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_120hr_ob %>%
@@ -1422,8 +1422,8 @@ paired_tows_1mi_144hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_144hr_ob %>%
@@ -1442,8 +1442,8 @@ paired_tows_1mi_168hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_168hr_ob %>%
@@ -1462,8 +1462,8 @@ paired_tows_1mi_192hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 1, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
   filter(STRATUM == strata)
 
 paired_tows_1mi_192hr_ob %>%
@@ -1486,8 +1486,8 @@ paired_tows_2mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 2, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1498,8 +1498,8 @@ paired_tows_2mi_48hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 2, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1511,8 +1511,8 @@ paired_tows_2mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 2, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1524,8 +1524,8 @@ paired_tows_2mi_96hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 2, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1537,8 +1537,8 @@ paired_tows_2mi_120hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 2, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1550,8 +1550,8 @@ paired_tows_2mi_144hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 2, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1563,8 +1563,8 @@ paired_tows_2mi_168hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 2, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1576,8 +1576,8 @@ paired_tows_2mi_192hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 2, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1626,8 +1626,8 @@ paired_tows_3mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 3, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1638,8 +1638,8 @@ paired_tows_3mi_48hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 3, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1651,8 +1651,8 @@ paired_tows_3mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 3, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1664,8 +1664,8 @@ paired_tows_3mi_96hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 3, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1677,8 +1677,8 @@ paired_tows_3mi_120hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 3, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1690,8 +1690,8 @@ paired_tows_3mi_144hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 3, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1703,8 +1703,8 @@ paired_tows_3mi_168hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 3, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1716,8 +1716,8 @@ paired_tows_3mi_192hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 3, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1766,8 +1766,8 @@ paired_tows_4mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 4, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1778,8 +1778,8 @@ paired_tows_4mi_48hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 4, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1791,8 +1791,8 @@ paired_tows_4mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 4, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1804,8 +1804,8 @@ paired_tows_4mi_96hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 4, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1817,8 +1817,8 @@ paired_tows_4mi_120hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 4, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1830,8 +1830,8 @@ paired_tows_4mi_144hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 4, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1843,8 +1843,8 @@ paired_tows_4mi_168hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 4, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1856,8 +1856,8 @@ paired_tows_4mi_192hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 4, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1906,8 +1906,8 @@ paired_tows_5mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1918,8 +1918,8 @@ paired_tows_5mi_48hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1931,8 +1931,8 @@ paired_tows_5mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1944,8 +1944,8 @@ paired_tows_5mi_96hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1957,8 +1957,8 @@ paired_tows_5mi_120hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1970,8 +1970,8 @@ paired_tows_5mi_144hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1983,8 +1983,8 @@ paired_tows_5mi_168hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -1996,8 +1996,8 @@ paired_tows_5mi_192hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 5, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2046,8 +2046,8 @@ paired_tows_6mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 6, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2058,8 +2058,8 @@ paired_tows_6mi_48hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 6, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2071,8 +2071,8 @@ paired_tows_6mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 6, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2084,8 +2084,8 @@ paired_tows_6mi_96hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 6, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2097,8 +2097,8 @@ paired_tows_6mi_120hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 6, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2110,8 +2110,8 @@ paired_tows_6mi_144hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 6, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2123,8 +2123,8 @@ paired_tows_6mi_168hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 6, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2136,8 +2136,8 @@ paired_tows_6mi_192hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 6, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2186,8 +2186,8 @@ paired_tows_7mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 7, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2198,8 +2198,8 @@ paired_tows_7mi_48hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 7, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2211,8 +2211,8 @@ paired_tows_7mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 7, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2224,8 +2224,8 @@ paired_tows_7mi_96hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 7, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2237,8 +2237,8 @@ paired_tows_7mi_120hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 7, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2250,8 +2250,8 @@ paired_tows_7mi_144hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 7, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2263,8 +2263,8 @@ paired_tows_7mi_168hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 7, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2276,8 +2276,8 @@ paired_tows_7mi_192hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 7, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2327,8 +2327,8 @@ paired_tows_8mi_24hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 8, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -1 & time_dif < 1) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -24 & time_dif < 24) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2339,8 +2339,8 @@ paired_tows_8mi_48hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 8, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -2 & time_dif < 2) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -48 & time_dif < 48) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2352,8 +2352,8 @@ paired_tows_8mi_72hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 8, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -3 & time_dif < 3) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -72 & time_dif < 72) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2365,8 +2365,8 @@ paired_tows_8mi_96hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 8, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -4 & time_dif < 4) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -96 & time_dif < 96) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2378,8 +2378,8 @@ paired_tows_8mi_120hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 8, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -5 & time_dif < 5) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -120 & time_dif < 120) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2391,8 +2391,8 @@ paired_tows_8mi_144hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 8, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -6 & time_dif < 6) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -144 & time_dif < 144) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2404,8 +2404,8 @@ paired_tows_8mi_168hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 8, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -7 & time_dif < 7) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -168 & time_dif < 168) %>%
   filter(STRATUM == strata)
 
 gc()
@@ -2417,8 +2417,8 @@ paired_tows_8mi_192hr_ob <- nefsc_slim %>%
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
                            max_dist = 8, unit = "miles") %>%
-  mutate(time_dif = difftime(START_TOW_DATE_GMT, START_TOW_DATE, units = "days")) %>%
-  filter(time_dif > -8 & time_dif < 8) %>%
+  mutate(time_dif = difftime(START_TOW_DATE_EST, START_TOW_DATE, units = "days")) %>%
+  filter(time_dif > -192 & time_dif < 192) %>%
   filter(STRATUM == strata)
 
 gc()
