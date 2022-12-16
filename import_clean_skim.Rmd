@@ -961,7 +961,7 @@ ob_trawl_slim <- observer_trawl %>%
 #selecting just the variables of interest for the nefsc dataset 
 nefsc_slim <- nefsc %>%
   select(c("cruise_station_ID", "STRATUM", "AREA", "SVVESSEL", "SVGEAR", 
-           "START_TOW_DATE_GMT", "END_TOW_DATE_GMT", "START_TOW_DATE_GMT", 
+           "START_TOW_DATE_GMT", "END_TOW_DATE_GMT", "START_TOW_DATE_EST", 
            "START_TOW_LAT", "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", 
            "TOWDUR", "AVGDEPTH", "AVGDEPTH", "AIRTEMP", "BAROPRESS", "WINDDIR", 
            "WINDSP", "WEATHER", "WAVEHGT", "SWELLDIR", "SWELLHGT", "SURFTEMP", 
