@@ -29,6 +29,7 @@ library(openxlsx)
 library(beepr)
 library(purrr)
 library(rsq)
+library(asht)
 ```
 
 # Read- In the Data
@@ -1007,8 +1008,17 @@ hist_kh_diff_log(haddock_paired_tows_5mi_72hr_re)
 
 #NOT SURE IF THIS SHOULD BE DONE WITH A WELCH T-TEST????
 
-haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_re$log_sf_species_cpua, haddock_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE)
+haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_re$log_sf_species_cpua, 
+                        haddock_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, 
+                        paired = TRUE)
 haddock_ttest
+
+
+# haddock_wsrt <- wilcox.test(haddock_paired_tows_5mi_72hr_re$log_sf_species_cpua, 
+#                             haddock_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, 
+#                             paired = TRUE) 
+# haddock_wsrt
+
 
 #back transform the estimate
 exp(haddock_ttest$estimate)
@@ -1063,8 +1073,16 @@ hist_kh_diff_log(witchfl_paired_tows_5mi_72hr_re)
 #NOT SURE IF THIS SHOULD BE DONE WITH A WELCH T-TEST????
 
 
-witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_re$log_sf_species_cpua, witchfl_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, paired = TRUE, var.equal = FALSE)
+witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_re$log_sf_species_cpua, 
+                        witchfl_paired_tows_5mi_72hr_re$log_nefsc_species_cpua, 
+                        paired = TRUE, var.equal = FALSE)
 witchfl_ttest
+
+
+witchfl_wsrt <- wsrTest(witchfl_paired_tows_5mi_72hr_re$sf_species_cpua,
+                            witchfl_paired_tows_5mi_72hr_re$nefsc_species_cpua)
+witchfl_wsrt
+
 
 #back transform the estimate
 exp(witchfl_ttest$estimate)
