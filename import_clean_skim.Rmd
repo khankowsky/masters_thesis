@@ -176,7 +176,7 @@ nefsc_length_spring <- read_csv("./data/22561_UNION_FSCS_SVLEN_spring.csv",
 #and apply a length-weight relationship to get their estimated weight and then 
 #subtract that from the aggregate catch weight 
 
-#filtering for species of interest and above their minimum landing size
+#filtering for species of interest and less than their minimum landing size
 nefsc_length_spring_select <- nefsc_length_spring %>%
   filter(SVSPP %in% c(73, 74, 75, 107, 105, 102, 101, 106, 155, 197)) %>%
   filter(SVSPP == 73 & LENGTH < 48.26 | #cod, minimum size 19in (48.26cm)
