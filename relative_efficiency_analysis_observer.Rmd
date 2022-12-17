@@ -426,65 +426,85 @@ monkfish_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
 ## Function Creation 
 ```{r}
 #################### FUNCTIONS FOR T-TESTS ####################################
+#################### FUNCTIONS FOR T-TESTS ####################################
+#boxplot for the difference in CPUA
+box.plot_diff <- function(x) {
+  x %>% 
+  ggplot() + 
+  geom_boxplot(aes(y = diff)) + 
+  labs(y = bquote("Difference between Observer and NEFSC CPUA [lb/"*km^2*"]")) + 
+  theme_classic()
+}
+
+#boxplot for the difference of the log(CPUA)
+box.plot_diff_log <- function(x) {
+  x %>% 
+  ggplot() + 
+  geom_boxplot(aes(y = diff_of_logs)) + 
+  labs(y = bquote("Ln(Difference between Observer and NEFSC CPUA [lb/"*km^2*"])")) + 
+  theme_classic()
+}
+
+#histogram of the difference in CPUA
+hist_kh_diff <- function(x) {
+  x %>%  
+  ggplot() + 
+  geom_histogram(aes(x = diff)) + 
+  labs(x = bquote("Difference between Observer and NEFSC CPUA [lb/"*km^2*"]"), 
+       y = "Count") + 
+  theme_classic()
+}
+
+#histogram of the difference in log(CPUA)
+hist_kh_diff_log <- function(x) {
+  x %>%  
+  ggplot() + 
+  geom_histogram(aes(x = diff_of_logs)) + 
+  labs(x = bquote("Ln(Difference between Observer and NEFSC CPUA [lb/"*km^2*"])"), 
+       y = "Count") + 
+  theme_classic()
+}
+
+
+####################### STUFF I DIDNT END UP USING ############################
+
+CPUA_label <- bquote("CPUA [lb/"*km^2*"]")
+logCPUA_lable <- bquote("Log(CPUA [lb/"*km^2*"])")
+
 #plots to check for normality before t-tests 
 #boxplot of catch per unit area
 box.plot <- function(x) {
-  x %>% 
-  pivot_longer(cols = c(ob_species_cpua, nefsc_species_cpua), 
-               names_to = "Trawl", 
+  x %>%
+  pivot_longer(cols = c(ob_species_cpua, nefsc_species_cpua),
+               names_to = "Trawl",
                values_to = "CPUA") %>%
-  filter(CPUA < 10000) %>%
-  ggplot() + 
-  geom_boxplot(aes(x = Trawl, y = CPUA)) + 
-  labs(x = "Trawl Type") + 
-  scale_x_discrete(labels = c("nefsc_species_cpua" = "NEFSC", 
-                              "ob_species_cpua" = "Study Fleet")) + 
+  ggplot() +
+  geom_boxplot(aes(x = Trawl, y = CPUA)) +
+  labs(x = "Trawl Type", y = CPUA_label) +
+  scale_x_discrete(labels = c("nefsc_species_cpua" = "NEFSC",
+                              "ob_species_cpua" = "Observer")) +
   theme_classic()
 }
 
 #histogram of catch per unit area
 hist_kh <- function(x) {
-  x %>%  
-  ggplot() + 
-  geom_histogram(aes(x = ob_species_cpua, y = ..density..), fill = "red") + 
-  geom_label(aes(x = Inf, y = Inf, label = "Observer CPUE", vjust =1 , hjust = 1), color = "red") +
-  geom_histogram(aes(x = nefsc_species_cpua, y = -..density..), fill = "blue") + 
-  geom_label(aes(x = Inf, y = -Inf, label = "NEFSC CPUE", vjust = -1, hjust = 1), color = "blue") +
-  labs(x = "CPUA (lb/min)", y = "Density", 
-       title = "Histogram of CPUE for x", 
-       subtitle = "Pairs within 5 mi and 72 hrs") + 
-  theme_classic()
-}
-  
-
-#boxplot with log-transformed data 
-box.log.plot <- function(x) {
-  x %>% 
-  pivot_longer(cols = c(log_ob_species_cpua, log_nefsc_species_cpua), 
-               names_to = "Trawl", 
-               values_to = "CPUA") %>%
-  filter(CPUA < 10000) %>%
-  ggplot() + 
-  geom_boxplot(aes(x = Trawl, y = CPUA)) + 
-  labs(x = "Trawl Type", y = "Log(CPUA)") + 
-  scale_x_discrete(labels = c("log_nefsc_species_cpua" = "NEFSC", 
-                              "log_ob_species_cpua" = "Observer")) + 
-  theme_classic()
-}
-
-#histogram with log-transformed data 
-hist_log_kh <- function(x) {
-  x %>%  
-  ggplot() + 
-  geom_histogram(aes(x = log_ob_species_cpua, y = ..density..), fill = "red") + 
+  x %>%
+  ggplot() +
+  geom_histogram(aes(x = ob_species_cpua, y = ..density.., fill = "Observer")) +
   # geom_label(aes(x = Inf, y = Inf, label = "Study Fleet CPUE", vjust =1 , hjust = 1), color = "red") +
-  geom_histogram(aes(x = log_nefsc_species_cpua, y = -..density..), fill = "blue") + 
+  geom_histogram(aes(x = nefsc_species_cpua, y = -..density.., fill = "NEFSC")) +
   # geom_label(aes(x = Inf, y = -Inf, label = "NEFSC CPUE", vjust = -1, hjust = 1), color = "blue") +
-  labs(x = "Log(CPUA (lb/min))", y = "Density", 
-       title = "Histogram of CPUE for x", 
-       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  labs(x = CPUA_label, y = "Density",
+       # title = "Histogram of CPUE for x",
+       # subtitle = "Pairs within 5 mi and 72 hrs"
+       ) +
+  scale_fill_manual(name = "Dataset",
+                    values = c("Observer" = "red", "NEFSC" = "blue"),
+                    labels = c("Observer", "NEFSC")) +
   theme_classic()
 }
+
+  
 
 
 
@@ -551,20 +571,28 @@ hist_kh(cod_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 cod_paired_tows_5mi_72hr_ob_re <- cod_paired_tows_5mi_72hr_ob_re %>%
-  mutate(log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua))
+  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+         log_ob_species_cpua = log(ob_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
 
-#looking at the boxplot and histograms of the log(catch per unit area)
-box.log.plot(cod_paired_tows_5mi_72hr_ob_re)
-hist_log_kh(cod_paired_tows_5mi_72hr_ob_re)
+#looking at the boxplot and histograms of the difference between CPUA
+box.plot_diff(cod_paired_tows_5mi_72hr_re)
+hist_kh_diff(cod_paired_tows_5mi_72hr_re)
+
+#looking at the boxplot and histograms of the diff_of_logs
+box.plot_diff_log(cod_paired_tows_5mi_72hr_re)
+hist_kh_diff_log(cod_paired_tows_5mi_72hr_re)
 
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
-cod_ttest <- t.test(cod_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, cod_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
-cod_ttest
+cod_ob_ttest <- t.test(cod_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, cod_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
+cod_ob_ttest
 
 
 #back transform the estimate
+exp(cod_ob_ttest$estimate)
+exp(cod_ob_ttest$conf.int)
 
 ```
 
@@ -598,21 +626,29 @@ hist_kh(haddock_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 haddock_paired_tows_5mi_72hr_ob_re <- haddock_paired_tows_5mi_72hr_ob_re %>%
-  mutate(log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua))
+  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+         log_ob_species_cpua = log(ob_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
 
-#looking at the boxplot and histograms of the log(catch per unit area)
-box.log.plot(haddock_paired_tows_5mi_72hr_ob_re)
-hist_log_kh(haddock_paired_tows_5mi_72hr_ob_re)
+#looking at the boxplot and histograms of the difference between CPUA
+box.plot_diff(haddock_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff(haddock_paired_tows_5mi_72hr_ob_re)
+
+#looking at the boxplot and histograms of the diff_of_logs
+box.plot_diff_log(haddock_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff_log(haddock_paired_tows_5mi_72hr_ob_re)
 
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
 
-haddock_ttest <- t.test(haddock_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, haddock_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
-haddock_ttest
+haddock_ob_ttest <- t.test(haddock_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, haddock_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
+haddock_ob_ttest
 
 
 #back transform the estimate
+exp(haddock_ob_ttest$estimate)
+exp(haddock_ob_ttest$conf.int)
 
 ```
 
@@ -646,20 +682,28 @@ hist_kh(witchfl_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 witchfl_paired_tows_5mi_72hr_ob_re <- witchfl_paired_tows_5mi_72hr_ob_re %>%
-  mutate(log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua))
+  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+         log_ob_species_cpua = log(ob_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
 
-#looking at the boxplot and histograms of the log(catch per unit area)
-box.log.plot(witchfl_paired_tows_5mi_72hr_ob_re)
-hist_log_kh(witchfl_paired_tows_5mi_72hr_ob_re)
+#looking at the boxplot and histograms of the difference between CPUA
+box.plot_diff(witchfl_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff(witchfl_paired_tows_5mi_72hr_ob_re)
+
+#looking at the boxplot and histograms of the diff_of_logs
+box.plot_diff_log(witchfl_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff_log(witchfl_paired_tows_5mi_72hr_ob_re)
 
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
 
-witchfl_ttest <- t.test(witchfl_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, witchfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
-witchfl_ttest
+witchfl_ob_ttest <- t.test(witchfl_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, witchfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
+witchfl_ob_ttest
 
 #back transform the estimate
+exp(witchfl_ob_ttest$estimate)
+exp(witchfl_ob_ttest$conf.int)
 
 ```
 
@@ -693,21 +737,31 @@ hist_kh(yellowtailfl_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 yellowtailfl_paired_tows_5mi_72hr_ob_re <- yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
-  mutate(log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua))
+  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+         log_ob_species_cpua = log(ob_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
 
-#looking at the boxplot and histograms of the log(catch per unit area)
-box.log.plot(yellowtailfl_paired_tows_5mi_72hr_ob_re)
-hist_log_kh(yellowtailfl_paired_tows_5mi_72hr_ob_re)
+#looking at the boxplot and histograms of the difference between CPUA
+box.plot_diff(yellowtailfl_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff(yellowtailfl_paired_tows_5mi_72hr_ob_re)
+
+#looking at the boxplot and histograms of the diff_of_logs
+box.plot_diff_log(yellowtailfl_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff_log(yellowtailfl_paired_tows_5mi_72hr_ob_re)
 
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
 
-yellowtail_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, yellowtailfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
-yellowtail_ttest
+yellowtail_ob_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua,
+                              yellowtailfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, 
+                              paired = TRUE)
+yellowtail_ob_ttest
 
 
 #back transform the estimate
+exp(yellowtail_ob_ttest$estimate)
+exp(yellowtail_ob_ttest$conf.int)
 
 ```
 
@@ -740,21 +794,31 @@ hist_kh(plaice_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 plaice_paired_tows_5mi_72hr_ob_re <- plaice_paired_tows_5mi_72hr_ob_re %>%
-  mutate(log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua))
+  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+         log_ob_species_cpua = log(ob_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
 
-#looking at the boxplot and histograms of the log(catch per unit area)
-box.log.plot(plaice_paired_tows_5mi_72hr_ob_re)
-hist_log_kh(plaice_paired_tows_5mi_72hr_ob_re)
+#looking at the boxplot and histograms of the difference between CPUA
+box.plot_diff(plaice_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff(plaice_paired_tows_5mi_72hr_ob_re)
+
+#looking at the boxplot and histograms of the diff_of_logs
+box.plot_diff_log(plaice_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff_log(plaice_paired_tows_5mi_72hr_ob_re)
 
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
 
-plaice_ttest <- t.test(plaice_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, plaice_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
-plaice_ttest
+plaice_ob_ttest <- t.test(plaice_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, 
+                       plaice_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, 
+                       paired = TRUE)
+plaice_ob_ttest
 
 
 #back transform the estimate
+exp(plaice_ob_ttest$estimate)
+exp(plaice_ob_ttest$conf.int)
 
 ```
 
@@ -788,21 +852,31 @@ hist_kh(winterfl_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 winterfl_paired_tows_5mi_72hr_ob_re <- winterfl_paired_tows_5mi_72hr_ob_re %>%
-  mutate(log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua))
+  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+         log_ob_species_cpua = log(ob_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
 
-#looking at the boxplot and histograms of the log(catch per unit area)
-box.log.plot(winterfl_paired_tows_5mi_72hr_ob_re)
-hist_log_kh(winterfl_paired_tows_5mi_72hr_ob_re)
+#looking at the boxplot and histograms of the difference between CPUA
+box.plot_diff(winterfl_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff(winterfl_paired_tows_5mi_72hr_ob_re)
 
-#assumptions of normality and equal variance are met with the log transformed data, 
-#so the t-test was conducted with the log-transformed data
+# #looking at the boxplot and histograms of the diff_of_logs
+# box.plot_diff_log(winterfl_paired_tows_5mi_72hr_ob_re)
+# hist_kh_diff_log(winterfl_paired_tows_5mi_72hr_ob_re)
 
-winterfl_ttest <- t.test(winterfl_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, winterfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
-winterfl_ttest
+#assumptions of normality and equal variance are met with the raw data, 
+#so the t-test was conducted with the raw CPUA data
+
+winterfl_ob_ttest <- t.test(winterfl_paired_tows_5mi_72hr_ob_re$ob_species_cpua, 
+                            winterfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, 
+                            paired = TRUE)
+winterfl_ob_ttest
 
 
-#back transform the estimate
+# #back transform the estimate - NOT NEEDED BECAUSE ASSUMPTIONS WERE MET W RAW DATA
+# exp(winterfl_ob_ttest$estimate)
+# exp(winterfl_ob_ttest$conf.int)
 
 ```
 
@@ -836,21 +910,30 @@ hist_kh(monkfish_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 monkfish_paired_tows_5mi_72hr_ob_re <- monkfish_paired_tows_5mi_72hr_ob_re %>%
-  mutate(log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua))
+  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+         log_ob_species_cpua = log(ob_species_cpua), 
+         log_nefsc_species_cpua = log(nefsc_species_cpua), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
 
-#looking at the boxplot and histograms of the log(catch per unit area)
-box.log.plot(monkfish_paired_tows_5mi_72hr_ob_re)
-hist_log_kh(monkfish_paired_tows_5mi_72hr_ob_re)
+#looking at the boxplot and histograms of the difference between CPUA
+box.plot_diff(monkfish_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff(monkfish_paired_tows_5mi_72hr_ob_re)
+
+#looking at the boxplot and histograms of the diff_of_logs
+box.plot_diff_log(monkfish_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff_log(monkfish_paired_tows_5mi_72hr_ob_re)
 
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
 
-monkfish_ttest <- t.test(monkfish_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, monkfish_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
-monkfish_ttest
+monkfish_ob_ttest <- t.test(monkfish_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, 
+                         monkfish_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, 
+                         paired = TRUE)
+monkfish_ob_ttest
 
 #back transform the estimate
-
+exp(monkfish_ob_ttest$estimate)
+exp(monkfish_ob_ttest$conf.int)
 
 ```
 
