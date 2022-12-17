@@ -25,6 +25,7 @@ library(hexbin)
 library(sf)
 library(scales)
 library(beepr)
+library(lubridate)
 ```
 
 
@@ -175,7 +176,7 @@ nefsc_length_spring <- read_csv("./data/22561_UNION_FSCS_SVLEN_spring.csv",
 #and apply a length-weight relationship to get their estimated weight and then 
 #subtract that from the aggregate catch weight 
 
-#filtering for species of interest and above their minimum landing size
+#filtering for species of interest and less than their minimum landing size
 nefsc_length_spring_select <- nefsc_length_spring %>%
   filter(SVSPP %in% c(73, 74, 75, 107, 105, 102, 101, 106, 155, 197)) %>%
   filter(SVSPP == 73 & LENGTH < 48.26 | #cod, minimum size 19in (48.26cm)
@@ -511,6 +512,10 @@ observer_trawl <- observer %>%
   mutate(trip_haul_ID = paste(TRIPID,HAULNUM, sep = '_')) %>%
   relocate(trip_haul_ID) %>%
   filter(YEARHBEG  >= 2009) %>%
+  mutate(START_TOW_DATE = make_datetime(YEARHBEG, MONTHHBEG, DAYHBEG, TIMEHBEG %/% 100, TIMEHBEG %% 100)) %>%
+  relocate(START_TOW_DATE, .after = TIMEHBEG) %>%
+  mutate(END_TOW_DATE = make_datetime(YEARHEND, MONTHEND, DAYHEND, TIMEHEND %/% 100, TIMEHEND %% 100)) %>%
+  relocate(END_TOW_DATE, .after = TIMEHEND) %>%
   mutate(survey_comercial_ID = 3) %>%
   rename(START_TOW_LAT = GIS_LATHBEG) %>% 
   rename(START_TOW_LON = GIS_LONHBEG) %>%
@@ -533,6 +538,8 @@ nefsc <- nefsc %>%
   mutate(BEGIN_GMT_TOWDATE = as.POSIXct(BEGIN_GMT_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
   mutate(END_GMT_TOWDATE = as.POSIXct(END_GMT_TOWDATE, format = "%m/%d/%y %H:%M")) %>%
   mutate(survey_commerical_ID = 1) %>%
+  rename(START_TOW_DATE_EST = BEGIN_EST_TOWDATE) %>%
+  rename(END_TOW_DATE_EST = END_EST_TOWDATE) %>%
   rename(START_TOW_DATE_GMT = BEGIN_GMT_TOWDATE) %>%
   rename(END_TOW_DATE_GMT = END_GMT_TOWDATE) %>%
   rename(START_TOW_LAT = DECDEG_BEGLAT) %>%
@@ -768,6 +775,55 @@ observer_trawl$swept_area <- observer_trawl$d_t * (0.001 * observer_trawl$lin_ef
 
 
 
+## Calculating Day/Night Variable
+```{r}
+library(suncalc)
+
+#Calculating whether the tow was conducted during the day or night for each dataset
+#Running for the observer dataset 
+observer_trawl <- observer_trawl %>%
+  mutate(start_tow_date = as.Date(START_TOW_DATE)) %>%
+  rowwise %>%
+  mutate(sunrise = getSunlightTimes(date = start_tow_date, lat = START_TOW_LAT, lon = START_TOW_LON, tz = "EST")$sunrise, 
+         sunset = getSunlightTimes(date = start_tow_date, lat = START_TOW_LAT, lon = START_TOW_LON, tz = "EST")$sunset)
+
+observer_trawl <- observer_trawl %>%
+  mutate(dayNight_ob = ifelse(START_TOW_DATE > sunrise & START_TOW_DATE < sunset, 'day', 'night'))
+
+gc()
+  
+  
+#Running it for the study fleet data
+sf_trawl <- sf_trawl %>% 
+  force_tz(START_TOW_DATE_GMT, tz = "GMT") %>%
+  mutate(START_TOW_DATE_EST = with_tz(START_TOW_DATE_GMT, tz = "EST")) %>%
+  mutate(start_tow_date = as.Date(START_TOW_DATE_EST)) %>%
+  rowwise %>%
+  mutate(sunrise = getSunlightTimes(date = start_tow_date, lat = START_TOW_LAT, lon = START_TOW_LON, tz = "EST")$sunrise, 
+         sunset = getSunlightTimes(date = start_tow_date, lat = START_TOW_LAT, lon = START_TOW_LON, tz = "EST")$sunset)
+
+sf_trawl <- sf_trawl %>% 
+  mutate(dayNight_sf = ifelse(START_TOW_DATE_EST > sunrise & START_TOW_DATE_EST < sunset, 'day', 'night'))
+  
+gc()  
+
+
+#Running it for the survey data
+nefsc <- nefsc %>%
+  mutate(start_tow_date = as.Date(START_TOW_DATE_EST)) %>%
+  rowwise %>%
+  mutate(sunrise = getSunlightTimes(date = start_tow_date, lat = START_TOW_LAT, lon = START_TOW_LON, tz = "EST")$sunrise, 
+         sunset = getSunlightTimes(date = start_tow_date, lat = START_TOW_LAT, lon = START_TOW_LON, tz = "EST")$sunset)
+  
+nefsc <- nefsc %>%
+  mutate(dayNight_nefsc = ifelse(START_TOW_DATE_EST > sunrise & START_TOW_DATE_EST < sunset, 'day', 'night'))
+
+gc()
+
+```
+
+
+
 ## Categorizing Trawl Types 
 ```{r}
 observer_trawl <- observer_trawl %>%
@@ -796,18 +852,19 @@ observer_trawl <- observer_trawl %>%
       #86 - 2-seam groundfish trawl 
       #87 - 4-seam groundfish trawl 
       #85 - groundfish trawl, seams unknown 
-    NETTYPE %in% c(10, 11, 12, 13, 1, 2, 08, 66, 67, 65) ~ 2, #Flatfish Trawls
+    NETTYPE %in% c(10, 11, 12, 13, 66, 67, 65, 81, 82, 80) ~ 2, #Flatfish Trawls
       #10 - flatfish trawl, seams unknown 
       #11 - 2-seam flatfish trawl 
       #12 - 4-seam flatfish trawl 
       #13 - flounder trawl 
-      #01 - 2-seam flynet trawl
-      #02 - 4-seam flynet trawl 
-      #08 - flynet, seams unknown
       #66 - 2-seam monkfish trawl
       #67 - 4-seam monkfish trawl
       #65 - monkfish trawl, seams unknown 
-    NETTYPE %in% c(3, 4, 9, 16, 6, 7, 5) ~ 3, #Separator Trawls
+    
+      #81 - 2-seam shuman trawl
+      #82 - 4-seam shuman trawl
+      #80 - shuman trawl, seams unknown
+    NETTYPE %in% c(03, 04, 09, 16, 06, 07, 05) ~ 3, #Separator Trawls
       #03 - 2-seam haddock separator trawl 
       #04 - 4-seam haddock separator trawl 
       #09 - haddock separator trawl, seams unknown 
@@ -815,16 +872,18 @@ observer_trawl <- observer_trawl %>%
       #06 - 2-seam separator trawl
       #07 - 4-seam separator trawl
       #05 - separator trawl, seams unknown 
-    NETTYPE %in% c(31, 30, 32, 17, 18, 15, 81, 82, 80) ~ 4, #Eliminator Trawls
+    NETTYPE %in% c(31, 30, 32, 17, 18, 15, 01, 02, 08) ~ 4, #Eliminator Trawls
       #31 - 2-seam eliminator trawl
       #30 - 4-seam eliminator trawl
       #32 - eliminator trawl, seams unknown
       #17 - 4-seam mid-sized ruhle trawl
       #18 - 4-seam millionaire trawl
       #15 - 4-seam ruhle trawl
-      #81 - 2-seam shuman trawl
-      #82 - 4-seam shuman trawl
-      #80 - shuman trawl, seams unknown
+    
+      #01 - 2-seam flynet trawl
+      #02 - 4-seam flynet trawl 
+      #08 - flynet, seams unknown
+
     # NETTYPE %in% c(91, 92, 00, 99) ~ 5, #Other/Unknown Trawls
 
   ))
@@ -854,8 +913,10 @@ observer_trawl <- observer_trawl %>%
 
 #calculates the catch per swept area for the nefsc bottom trawl survey 
 nefsc <- nefsc %>%
+  mutate(CATCHWT_updated_LB = 2.2046226218*CATCHWT_updated) %>%     #going from kilograms to pounds 
   rename(SWEPT_AREA = AREA_SWEPT_DOORS_MEAN_KM2) %>% 
-  mutate(nefsc_species_cpua = CATCHWT_updated/SWEPT_AREA)
+  mutate(nefsc_species_cpua = CATCHWT_updated/SWEPT_AREA) %>%
+  mutate(nefsc_species_cpua_LB = CATCHWT_updated_LB/SWEPT_AREA)
 
 ```
 
@@ -872,7 +933,7 @@ sf_trawl_slim <- sf_trawl %>%
            "GEAR_QUANTITY", "GEAR_SIZE", "MESH_SIZE", "MESH_TYPE", 
            "HAIL_AMOUNT", "HAIL_AMOUNT_LB", "haul_dur_hr", "haul_dist_nm", 
            "MEAN_DPTH_M", "survey_comercial_ID", "strata", "swept_area",
-           "sf_species_catch", "sf_species_cpua"))
+           "sf_species_catch", "sf_species_cpua", "dayNight_sf"))
   # select(-c("VES_NAME", "HULL_ID", "PPORT", "HPORT", "ACCSP_GEAR_CODE", 
   #           "PPST", "SAIL_PORT_NAME", "SAIL_STATE_POSTAL", "LAND_PORT_NAME", 
   #           "LAND_STATE_POSTAL", "START_SET_DATE_GMT", "START_SET_LAT", "START_SET_LON", 
@@ -883,8 +944,7 @@ sf_trawl_slim <- sf_trawl %>%
 
 #selecting just the variables of interest for observer dataset 
 ob_trawl_slim <- observer_trawl %>%
-  mutate(START_TOW_DATE = make_date(YEARHBEG, MONTHHBEG, DAYHBEG)) %>%
-  select(c("trip_haul_ID", "START_TOW_DATE", "AREA", "VESSELNAME",  "NEGEAR", 
+  select(c("trip_haul_ID", "START_TOW_DATE", "END_TOW_DATE", "AREA", "VESSELNAME",  "NEGEAR", 
            "GEARNM", "NETNAME", "NETTYPE", "HDROPLEN", "FTROPLEN", "GRCABLEN", 
            "BRDTPLEN", "CODHUNG", "LINERHUNG", "EXCLUSD", "EXCLTYP", "NETOHORIZ", 
            "DOORSPREAD", "GRCABTYP", "BRDLGTYP", "FTROPTYP", "NSWEEPS", 
@@ -892,7 +952,7 @@ ob_trawl_slim <- observer_trawl %>%
            "COMNAME", "CATDISP", "FISHDISP", "FISHDISPDESC", "START_TOW_LAT", 
            "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", "HAULDUR", "HAILWT", 
            "LIVE_WT", "survey_comercial_ID", "strata", "trawl_type", "swept_area", 
-           "ob_species_catch", "ob_species_cpua"))
+           "ob_species_catch", "ob_species_cpua", "dayNight_ob"))
          # "swept_area"))
 
 
@@ -901,13 +961,13 @@ ob_trawl_slim <- observer_trawl %>%
 #selecting just the variables of interest for the nefsc dataset 
 nefsc_slim <- nefsc %>%
   select(c("cruise_station_ID", "STRATUM", "AREA", "SVVESSEL", "SVGEAR", 
-           "START_TOW_DATE_GMT", "END_TOW_DATE_GMT", "START_TOW_LAT", 
-           "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", 
+           "START_TOW_DATE_GMT", "END_TOW_DATE_GMT", "START_TOW_DATE_EST", 
+           "START_TOW_LAT", "START_TOW_LON", "END_TOW_LAT", "END_TOW_LON", 
            "TOWDUR", "AVGDEPTH", "AVGDEPTH", "AIRTEMP", "BAROPRESS", "WINDDIR", 
            "WINDSP", "WEATHER", "WAVEHGT", "SWELLDIR", "SWELLHGT", "SURFTEMP", 
            "SURFSALIN", "BOTTEMP", "BOTSALIN", "LOGGED_SPECIES_NAME", "SVSPP", 
            "EXPCATCHNUM", "EXPCATCHWT", "undersized_fish_WT", "CATCHWT_updated", 
-           "SWEPT_AREA", "nefsc_species_cpua"))
+           "SWEPT_AREA", "nefsc_species_cpua", "nefsc_species_cpua_LB", "dayNight_nefsc"))
   # select(-c("EST_MONTH","EST_DAY", "EST_JULIAN_DAY", "BEGLAT", "BEGLON", "ENDLAT", 
   #           "ENDLON", "COURSE", "RPM", "DOPDISTW", "...11", "...12", 
   #           "BEGIN_EST_TOWDATE", "END_EST_TOWDATE", "SURFSALIN", "SURFTEMP", 
@@ -954,9 +1014,9 @@ nefsc_slim <- nefsc %>%
 #   drop_na(END_TOW_LAT) %>%
 #   drop_na(END_TOW_LON)
 
-rm(sf_trawl)
-rm(observer_trawl)
-rm(nefsc)
+# rm(sf_trawl)
+# rm(observer_trawl)
+# rm(nefsc)
 # rm(vw)
 ```
 

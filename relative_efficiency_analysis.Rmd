@@ -338,8 +338,8 @@ paired_tows_5mi_72hr_re %>%
   filter(sf_species_cpua < 10000) %>%
   filter(nefsc_species_cpua < 10000) %>%
   ggplot() + 
-  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "blue") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "red") + 
   labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
        title = "Comparison of CPUA for Atlantic Cod", 
        subtitle = "Pairs within 5 mi and 72 hrs")
