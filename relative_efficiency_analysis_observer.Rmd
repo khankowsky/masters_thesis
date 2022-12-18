@@ -6,7 +6,7 @@ date: "2022-10-05"
 
 
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 library(readxl)
 library(janitor)
@@ -30,6 +30,8 @@ library(beepr)
 library(purrr)
 library(broom)
 library(aod)
+library(car)
+
 ```
 
 # Read-In the Data
@@ -40,7 +42,7 @@ paired_tows_5mi_72hr_ob <- read.csv('./data/paired_tows_5mi_72hr_ob.csv')
 
 
 # Data for Maps 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #Additional Data for Maps
 #Statistical Areas
 sareas <- st_read(dsn = "./data/Statistical_Areas_2010_withNames") %>%
@@ -105,7 +107,6 @@ paired_tows_1mi_24hr_ob_logre <- paired_tows_1mi_24hr_ob %>%
 
 
 ## 5m and 72hr Paired Tows
-### Comparing CPUA and Relative Efficiency 
 ```{r}
 paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
   filter(SVSPP == 73 & NESPP4 == 818 | #cod 
@@ -132,251 +133,17 @@ paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
     month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
     month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
   )) %>%
+  mutate(DayNight_var = case_when(
+    dayNight_ob == "night" & dayNight_nefsc == "night" ~ "Night",
+    dayNight_ob == "day" & dayNight_nefsc == "day" ~ "Day",
+    dayNight_ob == "night" & dayNight_nefsc =="day" ~ "Mismatch",
+    dayNight_ob == "day" & dayNight_nefsc == "night" ~ "Mismatch"
+  )) %>%
   mutate(trawl_type = as.factor(trawl_type)) %>%
+  drop_na(trawl_type) %>%
   distinct()
 
-
-
-
-
-
-#COD
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 73 & NESPP4 == 818) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Atlantic Cod", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 73 & NESPP4 == 818) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Atlantic Cod", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#HADDOCK
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 74 & NESPP4 == 1477) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Haddock", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 74 & NESPP4 == 1477) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Haddock", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#WITCH FLOUNDER 
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 107 & NESPP4 == 1220) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Witch Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 107 & NESPP4 == 1220) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Witch Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#YELLOWTAIL FLOUNDER
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 105 & NESPP4 == 1230) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Yellowtail Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 105 & NESPP4 == 1230) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Yellowtail Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#AMERICAN PLAICE
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 102 & NESPP4 == 1240) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for American Plaice", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 102 & NESPP4 == 1240) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for American Plaice", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#WINTER FLOUNDER
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 106 & NESPP4 == 1200) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Winter Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 106 & NESPP4 == 1200) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Winter Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#MONKFISH
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 197 & NESPP4 == 124) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Monkfish", 
-       subtitle = "Pairs within 5 mi and 72 hrs") 
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 197 & NESPP4 == 124) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE) %>%
-  filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Monkfish", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-  
 ```
-
-
-### Maps of Matched Tows 
-```{r}
-
-```
-
 
 
 
@@ -510,7 +277,7 @@ hist_kh <- function(x) {
 
 ######################## FUNCTIONS FOR MODELLING #############################
 #trying to  create functions because I will be running the same models for every species dataset 
-covars <- c("season", "mgmt_area",  "VESSELNAME", "AVGDEPTH", "BOTTEMP")
+covars <- c("season", "mgmt_area", "VESSELNAME", "AVGDEPTH", "BOTTEMP")
 combos <- purrr::map(1:5, ~as.data.frame(t(combn(covars, .x))))
 
 formulae <- combos %>%
@@ -563,6 +330,55 @@ predict.plot <- function(x,y) {
 
 # Statisitical Analysis by Species 
 ## Cod
+#### Exploratory Plots 
+```{r}
+#Looking at the cpua for the paired tows for each species 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  geom_vline(aes(xintercept = 0.5),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Atlantic Cod", 
+       subtitle = "Pairs within 5 mi and 72 hrs")  
+
+
+#Map of the matched tows 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = cod_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = cod_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Observer")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
+  labs(title = "Map of Matched Observer and NEFSC Tows for Cod", subtitle = "within 5 mi and 72 hrs")
+
+
+```
+
+
 #### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
@@ -577,12 +393,12 @@ cod_paired_tows_5mi_72hr_ob_re <- cod_paired_tows_5mi_72hr_ob_re %>%
          diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
 
 #looking at the boxplot and histograms of the difference between CPUA
-box.plot_diff(cod_paired_tows_5mi_72hr_re)
-hist_kh_diff(cod_paired_tows_5mi_72hr_re)
+box.plot_diff(cod_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff(cod_paired_tows_5mi_72hr_ob_re)
 
 #looking at the boxplot and histograms of the diff_of_logs
-box.plot_diff_log(cod_paired_tows_5mi_72hr_re)
-hist_kh_diff_log(cod_paired_tows_5mi_72hr_re)
+box.plot_diff_log(cod_paired_tows_5mi_72hr_ob_re)
+hist_kh_diff_log(cod_paired_tows_5mi_72hr_ob_re)
 
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
@@ -597,12 +413,14 @@ exp(cod_ob_ttest$conf.int)
 ```
 
 #### Model Run 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #COD
 codm <- fit.models(cod_paired_tows_5mi_72hr_ob_re)
-
 compare.models(codm)
 
+#dropping the NAs in the avg depth column 
+cod_paired_tows_5mi_72hr_ob_re <- cod_paired_tows_5mi_72hr_ob_re %>%
+  drop_na(AVGDEPTH)
 
 #storing the optimal model and plotting the diagnostics
 codm_ob_optimal <- glm(relative_efficiency ~ trawl_type + AVGDEPTH, family = binomial, data = cod_paired_tows_5mi_72hr_ob_re)
@@ -615,9 +433,148 @@ summary(codm_ob_optimal)
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(codm_ob_optimal), confint(codm_ob_optimal)))
 
+#look at the component residual plots 
+crPlots(codm_ob_optimal)
+
+
+# Extract the fitted and predicted values 
+cod_paired_tows_5mi_72hr_ob_re$predict <- predict(codm_ob_optimal)
+cod_paired_tows_5mi_72hr_ob_re$fitted <- fitted(codm_ob_optimal)
+
+#predicted vs observed values 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept=0, slope=1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
+
+#getting final RE estimate 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise(mean(fitted), n = n())
+
+cod_paired_tows_5mi_72hr_ob_re %>%
+  summarise(mean(fitted), n = n())
+
+#plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.6005787, linetype = "dashed", color = "red") + 
+  scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip()
+
+
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = AVGDEPTH, y = relative_efficiency, color = trawl_type, pch = trawl_type)) + 
+  geom_point() + 
+  geom_smooth(method = 'glm', method.args = list(family = 'binomial')) + 
+  labs(x = "Average Depth", y = "Relative Efficiency") + 
+  theme_classic()
+
+
+
 ```
 
 ## Haddock
+#### Exploratory Plots 
+```{r}
+#Looking at the cpua for the paired tows for each species 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Haddock", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  geom_vline(aes(xintercept = 0.5),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Haddock", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+# Looks like there are some unrealistic outliers from the science center trawl 
+haddock_paired_tows_5mi_72hr_ob_re <- haddock_paired_tows_5mi_72hr_ob_re %>%
+  filter(ob_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000)
+  
+  
+#Looking at the cpua for the paired tows for each species with outliers removed 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Haddock", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  geom_vline(aes(xintercept = 0.5),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Haddock", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+  
+
+#Map of the matched tows 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = haddock_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = haddock_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Observer")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
+  labs(title = "Map of Matched Observer and NEFSC Tows for Haddock", subtitle = "within 5 mi and 72 hrs")
+
+  
+
+```
+
+
 #### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
@@ -653,15 +610,14 @@ exp(haddock_ob_ttest$conf.int)
 ```
 
 #### Model Run 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #HADDOCK
 haddockm <- fit.models(haddock_paired_tows_5mi_72hr_ob_re)
-
 compare.models(haddockm)
 
 
 #storing the optimal model and plotting the diagnostics
-haddockm_ob_optimal <- glm(relative_efficiency ~ mgmt_area + trawl_type + AVGDEPTH + BOTTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_ob_re)
+haddockm_ob_optimal <- glm(relative_efficiency ~ season + mgmt_area + AVGDEPTH, family = binomial, data = haddock_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(haddockm_ob_optimal)
@@ -671,9 +627,105 @@ summary(haddockm_ob_optimal)
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(haddockm_ob_optimal), confint(haddockm_ob_optimal)))
 
+#look at the component residual plots 
+crPlots(haddockm_ob_optimal)
+
+
+# Extract the fitted and predicted values 
+haddock_paired_tows_5mi_72hr_ob_re$predict <- predict(haddockm_ob_optimal)
+haddock_paired_tows_5mi_72hr_ob_re$fitted <- fitted(haddockm_ob_optimal)
+
+#predicted vs observed values 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept=0, slope=1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
+
+#getting final RE estimate 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise(mean(fitted), n = n())
+
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  summarise(mean(fitted), n = n())
+
+#plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.6276351, linetype = "dashed", color = "red") + 
+  scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip()
+
+
 ```
 
 ## Witch Flounder
+#### Exploratory Plots
+```{r}
+#Looking at the cpua for the paired tows for each species 
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua,  fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Witch Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  scale_fill_manual(name = "",
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  geom_vline(aes(xintercept = 0.5),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Witch Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+#Map of the matched tows 
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = witchfl_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = witchfl_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Observer")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
+  labs(title = "Map of Matched Observer and NEFSC Tows for Witch Flounder", subtitle = "within 5 mi and 72 hrs")
+
+```
+
+
 #### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
@@ -708,15 +760,14 @@ exp(witchfl_ob_ttest$conf.int)
 ```
 
 #### Model Run 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #WITCH FLOUNDER 
 witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_ob_re)
-
 compare.models(witchflm)
 
 
 #storing the optimal model and plotting the diagnostics
-witchflm_ob_optimal <- glm(relative_efficiency ~ trawl_type, family = binomial, data = witchfl_paired_tows_5mi_72hr_ob_re)
+witchflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season, family = binomial, data = witchfl_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(witchflm_ob_optimal)
@@ -726,9 +777,103 @@ summary(witchflm_ob_optimal)
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(witchflm_ob_optimal), confint(witchflm_ob_optimal)))
 
+#look at the component residual plots 
+crPlots(witchflm_ob_optimal)
+
+
+# Extract the fitted and predicted values 
+witchfl_paired_tows_5mi_72hr_ob_re$predict <- predict(witchflm_ob_optimal)
+witchfl_paired_tows_5mi_72hr_ob_re$fitted <- fitted(witchflm_ob_optimal)
+
+#predicted vs observed values 
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept=0, slope=1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
+
+#getting final RE estimate 
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise(mean(fitted), n = n())
+
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  summarise(mean(fitted), n = n())
+
+#plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.4874408, linetype = "dashed", color = "red") + 
+  scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip()
+
 ```
 
 ## Yewllowtail Flounder
+#### Exploratory Plots 
+```{r}
+#Looking at the cpua for the paired tows for each species 
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Yellowtail Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  scale_fill_manual(name = "",
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  geom_vline(aes(xintercept = 0.5),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Yellowtail Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+  
+
+#Map of the matched tows 
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = yellowtailfl_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = yellowtailfl_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Observer")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
+  labs(title = "Map of Matched Observer and NEFSC Tows for Yellowtail Flounder", subtitle = "within 5 mi and 72 hrs")
+
+```
+
+
 #### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
@@ -766,15 +911,14 @@ exp(yellowtail_ob_ttest$conf.int)
 ```
 
 #### Model Run 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #YELLOWTAIL FLOUNDER
 yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_ob_re)
-
 compare.models(yellowtailflm)
 
 
 #storing the optimal model and plotting the diagnostics
-yellowtailflm_ob_optimal <- glm(relative_efficiency ~ trawl_type, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_ob_re)
+yellowtailflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(yellowtailflm_ob_optimal)
@@ -783,9 +927,104 @@ summary(yellowtailflm_ob_optimal)
 
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(yellowtailflm_ob_optimal), confint(yellowtailflm_ob_optimal)))
+
+#look at the component residual plots 
+crPlots(yellowtailflm_ob_optimal)
+
+
+# Extract the fitted and predicted values 
+yellowtailfl_paired_tows_5mi_72hr_ob_re$predict <- predict(yellowtailflm_ob_optimal)
+yellowtailfl_paired_tows_5mi_72hr_ob_re$fitted <- fitted(yellowtailflm_ob_optimal)
+
+#predicted vs observed values 
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept=0, slope=1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
+
+#getting final RE estimate 
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise(mean(fitted), n = n())
+
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  summarise(mean(fitted), n = n())
+
+#plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.6146174, linetype = "dashed", color = "red") + 
+  scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip()
+
 ```
 
 ## American Plaice
+#### Exploratory PLots 
+```{r}
+#Looking at the cpua for the paired tows for each species 
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua,  fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for American Plaice", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  scale_fill_manual(name = "",
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  geom_vline(aes(xintercept = 0.5),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for American Plaice", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+#Map of the matched tows 
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = plaice_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = plaice_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Observer")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
+  labs(title = "Map of Matched Observer and NEFSC Tows for American Plaice", subtitle = "within 5 mi and 72 hrs")
+
+```
+
+
 #### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
@@ -823,15 +1062,14 @@ exp(plaice_ob_ttest$conf.int)
 ```
 
 #### Model Run 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #AMERICAN PLAICE 
 plaicem <- fit.models(plaice_paired_tows_5mi_72hr_ob_re)
-
 compare.models(plaicem)
 
 
 #storing the optimal model and plotting the diagnostics
-plaicem_ob_optimal <- glm(relative_efficiency ~ trawl_type, family = binomial, data = plaice_paired_tows_5mi_72hr_ob_re)
+plaicem_ob_optimal <- glm(relative_efficiency ~ trawl_type + mgmt_area, family = binomial, data = plaice_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(plaicem_ob_optimal)
@@ -841,9 +1079,104 @@ summary(plaicem_ob_optimal)
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(plaicem_ob_optimal), confint(plaicem_ob_optimal)))
 
+#look at the component residual plots 
+crPlots(plaicem_ob_optimal)
+
+
+# Extract the fitted and predicted values 
+plaice_paired_tows_5mi_72hr_ob_re$predict <- predict(plaicem_ob_optimal)
+plaice_paired_tows_5mi_72hr_ob_re$fitted <- fitted(plaicem_ob_optimal)
+
+#predicted vs observed values 
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept=0, slope=1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
+
+#getting final RE estimate 
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise(mean(fitted), n = n())
+
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  summarise(mean(fitted), n = n())
+
+#plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.5985181, linetype = "dashed", color = "red") + 
+  scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip()
+
 ```
 
 ## Winter Flounder
+#### Exploratory Plots 
+```{r}
+#Looking at the cpua for the paired tows for each species 
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Winter Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  scale_fill_manual(name = "",
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  geom_vline(aes(xintercept = 0.5),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Winter Flounder", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+#Map of the matched tows 
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = winterfl_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = winterfl_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Observer")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
+  labs(title = "Map of Matched Observer and NEFSC Tows for Winter Flounder", subtitle = "within 5 mi and 72 hrs")
+
+```
+
+
 #### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
@@ -881,15 +1214,14 @@ winterfl_ob_ttest
 ```
 
 #### Model Run 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #WINTER FLOUNDER 
 winterflm <- fit.models(winterfl_paired_tows_5mi_72hr_ob_re)
-
 compare.models(winterflm)
 
 
 #storing the optimal model and plotting the diagnostics
-winterflm_ob_optimal <- glm(relative_efficiency ~ season + trawl_type + SURFTEMP, family = binomial, data = winterfl_paired_tows_5mi_72hr_ob_re)
+winterflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season + BOTTEMP, family = binomial, data = winterfl_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(winterflm_ob_optimal)
@@ -899,9 +1231,106 @@ summary(winterflm_ob_optimal)
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(winterflm_ob_optimal), confint(winterflm_ob_optimal)))
 
+
+#look at the component residual plots 
+crPlots(winterflm_ob_optimal)
+
+
+# Extract the fitted and predicted values 
+winterfl_paired_tows_5mi_72hr_ob_re$predict <- predict(winterflm_ob_optimal)
+winterfl_paired_tows_5mi_72hr_ob_re$fitted <- fitted(winterflm_ob_optimal)
+
+#predicted vs observed values 
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept=0, slope=1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
+
+#getting final RE estimate 
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise(mean(fitted), n = n())
+
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  summarise(mean(fitted), n = n())
+
+#plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.5122059, linetype = "dashed", color = "red") + 
+  scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip()
+
 ```
 
 ## Monkfish 
+#### Exploratory Plots 
+```{r}
+#Looking at the cpua for the paired tows for each species 
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
+       title = "Comparison of CPUA for Monkfish", 
+       subtitle = "Pairs within 5 mi and 72 hrs") + 
+  scale_fill_manual(name = "",
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() +
+  geom_histogram(aes(x = relative_efficiency), bins = 100, color = "black", fill = "white") + 
+  geom_vline(aes(xintercept = 0.5),
+            color = "black", linetype = "dashed", size = 1) + 
+  geom_vline(aes(xintercept = mean(relative_efficiency)),
+            color = "red", linetype = "dashed", size = 1) + 
+  labs(x = "Relative Efficiency", y = "Count", 
+       title = "Histogram of Relative Efficiency for Monkfish", 
+       subtitle = "Pairs within 5 mi and 72 hrs")
+
+
+#Map of the matched tows 
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = monkfish_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = monkfish_paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Observer")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
+  labs(title = "Map of Matched Observer and NEFSC Tows for Monkfish", subtitle = "within 5 mi and 72 hrs")
+
+
+```
+
+
 #### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
@@ -938,10 +1367,10 @@ exp(monkfish_ob_ttest$conf.int)
 ```
 
 #### Model Run 
-```{r}
+```{r, message = FALSE, warning = FALSE}
+#NOT SURE IF ITS FAIR TO RUN THIS ANALYSIS ON SUCH A SMALL SAMPLE SIZE (n=11)
 #MONKFISH 
 monkfishm <- fit.models(monkfish_paired_tows_5mi_72hr_ob_re)
-
 compare.models(monkfishm)
 
 
@@ -955,6 +1384,53 @@ summary(monkfishm_ob_optimal)
 
 #back transform the estimates into an odds-ratio 
 exp(cbind(OR = coef(monkfishm_ob_optimal), confint(monkfishm_ob_optimal)))
+
+#look at the component residual plots 
+crPlots(monkfishm_ob_optimal)
+
+
+# Extract the fitted and predicted values 
+monkfish_paired_tows_5mi_72hr_ob_re$predict <- predict(monkfishm_ob_optimal)
+monkfish_paired_tows_5mi_72hr_ob_re$fitted <- fitted(monkfishm_ob_optimal)
+
+#predicted vs observed values 
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept=0, slope=1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+
+
+
+#getting final RE estimate 
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise(mean(fitted), n = n())
+
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  summarise(mean(fitted), n = n())
+
+#plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.5122059, linetype = "dashed", color = "red") + 
+  scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip()
 
 ```
 
