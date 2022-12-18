@@ -30,6 +30,7 @@ library(beepr)
 library(purrr)
 library(rsq)
 library(asht)
+library(car)
 ```
 
 # Read- In the Data
@@ -969,14 +970,64 @@ exp(cod_ttest$conf.int)
 ```{r}
 #COD
 codm <- fit.models(cod_paired_tows_5mi_72hr_re)
-
 compare.models(codm)
+
+#dropping the NAs in the bottom-temp column 
+cod_paired_tows_5mi_72hr_re <- cod_paired_tows_5mi_72hr_re %>%
+  drop_na(BOTTEMP)
 
 #storing the optimal model and plotting the diagnostics
 codm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +season + BOTTEMP, family = binomial, data = cod_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(codm_optimal)
+
+
+#back transform the estimates and CIs 
+exp(cbind(OR = coef(codm_optimal), confint(codm_optimal)))
+
+#look at the component residual plots 
+crPlots(codm_optimal)
+
+# Extract the fitted and predicted values 
+cod_paired_tows_5mi_72hr_re$predict <- predict(codm_optimal)
+cod_paired_tows_5mi_72hr_re$fitted <- fitted(codm_optimal)
+
+#predicted vs observed values 
+cod_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x = 'Predicted Values', y = 'Actual Values', title = 'Predicted vs. Actual Values')
+
+
+#getting final RE estimate 
+cod_paired_tows_5mi_72hr_re %>%
+  group_by(VESSEL_NAME) %>%
+  summarise(mean(fitted), n = n())
+
+cod_paired_tows_5mi_72hr_re %>%
+  summarise(mean(fitted), n = n())
+
+
+cod_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.3600107, linetype = "dashed", color = "red") + 
+  coord_flip()
 
 ```
 
@@ -1031,15 +1082,65 @@ exp(haddock_ttest$conf.int)
 ```{r}
 #HADDOCK
 haddockm <- fit.models(haddock_paired_tows_5mi_72hr_re)
-
 compare.models(haddockm)
 
 
+#dropping the NAs in the bottom-temp column 
+haddock_paired_tows_5mi_72hr_re <- haddock_paired_tows_5mi_72hr_re %>%
+  drop_na(BOTTEMP)
+
 #storing the optimal model and plotting the diagnostics
-haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + BOTTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_re)
+haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area + BOTTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(haddockm_optimal)
+
+
+
+exp(cbind(OR = coef(haddockm_optimal), confint(haddockm_optimal)))
+
+#look at the component residual plots 
+crPlots(haddockm_optimal)
+
+# Extract the fitted and predicted values 
+haddock_paired_tows_5mi_72hr_re$predict <- predict(haddockm_optimal)
+haddock_paired_tows_5mi_72hr_re$fitted <- fitted(haddockm_optimal)
+
+#predicted vs observed values 
+haddock_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x = 'Predicted Values', y = 'Actual Values', title = 'Predicted vs. Actual Values')
+
+
+#getting final RE estimate 
+haddock_paired_tows_5mi_72hr_re %>%
+  group_by(VESSEL_NAME) %>%
+  summarise(mean(fitted), n = n())
+
+haddock_paired_tows_5mi_72hr_re %>%
+  summarise(mean(fitted), n = n())
+
+
+haddock_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.7354697, linetype = "dashed", color = "red") + 
+  coord_flip()
 
 ```
 
@@ -1095,15 +1196,69 @@ exp(witchfl_ttest$conf.int)
 ```{r}
 #WITCH FLOUNDER 
 witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_re)
-
 compare.models(witchflm)
 
 
+#dropping the NAs in the bottom-temp column 
+witchfl_paired_tows_5mi_72hr_re <- witchfl_paired_tows_5mi_72hr_re %>%
+  drop_na(BOTTEMP)
+
+
 #storing the optimal model and plotting the diagnostics
-witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +BOTTEMP, family = binomial, data = witchfl_paired_tows_5mi_72hr_re)
+witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + BOTTEMP, family = binomial, data = witchfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(witchflm_optimal)
+
+
+
+
+
+#back transform the estimates and CIs 
+exp(cbind(OR = coef(witchflm_optimal), confint(witchflm_optimal)))
+
+#look at the component residual plots 
+crPlots(witchflm_optimal)
+
+# Extract the fitted and predicted values 
+witchfl_paired_tows_5mi_72hr_re$predict <- predict(witchflm_optimal)
+witchfl_paired_tows_5mi_72hr_re$fitted <- fitted(witchflm_optimal)
+
+#predicted vs observed values 
+witchfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x = 'Predicted Values', y = 'Actual Values', title = 'Predicted vs. Actual Values')
+
+
+#getting final RE estimate 
+witchfl_paired_tows_5mi_72hr_re %>%
+  group_by(VESSEL_NAME) %>%
+  summarise(mean(fitted), n = n())
+
+witchfl_paired_tows_5mi_72hr_re %>%
+  summarise(mean(fitted), n = n())
+
+
+witchfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.2454456, linetype = "dashed", color = "red") + 
+  coord_flip()
 ```
 
 
