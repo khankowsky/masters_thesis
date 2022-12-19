@@ -5,7 +5,7 @@ date: "2022-08-17"
 ---
 
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 library(readxl)
 library(janitor)
@@ -327,148 +327,8 @@ paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr %>%
     month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
     month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
   )) %>%
+  drop_na(AVGDEPTH, BOTTEMP) %>%
   distinct() 
-
-
-
-
-
-
-
-
-
-
-
-
-#YELLOWTAIL FLOUNDER
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_re %>%
-  filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Yellowtail Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_re %>%
-  filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>%
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 50, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Yellowtail Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#AMERICAN PLAICE
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_re %>%
-  filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for American Plaice", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_re %>%
-  filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>%
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 50, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for American Plaice", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#WINTER FLOUNDER
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_re %>%
-  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Winter Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_re %>%
-  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>%
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 50, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Winter Flounder", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
-
-
-
-#MONKFISH
-#Looking at the cpua for the paired tows for each species 
-paired_tows_5mi_72hr_re %>%
-  filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() + 
-  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua), stat = "identity", fill = "blue") + 
-  labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
-       title = "Comparison of CPUA for Monkfish", 
-       subtitle = "Pairs within 5 mi and 72 hrs") 
-
-#Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
-paired_tows_5mi_72hr_re %>%
-  filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>%
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter(sf_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000) %>%
-  ggplot() +
-  geom_histogram(aes(x = relative_efficiency), bins = 50, color = "black", fill = "white") + 
-  geom_vline(aes(xintercept = 0.5),
-            color = "black", linetype = "dashed", size = 1) + 
-  geom_vline(aes(xintercept = mean(relative_efficiency)),
-            color = "red", linetype = "dashed", size = 1) + 
-  labs(x = "Relative Efficiency", y = "Count", 
-       title = "Histogram of Relative Efficiency for Monkfish", 
-       subtitle = "Pairs within 5 mi and 72 hrs")
-
   
 ```
 
@@ -966,12 +826,10 @@ exp(cod_ttest$conf.int)
 codm <- fit.models(cod_paired_tows_5mi_72hr_re)
 compare.models(codm)
 
-#dropping the NAs in the bottom-temp column 
-cod_paired_tows_5mi_72hr_re <- cod_paired_tows_5mi_72hr_re %>%
-  drop_na(BOTTEMP)
 
 #storing the optimal model and plotting the diagnostics
-codm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +season + BOTTEMP, family = binomial, data = cod_paired_tows_5mi_72hr_re)
+codm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +season + BOTTEMP, 
+                    family = binomial, data = cod_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(codm_optimal)
@@ -1162,13 +1020,9 @@ exp(haddock_ttest$conf.int)
 haddockm <- fit.models(haddock_paired_tows_5mi_72hr_re)
 compare.models(haddockm)
 
-
-#dropping the NAs in the bottom-temp column 
-haddock_paired_tows_5mi_72hr_re <- haddock_paired_tows_5mi_72hr_re %>%
-  drop_na(BOTTEMP)
-
 #storing the optimal model and plotting the diagnostics
-haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area + BOTTEMP, family = binomial, data = haddock_paired_tows_5mi_72hr_re)
+haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area,
+                        family = binomial, data = haddock_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(haddockm_optimal)
@@ -1323,14 +1177,9 @@ exp(witchfl_ttest$conf.int)
 witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_re)
 compare.models(witchflm)
 
-
-#dropping the NAs in the bottom-temp column 
-witchfl_paired_tows_5mi_72hr_re <- witchfl_paired_tows_5mi_72hr_re %>%
-  drop_na(BOTTEMP)
-
-
 #storing the optimal model and plotting the diagnostics
-witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + BOTTEMP, family = binomial, data = witchfl_paired_tows_5mi_72hr_re)
+witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area, 
+                        family = binomial, data = witchfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(witchflm_optimal)
@@ -1509,15 +1358,62 @@ exp(yellowtail_ttest$conf.int)
 ```{r, message = FALSE, warning = FALSE}
 #YELLOWTAIL FLOUNDER
 yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_re)
-
 compare.models(yellowtailflm)
 
-
 #storing the optimal model and plotting the diagnostics
-yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP, family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re)
+yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area + AVGDEPTH + BOTTEMP, 
+                             family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(yellowtailflm_optimal)
+
+
+
+#back transform the estimates and CIs 
+exp(cbind(OR = coef(yellowtailflm_optimal), confint(yellowtailflm_optimal)))
+
+#look at the component residual plots 
+# crPlots(yellowtailflm_optimal)
+
+# Extract the fitted and predicted values 
+yellowtailfl_paired_tows_5mi_72hr_re$predict <- predict(yellowtailflm_optimal)
+yellowtailfl_paired_tows_5mi_72hr_re$fitted <- fitted(yellowtailflm_optimal)
+
+#predicted vs observed values 
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x = 'Predicted Values', y = 'Actual Values', title = 'Predicted vs. Actual Values')
+
+
+#getting final RE estimate 
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  group_by(VESSEL_NAME) %>%
+  summarise(mean(fitted), n = n())
+
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  summarise(mean(fitted), n = n())
+
+
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.4336806, linetype = "dashed", color = "red") + 
+  coord_flip()
 
 ```
 
@@ -1610,15 +1506,63 @@ exp(plaice_ttest$conf.int)
 ```{r, message = FALSE, warning = FALSE}
 #AMERICAN PLAICE 
 plaicem <- fit.models(plaice_paired_tows_5mi_72hr_re)
-
 compare.models(plaicem)
 
 
 #storing the optimal model and plotting the diagnostics
-plaicem_optimal <- glm(relative_efficiency ~ VESSEL_NAME +BOTTEMP, family = binomial, data = plaice_paired_tows_5mi_72hr_re)
+plaicem_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + mgmt_area, 
+                       family = binomial, data = plaice_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(plaicem_optimal)
+
+
+
+#back transform the estimates and CIs 
+exp(cbind(OR = coef(plaicem_optimal), confint(plaicem_optimal)))
+
+#look at the component residual plots 
+crPlots(plaicem_optimal)
+
+# Extract the fitted and predicted values 
+plaice_paired_tows_5mi_72hr_re$predict <- predict(plaicem_optimal)
+plaice_paired_tows_5mi_72hr_re$fitted <- fitted(plaicem_optimal)
+
+#predicted vs observed values 
+plaice_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x = 'Predicted Values', y = 'Actual Values', title = 'Predicted vs. Actual Values')
+
+
+#getting final RE estimate 
+plaice_paired_tows_5mi_72hr_re %>%
+  group_by(VESSEL_NAME) %>%
+  summarise(mean(fitted), n = n())
+
+plaice_paired_tows_5mi_72hr_re %>%
+  summarise(mean(fitted), n = n())
+
+
+plaice_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.5014979, linetype = "dashed", color = "red") + 
+  coord_flip()
 
 ```
 
@@ -1747,15 +1691,63 @@ exp(winterfl_ttest$conf.int)
 ```{r, message = FALSE, warning = FALSE}
 #WINTER FLOUNDER 
 winterflm <- fit.models(winterfl_paired_tows_5mi_72hr_re)
-
 compare.models(winterflm)
 
 
 #storing the optimal model and plotting the diagnostics
-winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP, family = binomial, data = winterfl_paired_tows_5mi_72hr_re)
+winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + mgmt_area + BOTTEMP, 
+                         family = binomial, data = winterfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(winterflm_optimal)
+
+
+
+#back transform the estimates and CIs 
+exp(cbind(OR = coef(winterflm_optimal), confint(winterflm_optimal)))
+
+#look at the component residual plots 
+# crPlots(winterflm_optimal)
+
+# Extract the fitted and predicted values 
+winterfl_paired_tows_5mi_72hr_re$predict <- predict(winterflm_optimal)
+winterfl_paired_tows_5mi_72hr_re$fitted <- fitted(winterflm_optimal)
+
+#predicted vs observed values 
+winterfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x = 'Predicted Values', y = 'Actual Values', title = 'Predicted vs. Actual Values')
+
+
+#getting final RE estimate 
+winterfl_paired_tows_5mi_72hr_re %>%
+  group_by(VESSEL_NAME) %>%
+  summarise(mean(fitted), n = n())
+
+winterfl_paired_tows_5mi_72hr_re %>%
+  summarise(mean(fitted), n = n())
+
+
+winterfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.4143611, linetype = "dashed", color = "red") + 
+  coord_flip()
 
 ```
 
@@ -1848,15 +1840,63 @@ exp(monkfish_ttest$conf.int)
 ```{r, message = FALSE, warning = FALSE}
 #MONKFISH 
 monkfishm <- fit.models(monkfish_paired_tows_5mi_72hr_re)
-
 compare.models(monkfishm)
 
 
 #storing the optimal model and plotting the diagnostics
-monkfishm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +BOTTEMP, family = binomial, data = monkfish_paired_tows_5mi_72hr_re)
+monkfishm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + AVGDEPTH, 
+                         family = binomial, data = monkfish_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
 plot(monkfishm_optimal)
+
+
+
+#back transform the estimates and CIs 
+exp(cbind(OR = coef(monkfishm_optimal), confint(monkfishm_optimal)))
+
+#look at the component residual plots 
+crPlots(monkfishm_optimal)
+
+# Extract the fitted and predicted values 
+monkfish_paired_tows_5mi_72hr_re$predict <- predict(monkfishm_optimal)
+monkfish_paired_tows_5mi_72hr_re$fitted <- fitted(monkfishm_optimal)
+
+#predicted vs observed values 
+monkfish_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = fitted, 
+             y = relative_efficiency)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0,1) + 
+  ylim(0,1) + 
+  labs(x = 'Predicted Values', y = 'Actual Values', title = 'Predicted vs. Actual Values')
+
+
+#getting final RE estimate 
+monkfish_paired_tows_5mi_72hr_re %>%
+  group_by(VESSEL_NAME) %>%
+  summarise(mean(fitted), n = n())
+
+monkfish_paired_tows_5mi_72hr_re %>%
+  summarise(mean(fitted), n = n())
+
+
+monkfish_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  geom_hline(yintercept = 0.3425527, linetype = "dashed", color = "red") + 
+  coord_flip()
 
 ```
 
