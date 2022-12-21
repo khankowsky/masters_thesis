@@ -594,7 +594,6 @@ box.plot <- function(x) {
   pivot_longer(cols = c(sf_species_cpua, nefsc_species_cpua),
                names_to = "Trawl",
                values_to = "CPUA") %>%
-  filter(CPUA < 10000) %>%
   ggplot() +
   geom_boxplot(aes(x = Trawl, y = CPUA)) +
   labs(x = "Trawl Type", y = CPUA_label) +
@@ -615,7 +614,6 @@ hist_kh <- function(x) {
        # title = "Histogram of CPUE for x",
        # subtitle = "Pairs within 5 mi and 72 hrs"
        ) +
-  xlim(0,2000) +
   scale_fill_manual(name = "Dataset",
                     values = c("Study Fleet" = "red", "NEFSC" = "blue"),
                     labels = c("Study Fleet", "NEFSC")) +
@@ -784,7 +782,7 @@ cod_paired_tows_5mi_72hr_re %>%
 
 
 #### T-test
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(cod_paired_tows_5mi_72hr_re)
 hist_kh(cod_paired_tows_5mi_72hr_re)
@@ -970,7 +968,7 @@ haddock_paired_tows_5mi_72hr_re %>%
 
 
 #### T-test 
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(haddock_paired_tows_5mi_72hr_re)
 hist_kh(haddock_paired_tows_5mi_72hr_re)
@@ -1127,7 +1125,7 @@ witchfl_paired_tows_5mi_72hr_re %>%
 
 
 #### T-test
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(witchfl_paired_tows_5mi_72hr_re)
 hist_kh(witchfl_paired_tows_5mi_72hr_re)
@@ -1320,7 +1318,7 @@ yellowtailfl_paired_tows_5mi_72hr_re %>%
 
 
 #### T-test
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(yellowtailfl_paired_tows_5mi_72hr_re)
 hist_kh(yellowtailfl_paired_tows_5mi_72hr_re)
@@ -1467,7 +1465,7 @@ plaice_paired_tows_5mi_72hr_re %>%
 
 
 #### T-test
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(plaice_paired_tows_5mi_72hr_re)
 hist_kh(plaice_paired_tows_5mi_72hr_re)
@@ -1653,7 +1651,7 @@ winterfl_paired_tows_5mi_72hr_re %>%
 
 
 ####T-test
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(winterfl_paired_tows_5mi_72hr_re)
 hist_kh(winterfl_paired_tows_5mi_72hr_re)
@@ -1801,7 +1799,7 @@ monkfish_paired_tows_5mi_72hr_re %>%
 
 
 #### T-test
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(monkfish_paired_tows_5mi_72hr_re)
 hist_kh(monkfish_paired_tows_5mi_72hr_re)
