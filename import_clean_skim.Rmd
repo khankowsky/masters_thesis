@@ -34,6 +34,11 @@ library(lubridate)
 ```{r}
 #importing the study fleet data
 study_fleet <- read_csv('./data/STUDY_FLEET_GROUNFISH_DATA_PULL_V1.csv')
+
+#dealing with the 'Angela Rose' issue (one vessel that had two names in the dataset)
+study_fleet <- study_fleet %>%
+  mutate(VESSEL_NAME = replace(VESSEL_NAME, VESSEL_NAME == "ANGELA AND ROSE", "ANGELA & ROSE"))
+
 ```
 
 
