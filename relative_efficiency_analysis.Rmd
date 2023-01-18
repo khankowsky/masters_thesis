@@ -721,7 +721,7 @@ cod_paired_tows_5mi_72hr_re %>%
                     values = c("Study Fleet" = "red", "NEFSC" = "blue"), 
                     labels = c("Study Fleet", "NEFSC")) + 
   theme_classic() + 
-  theme(axis.text.x=element_blank())
+  theme(axis.text.x = element_blank())
 
 
 #Looking at the relative efficiency of the study fleet tows compared to the nefsc survey 
@@ -786,6 +786,16 @@ cod_paired_tows_5mi_72hr_re %>%
   coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
   scale_colour_manual("", breaks = c("Study Fleet", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Study Fleet tows Matched to NEFSC tows for Cod", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#looking at scatterplot of CPUAs 
+cod_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = '')
 
 
 
@@ -1057,7 +1067,7 @@ haddockm <- fit.models(haddock_paired_tows_5mi_72hr_re)
 compare.models(haddockm)
 
 #storing the optimal model and plotting the diagnostics
-haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area,
+haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + towTime,
                         family = binomial, data = haddock_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
@@ -1397,7 +1407,7 @@ yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_re)
 compare.models(yellowtailflm)
 
 #storing the optimal model and plotting the diagnostics
-yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area + AVGDEPTH + BOTTEMP, 
+yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + AVGDEPTH, 
                              family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
@@ -1731,7 +1741,7 @@ compare.models(winterflm)
 
 
 #storing the optimal model and plotting the diagnostics
-winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + mgmt_area + BOTTEMP, 
+winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + AVGDEPTH, 
                          family = binomial, data = winterfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
