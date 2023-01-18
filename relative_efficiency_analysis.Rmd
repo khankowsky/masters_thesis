@@ -879,6 +879,33 @@ cod_paired_tows_5mi_72hr_re %>%
   geom_hline(yintercept = 0.3600107, linetype = "dashed", color = "red") + 
   coord_flip()
 
+
+#now just selecting for the most efficient vessels and estimating the relative efficiency
+cod_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ELIZABETH & KATHERINE", "LIGHTNING BAY", "LISA ANN II", "LISA ANN III", "MARY K")) %>%
+  summarise(mean(fitted), n = n())
+  
+
+cod_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ELIZABETH & KATHERINE", "LIGHTNING BAY", "LISA ANN II", "LISA ANN III", "MARY K")) %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  ylim(0,1) + 
+  geom_hline(yintercept = 0.1630779, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
+  coord_flip()
+
+
 ```
 
 
