@@ -327,7 +327,17 @@ paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr %>%
     month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
     month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
   )) %>%
-  drop_na(AVGDEPTH, BOTTEMP) %>%
+  mutate(dayNight = case_when(
+    dayNight_sf == "day" & dayNight_nefsc == "day" ~ "day", 
+    dayNight_sf == "night" & dayNight_nefsc == "night" ~ "night", 
+    dayNight_sf == "day" & dayNight_nefsc == "night" ~ "mismatch",
+    dayNight_sf == "night" & dayNight_nefsc == "day" ~ "mismatch", 
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  drop_na(AVGDEPTH, BOTTEMP, dayNight, towTime) %>%
   distinct() 
   
 ```
@@ -527,7 +537,8 @@ monkfish_paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr_re %>%
 ## Exploring Collinearrity Among Explanatory Variables 
 ```{r}
 ggpairs(cod_paired_tows_5mi_72hr_re, 
-        columns = c("relative_efficiency", "season", "mgmt_area", "VESSEL_NAME", "AVGDEPTH", "BOTTEMP"), 
+        columns = c("relative_efficiency", "season", "mgmt_area", "VESSEL_NAME", "AVGDEPTH", "BOTTEMP",
+                    "dayNight", "towTime"), 
         cardinality_threshold = 17)
 
 paired_tows_5mi_72hr_re %>%
@@ -661,8 +672,8 @@ hist_kh <- function(x) {
 ######################## FUNCTIONS FOR MODELLING #############################
 
 #trying to  create functions because I will be running the same models for every species dataset 
-covars <- c("season", "mgmt_area", "AVGDEPTH", "BOTTEMP")
-combos <- purrr::map(1:4, ~as.data.frame(t(combn(covars, .x))))
+covars <- c("season", "mgmt_area", "AVGDEPTH", "BOTTEMP", "dayNight", "towTime")
+combos <- purrr::map(1:6, ~as.data.frame(t(combn(covars, .x))))
 
 formulae <- combos %>%
   map_dfr(unite, col="formula", sep = " + ") %>%
@@ -680,7 +691,7 @@ compare.models <- function(x) {
   formulae %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[15]) %>%
+  mutate(deltaAIC = aic - aic[63]) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   mutate(rsq = sprintf("%0.2f", rsq)) %>%
   mutate(aic = sprintf("%1.0f", aic)) %>%
@@ -826,7 +837,7 @@ compare.models(codm)
 
 
 #storing the optimal model and plotting the diagnostics
-codm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +season + BOTTEMP, 
+codm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + towTime, 
                     family = binomial, data = cod_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
