@@ -1550,5 +1550,28 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
 haddock_paired_tows_5mi_72hr_ob_re %>%
   count(trawl_type)
 
+
+
+
+
+
+
+
+
+#plotting the matches for 5 mi and 3 days 
+paired_tows_5mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_sf(data = nefsc_strata, fill = "grey") +
+  geom_polygon(data = NEUS, aes(x=long, y = lat, group = group), fill = "darkgreen",  
+               color="black",inherit.aes = FALSE)  +
+  geom_point(data = paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.x,y = END_TOW_LAT.x, color = "NEFSC")) +
+  geom_point(data = paired_tows_5mi_72hr_ob_re, aes(x = END_TOW_LON.y,y = END_TOW_LAT.y, color = "Observer")) +
+  
+  # geom_segment(data = paired_tows_1mi_24hr, aes(x = START_TOW_LON.x, xend = END_TOW_LON.x,
+  #                                               y = START_TOW_LAT.x, yend = END_TOW_LAT.x)) +
+  coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
+  scale_colour_manual("", breaks = c("NEFSC", "Observer"), values = c("red", "blue")) +
+  labs(title = "Observer tows Matched to NEFSC tows", subtitle = "within 5 mi and 72 hrs")
+
 ```
 
