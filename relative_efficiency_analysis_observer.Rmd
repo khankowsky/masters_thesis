@@ -133,14 +133,19 @@ paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
     month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
     month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
   )) %>%
-  mutate(DayNight_var = case_when(
+  mutate(DayNight = case_when(
     dayNight_ob == "night" & dayNight_nefsc == "night" ~ "Night",
     dayNight_ob == "day" & dayNight_nefsc == "day" ~ "Day",
     dayNight_ob == "night" & dayNight_nefsc =="day" ~ "Mismatch",
     dayNight_ob == "day" & dayNight_nefsc == "night" ~ "Mismatch"
   )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
   mutate(trawl_type = as.factor(trawl_type)) %>%
   drop_na(trawl_type) %>%
+  drop_na(AVGDEPTH, BOTTEMP, DayNight, towTime) %>%
   distinct()
 
 ```
@@ -277,8 +282,8 @@ hist_kh <- function(x) {
 
 ######################## FUNCTIONS FOR MODELLING #############################
 #trying to  create functions because I will be running the same models for every species dataset 
-covars <- c("season", "mgmt_area", "VESSELNAME", "AVGDEPTH", "BOTTEMP")
-combos <- purrr::map(1:5, ~as.data.frame(t(combn(covars, .x))))
+covars <- c("season", "mgmt_area", "AVGDEPTH", "BOTTEMP", "DayNight", "towTime")
+combos <- purrr::map(1:6, ~as.data.frame(t(combn(covars, .x))))
 
 formulae <- combos %>%
   map_dfr(unite, col="formula", sep = " + ") %>%
@@ -296,7 +301,7 @@ compare.models <- function(x) {
   formulae %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[31]) %>%
+  mutate(deltaAIC = aic - aic[63]) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   mutate(rsq = sprintf("%0.2f", rsq)) %>%
   mutate(aic = sprintf("%1.0f", aic)) %>%
@@ -418,9 +423,6 @@ exp(cod_ob_ttest$conf.int)
 codm <- fit.models(cod_paired_tows_5mi_72hr_ob_re)
 compare.models(codm)
 
-#dropping the NAs in the avg depth column 
-cod_paired_tows_5mi_72hr_ob_re <- cod_paired_tows_5mi_72hr_ob_re %>%
-  drop_na(AVGDEPTH)
 
 #storing the optimal model and plotting the diagnostics
 codm_ob_optimal <- glm(relative_efficiency ~ trawl_type + AVGDEPTH, family = binomial, data = cod_paired_tows_5mi_72hr_ob_re)
@@ -476,6 +478,7 @@ cod_paired_tows_5mi_72hr_ob_re %>%
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.6005787, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
@@ -617,7 +620,8 @@ compare.models(haddockm)
 
 
 #storing the optimal model and plotting the diagnostics
-haddockm_ob_optimal <- glm(relative_efficiency ~ season + mgmt_area + AVGDEPTH, family = binomial, data = haddock_paired_tows_5mi_72hr_ob_re)
+haddockm_ob_optimal <- glm(relative_efficiency ~  trawl_type + season + mgmt_area + AVGDEPTH + towTime, 
+                           family = binomial, data = haddock_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(haddockm_ob_optimal)
@@ -670,6 +674,7 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.6276351, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
@@ -767,7 +772,8 @@ compare.models(witchflm)
 
 
 #storing the optimal model and plotting the diagnostics
-witchflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season, family = binomial, data = witchfl_paired_tows_5mi_72hr_ob_re)
+witchflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season, 
+                           family = binomial, data = witchfl_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(witchflm_ob_optimal)
@@ -820,6 +826,7 @@ witchfl_paired_tows_5mi_72hr_ob_re %>%
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.4874408, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
@@ -971,6 +978,7 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.6146174, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
@@ -1069,7 +1077,8 @@ compare.models(plaicem)
 
 
 #storing the optimal model and plotting the diagnostics
-plaicem_ob_optimal <- glm(relative_efficiency ~ trawl_type + mgmt_area, family = binomial, data = plaice_paired_tows_5mi_72hr_ob_re)
+plaicem_ob_optimal <- glm(relative_efficiency ~ trawl_type + mgmt_area, 
+                          family = binomial, data = plaice_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(plaicem_ob_optimal)
@@ -1122,6 +1131,7 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.5985181, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
@@ -1221,7 +1231,8 @@ compare.models(winterflm)
 
 
 #storing the optimal model and plotting the diagnostics
-winterflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season + BOTTEMP, family = binomial, data = winterfl_paired_tows_5mi_72hr_ob_re)
+winterflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season + BOTTEMP, 
+                            family = binomial, data = winterfl_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(winterflm_ob_optimal)
@@ -1275,6 +1286,7 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.5122059, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
@@ -1375,7 +1387,8 @@ compare.models(monkfishm)
 
 
 #storing the optimal model and plotting the diagnostics
-monkfishm_ob_optimal <- glm(relative_efficiency ~ trawl_type + AVGDEPTH, family = binomial, data = monkfish_paired_tows_5mi_72hr_ob_re)
+monkfishm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season + AVGDEPTH, 
+                            family = binomial, data = monkfish_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
 plot(monkfishm_ob_optimal)
@@ -1428,6 +1441,7 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.5122059, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
