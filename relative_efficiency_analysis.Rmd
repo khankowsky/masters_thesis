@@ -898,6 +898,7 @@ cod_paired_tows_5mi_72hr_re %>%
   ) + 
   labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.3600107, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
 
@@ -1012,6 +1013,15 @@ haddock_paired_tows_5mi_72hr_re %>%
   scale_colour_manual("", breaks = c("Study Fleet", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Study Fleet tows Matched to NEFSC tows for Haddock", subtitle = "within 5 mi and 72 hrs")
 
+
+#looking at scatterplot of CPUAs 
+haddock_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = 'Catch Comparison of Haddock')
+
 ```
 
 
@@ -1118,7 +1128,35 @@ haddock_paired_tows_5mi_72hr_re %>%
   ) + 
   labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.7354697, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
+
+
+#now just selecting for the most efficient vessels and estimating the relative efficiency
+haddock_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("DEBBIE SUE", "LADY JANE", "LISA ANN II", "MARY K")) %>%
+  summarise(mean(fitted), n = n())
+  
+
+haddock_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("DEBBIE SUE", "LADY JANE", "LISA ANN II", "MARY K")) %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  ylim(0,1) + 
+  geom_hline(yintercept = 0.387782, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
+  coord_flip()
+
 
 ```
 
@@ -1168,6 +1206,15 @@ witchfl_paired_tows_5mi_72hr_re %>%
   coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
   scale_colour_manual("", breaks = c("Study Fleet", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Study Fleet tows Matched to NEFSC tows - Witch Flounder", subtitle = "within 5 mi and 72 hrs")
+
+
+#looking at scatterplot of CPUAs 
+witchfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = 'Catch Comparison of Witch Flounder')
 
 ```
 
@@ -1278,7 +1325,37 @@ witchfl_paired_tows_5mi_72hr_re %>%
   ) + 
   labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.2454456, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
+
+
+
+#now just selecting for the most efficient vessels and estimating the relative efficiency
+witchfl_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ANGELA & ROSE", "LISA ANN III", "LADY JANE", "BANTRY BAY")) %>%
+  summarise(mean(fitted), n = n())
+  
+
+witchfl_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ANGELA & ROSE", "LISA ANN III", "LADY JANE", "BANTRY BAY")) %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  ylim(0,1) + 
+  geom_hline(yintercept = 0.07462776, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
+  coord_flip()
+
+
 ```
 
 
@@ -1362,6 +1439,15 @@ yellowtailfl_paired_tows_5mi_72hr_re %>%
   scale_colour_manual("", breaks = c("Study Fleet", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Study Fleet tows Matched to NEFSC tows - Yellowtail", subtitle = "within 5 mi and 72 hrs")
 
+
+#looking at scatterplot of CPUAs 
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = 'Catch Comparison of Yellowtail Flounder')
+
 ```
 
 
@@ -1407,7 +1493,7 @@ yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_re)
 compare.models(yellowtailflm)
 
 #storing the optimal model and plotting the diagnostics
-yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + AVGDEPTH, 
+yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + mgmt_area + AVGDEPTH, 
                              family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
@@ -1459,6 +1545,34 @@ yellowtailfl_paired_tows_5mi_72hr_re %>%
   ) + 
   labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.4336806, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
+  coord_flip()
+
+
+
+#now just selecting for the most efficient vessels and estimating the relative efficiency
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ELIZABETH & KATHERINE", "SAO PAULO", "PROUD MARY", "MYSTIC", "MARY K")) %>%
+  summarise(mean(fitted), n = n())
+  
+
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ELIZABETH & KATHERINE", "SAO PAULO", "PROUD MARY", "MYSTIC", "MARY K")) %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  ylim(0,1) + 
+  geom_hline(yintercept = 0.3416438, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
 ```
@@ -1509,6 +1623,15 @@ plaice_paired_tows_5mi_72hr_re %>%
   scale_colour_manual("", breaks = c("Study Fleet", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Study Fleet tows Matched to NEFSC tows - Plaice", subtitle = "within 5 mi and 72 hrs")
 
+
+#looking at scatterplot of CPUAs 
+plaice_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = 'Catch Comparison of American Plaice')
+
 ```
 
 
@@ -1556,7 +1679,7 @@ compare.models(plaicem)
 
 
 #storing the optimal model and plotting the diagnostics
-plaicem_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + mgmt_area, 
+plaicem_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season, 
                        family = binomial, data = plaice_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
@@ -1608,6 +1731,35 @@ plaice_paired_tows_5mi_72hr_re %>%
   ) + 
   labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.5014979, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
+  coord_flip()
+
+
+
+
+#now just selecting for the most efficient vessels and estimating the relative efficiency
+plaice_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("LISA ANN III", "SAO APULO", "LIGHTNING BAY", "MARY K")) %>%
+  summarise(mean(fitted), n = n())
+  
+
+plaice_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("LISA ANN III", "SAO APULO", "LIGHTNING BAY", "MARY K")) %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  ylim(0,1) + 
+  geom_hline(yintercept = 0.2841749, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
 ```
@@ -1695,6 +1847,15 @@ winterfl_paired_tows_5mi_72hr_re %>%
   scale_colour_manual("", breaks = c("Study Fleet", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Study Fleet tows Matched to NEFSC tows - Winter Flounder", subtitle = "within 5 mi and 72 hrs")
 
+
+#looking at scatterplot of CPUAs 
+winterfl_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = 'Catch Comparison of Winter Flounder')
+
 ```
 
 
@@ -1741,7 +1902,7 @@ compare.models(winterflm)
 
 
 #storing the optimal model and plotting the diagnostics
-winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + AVGDEPTH, 
+winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area + AVGDEPTH, 
                          family = binomial, data = winterfl_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
@@ -1793,6 +1954,34 @@ winterfl_paired_tows_5mi_72hr_re %>%
   ) + 
   labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.4143611, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
+  coord_flip()
+
+
+
+#now just selecting for the most efficient vessels and estimating the relative efficiency
+winterfl_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ELIZABETH & KATHERINE", "PROUD MARY", "SAO PAULO", "MARY K")) %>%
+  summarise(mean(fitted), n = n())
+  
+
+winterfl_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ELIZABETH & KATHERINE", "PROUD MARY", "SAO PAULO", "MARY K")) %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  ylim(0,1) + 
+  geom_hline(yintercept = 0.2487188, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
 ```
@@ -1842,6 +2031,15 @@ monkfish_paired_tows_5mi_72hr_re %>%
   coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
   scale_colour_manual("", breaks = c("Study Fleet", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Study Fleet tows Matched to NEFSC tows for Monkfish", subtitle = "within 5 mi and 72 hrs")
+
+
+#looking at scatterplot of CPUAs 
+monkfish_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = 'Catch Comparison of Monkfish')
 
 ```
 
@@ -1942,8 +2140,36 @@ monkfish_paired_tows_5mi_72hr_re %>%
   ) + 
   labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
   geom_hline(yintercept = 0.3425527, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
+
+
+
+#now just selecting for the most efficient vessels and estimating the relative efficiency
+monkfish_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ELLEN DIANE", "ILLUSION", "MARY K")) %>%
+  summarise(mean(fitted), n = n())
+  
+
+monkfish_paired_tows_5mi_72hr_re %>%
+  filter(VESSEL_NAME %in% c("ELLEN DIANE", "ILLUSION", "MARY K")) %>%
+  ggplot(aes(x = VESSEL_NAME, 
+             y = fitted)) + 
+  geom_jitter() + 
+  stat_summary(
+    geom = "point",
+    fun = "mean",
+    col = "black",
+    size = 3,
+    shape = 24,
+    fill = "red"
+  ) + 
+  labs(x = "Vessel Name", y = "Fitted Values of Relative Efficiency") + 
+  ylim(0,1) + 
+  geom_hline(yintercept = 0.1292496, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
+  coord_flip()
 ```
 
 
