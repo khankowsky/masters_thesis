@@ -31,6 +31,7 @@ library(purrr)
 library(broom)
 library(aod)
 library(car)
+library(effects)
 
 ```
 
@@ -381,6 +382,15 @@ cod_paired_tows_5mi_72hr_ob_re %>%
   labs(title = "Map of Matched Observer and NEFSC Tows for Cod", subtitle = "within 5 mi and 72 hrs")
 
 
+#looking at scatterplot of CPUAs 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = ob_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '')
+
+
 ```
 
 
@@ -492,6 +502,76 @@ cod_paired_tows_5mi_72hr_ob_re %>%
   theme_classic()
 
 
+#plotting effects of each variable on RE
+plot(allEffects(codm_ob_optimal))
+
+
+###############################################################################
+# #predicted vs trawl type w point shape as explanatory variables - not important for this project but saving for my thesis work 
+#mgmt_area
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type,
+             y = fitted, color = mgmt_area)) +
+  geom_jitter() +
+  labs(x = "Vessel Name", y = "Fitted Values") +
+  coord_flip()
+
+#season
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type,
+             y = fitted, color = season)) +
+  geom_jitter() +
+  coord_flip()
+
+#depth
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type,
+             y = fitted, color = BOTTEMP)) +
+  geom_jitter() +
+  coord_flip()
+
+#foot rope length 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type,
+             y = fitted, color = FTROPLEN)) +
+  geom_jitter() +
+  coord_flip()
+
+
+#sweep diameter
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type,
+             y = fitted, color = SWEEPDIA)) +
+  geom_jitter() +
+  coord_flip()
+
+
+#n sweeps
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type,
+             y = fitted, color = NSWEEPS)) +
+  geom_jitter() +
+  coord_flip()
+
+
+#footrope type
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type,
+             y = fitted, color = as.factor(FTROPTYP))) +
+  geom_jitter() +
+  coord_flip()
+
+#ground cable type
+cod_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = trawl_type,
+             y = fitted, color = as.factor(GRCABTYP))) +
+  geom_jitter() +
+  coord_flip()
+
+
+
+
+
 
 ```
 
@@ -573,7 +653,15 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
   scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Map of Matched Observer and NEFSC Tows for Haddock", subtitle = "within 5 mi and 72 hrs")
 
-  
+
+
+#looking at scatterplot of CPUAs 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = ob_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '')
 
 ```
 
@@ -680,6 +768,10 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
   coord_flip()
 
 
+#plotting effects of each variable on RE
+plot(allEffects(haddockm_ob_optimal))
+
+
 ```
 
 ## Witch Flounder
@@ -727,6 +819,15 @@ witchfl_paired_tows_5mi_72hr_ob_re %>%
   coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
   scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Map of Matched Observer and NEFSC Tows for Witch Flounder", subtitle = "within 5 mi and 72 hrs")
+
+
+#looking at scatterplot of CPUAs 
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = ob_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '')
 
 ```
 
@@ -831,6 +932,10 @@ witchfl_paired_tows_5mi_72hr_ob_re %>%
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
 
+#plotting effects of each variable on RE
+plot(allEffects(witchflm_ob_optimal))
+
+
 ```
 
 ## Yewllowtail Flounder
@@ -877,6 +982,15 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
   coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
   scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Map of Matched Observer and NEFSC Tows for Yellowtail Flounder", subtitle = "within 5 mi and 72 hrs")
+
+
+#looking at scatterplot of CPUAs 
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = ob_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '')
 
 ```
 
@@ -983,6 +1097,10 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
 
+
+#plotting effects of each variable on RE
+plot(allEffects(yellowtailflm_ob_optimal))
+
 ```
 
 ## American Plaice
@@ -1029,6 +1147,15 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
   coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
   scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Map of Matched Observer and NEFSC Tows for American Plaice", subtitle = "within 5 mi and 72 hrs")
+
+
+#looking at scatterplot of CPUAs 
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = ob_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '')
 
 ```
 
@@ -1136,6 +1263,10 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
 
+
+#plotting effects of each variable on RE
+plot(allEffects(plaicem_ob_optimal))
+
 ```
 
 ## Winter Flounder
@@ -1183,6 +1314,16 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
   coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
   scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Map of Matched Observer and NEFSC Tows for Winter Flounder", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#looking at scatterplot of CPUAs 
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = ob_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '')
 
 ```
 
@@ -1291,6 +1432,9 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
 
+#plotting effects of each variable on RE
+plot(allEffects(winterflm_ob_optimal))
+
 ```
 
 ## Monkfish 
@@ -1338,6 +1482,16 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
   coord_sf(ylim = c(39, 44),  xlim = c(-74, -66)) + 
   scale_colour_manual("", breaks = c("Observer", "NEFSC"), values = c("red", "blue")) +
   labs(title = "Map of Matched Observer and NEFSC Tows for Monkfish", subtitle = "within 5 mi and 72 hrs")
+
+
+
+#looking at scatterplot of CPUAs 
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  ggplot(aes(x = ob_species_cpua, 
+             y = nefsc_species_cpua)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '')
 
 
 ```
@@ -1445,6 +1599,10 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip()
+
+
+#plotting effects of each variable on RE
+plot(allEffects(monkfishm_ob_optimal))
 
 ```
 
