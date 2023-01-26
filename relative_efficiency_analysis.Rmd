@@ -31,6 +31,7 @@ library(purrr)
 library(rsq)
 library(asht)
 library(car)
+library(effects)
 ```
 
 # Read- In the Data
@@ -337,8 +338,14 @@ paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr %>%
     time_dif > 0 ~ "nefsc_first", 
     time_dif < 0 ~ "sf_first"
   )) %>%
-  drop_na(AVGDEPTH, BOTTEMP, dayNight, towTime) %>%
+  drop_na(AVGDEPTH, BOTTEMP, dayNight, towTime, mgmt_area) %>%
   distinct() 
+
+
+
+# paired_tows_5mi_72hr_re <- paired_tows_5mi_72hr %>%
+#   mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT.y, END_TOW_LAT.y)))) %>%
+#   mutate(midpoint_long = rowMeans(across(c(START_TOW_LON.y, END_TOW_LON.y))))
   
 ```
 
@@ -927,6 +934,48 @@ cod_paired_tows_5mi_72hr_re %>%
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
+#plotting effects of each variable on RE
+plot(allEffects(codm_optimal))
+
+#count of how many tows are more efficient than the survey 
+cod_paired_tows_5mi_72hr_re %>%
+  filter(relative_efficiency < 0.5) %>%
+  count()
+
+
+###############################################################################
+# #predicted vs trawl type w point shape as explanatory variables - not important for this project but saving for my thesis work 
+#mgmt_area
+cod_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME,
+             y = fitted, color = mgmt_area)) +
+  geom_jitter() +
+  labs(x = "Vessel Name", y = "Fitted Values") +
+  coord_flip()
+
+#season
+cod_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME,
+             y = fitted, color = season)) +
+  geom_jitter() +
+  coord_flip()
+
+#depth
+cod_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME,
+             y = fitted, color = BOTTEMP)) +
+  geom_jitter() +
+  coord_flip()
+
+#MESH_TYPE
+cod_paired_tows_5mi_72hr_re %>%
+  ggplot(aes(x = VESSEL_NAME,
+             y = fitted, color = as.factor(MESH_TYPE))) +
+  geom_jitter() +
+  coord_flip()
+
+
+
 
 ```
 
@@ -1158,6 +1207,13 @@ haddock_paired_tows_5mi_72hr_re %>%
   coord_flip()
 
 
+#plotting effects of each variable on RE
+plot(allEffects(haddockm_optimal))
+
+#count of how many tows are more efficient than the survey 
+haddock_paired_tows_5mi_72hr_re %>%
+  filter(relative_efficiency < 0.5) %>%
+  count()
 ```
 
 
@@ -1271,8 +1327,8 @@ witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_re)
 compare.models(witchflm)
 
 #storing the optimal model and plotting the diagnostics
-witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area, 
-                        family = binomial, data = witchfl_paired_tows_5mi_72hr_re)
+witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + AVGDEPTH, 
+                        family = binomial, data = witchfl_paired_tows_5mi_72hr_re) # Model w mgmt_area had NAs in coefficient table 
 
 par(mfrow=c(2,2))
 plot(witchflm_optimal)
@@ -1356,6 +1412,14 @@ witchfl_paired_tows_5mi_72hr_re %>%
   coord_flip()
 
 
+#plotting effects of each variable on RE
+plot(allEffects(witchflm_optimal))
+
+
+#count of how many tows are more efficient than the survey 
+witchfl_paired_tows_5mi_72hr_re %>%
+  filter(relative_efficiency < 0.5) %>%
+  count()
 ```
 
 
@@ -1493,8 +1557,8 @@ yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_re)
 compare.models(yellowtailflm)
 
 #storing the optimal model and plotting the diagnostics
-yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + mgmt_area + AVGDEPTH, 
-                             family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re)
+yellowtailflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season  + AVGDEPTH, 
+                             family = binomial, data = yellowtailfl_paired_tows_5mi_72hr_re) # Model w mgmt_area had NAs in coefficient table 
 
 par(mfrow=c(2,2))
 plot(yellowtailflm_optimal)
@@ -1575,6 +1639,15 @@ yellowtailfl_paired_tows_5mi_72hr_re %>%
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
+
+#plotting effects of each variable on RE
+plot(allEffects(yellowtailflm_optimal))
+
+
+#count of how many tows are more efficient than the survey 
+yellowtailfl_paired_tows_5mi_72hr_re %>%
+  filter(relative_efficiency < 0.5) %>%
+  count()
 ```
 
 ## American Plaice
@@ -1762,6 +1835,14 @@ plaice_paired_tows_5mi_72hr_re %>%
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
+
+#plotting effects of each variable on RE
+plot(allEffects(plaicem_optimal))
+
+#count of how many tows are more efficient than the survey 
+plaice_paired_tows_5mi_72hr_re %>%
+  filter(relative_efficiency < 0.5) %>%
+  count()
 ```
 
 
@@ -1902,8 +1983,8 @@ compare.models(winterflm)
 
 
 #storing the optimal model and plotting the diagnostics
-winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area + AVGDEPTH, 
-                         family = binomial, data = winterfl_paired_tows_5mi_72hr_re)
+winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + AVGDEPTH, 
+                         family = binomial, data = winterfl_paired_tows_5mi_72hr_re) # Model w mgmt_area had NAs in coefficient table 
 
 par(mfrow=c(2,2))
 plot(winterflm_optimal)
@@ -1984,6 +2065,14 @@ winterfl_paired_tows_5mi_72hr_re %>%
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
 
+
+#plotting effects of each variable on RE
+plot(allEffects(winterflm_optimal))
+
+#count of how many tows are more efficient than the survey 
+winterfl_paired_tows_5mi_72hr_re %>%
+  filter(relative_efficiency < 0.5) %>%
+  count()
 ```
 
 
@@ -2170,6 +2259,15 @@ monkfish_paired_tows_5mi_72hr_re %>%
   geom_hline(yintercept = 0.1292496, linetype = "dashed", color = "red") + 
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   coord_flip()
+
+
+#plotting effects of each variable on RE
+plot(allEffects(monkfishm_optimal))
+
+#count of how many tows are more efficient than the survey 
+monkfish_paired_tows_5mi_72hr_re %>%
+  filter(relative_efficiency < 0.5) %>%
+  count()
 ```
 
 
