@@ -2466,9 +2466,13 @@ paired_tows_8mi_192hr_ob %>%
 # Save the Datasets to CSV
 ```{r}
 write.csv(paired_tows_1mi_24hr, './data/paired_tows_1mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_48hr, './data/paired_tows_2mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_72hr, './data/paired_tows_3mi_72hr.csv', row.names = FALSE)
 write.csv(paired_tows_5mi_72hr, './data/paired_tows_5mi_72hr.csv', row.names = FALSE)
 
 write.csv(paired_tows_1mi_24hr_ob, './data/paired_tows_1mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_48hr_ob, './data/paired_tows_2mi_48hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_72hr_ob, './data/paired_tows_3mi_72hr_ob.csv', row.names = FALSE)
 write.csv(paired_tows_5mi_72hr_ob, './data/paired_tows_5mi_72hr_ob.csv', row.names = FALSE)
 
 ```
