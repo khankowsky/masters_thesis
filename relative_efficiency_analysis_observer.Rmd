@@ -506,71 +506,6 @@ cod_paired_tows_5mi_72hr_ob_re %>%
 plot(allEffects(codm_ob_optimal))
 
 
-###############################################################################
-# #predicted vs trawl type w point shape as explanatory variables - not important for this project but saving for my thesis work 
-#mgmt_area
-cod_paired_tows_5mi_72hr_ob_re %>%
-  ggplot(aes(x = trawl_type,
-             y = fitted, color = mgmt_area)) +
-  geom_jitter() +
-  labs(x = "Vessel Name", y = "Fitted Values") +
-  coord_flip()
-
-#season
-cod_paired_tows_5mi_72hr_ob_re %>%
-  ggplot(aes(x = trawl_type,
-             y = fitted, color = season)) +
-  geom_jitter() +
-  coord_flip()
-
-#depth
-cod_paired_tows_5mi_72hr_ob_re %>%
-  ggplot(aes(x = trawl_type,
-             y = fitted, color = BOTTEMP)) +
-  geom_jitter() +
-  coord_flip()
-
-#foot rope length 
-cod_paired_tows_5mi_72hr_ob_re %>%
-  ggplot(aes(x = trawl_type,
-             y = fitted, color = FTROPLEN)) +
-  geom_jitter() +
-  coord_flip()
-
-
-#sweep diameter
-cod_paired_tows_5mi_72hr_ob_re %>%
-  ggplot(aes(x = trawl_type,
-             y = fitted, color = SWEEPDIA)) +
-  geom_jitter() +
-  coord_flip()
-
-
-#n sweeps
-cod_paired_tows_5mi_72hr_ob_re %>%
-  ggplot(aes(x = trawl_type,
-             y = fitted, color = NSWEEPS)) +
-  geom_jitter() +
-  coord_flip()
-
-
-#footrope type
-cod_paired_tows_5mi_72hr_ob_re %>%
-  ggplot(aes(x = trawl_type,
-             y = fitted, color = as.factor(FTROPTYP))) +
-  geom_jitter() +
-  coord_flip()
-
-#ground cable type
-cod_paired_tows_5mi_72hr_ob_re %>%
-  ggplot(aes(x = trawl_type,
-             y = fitted, color = as.factor(GRCABTYP))) +
-  geom_jitter() +
-  coord_flip()
-
-
-
-
 
 
 ```
@@ -1605,6 +1540,95 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
 plot(allEffects(monkfishm_ob_optimal))
 
 ```
+
+
+# plotting relative efficiency with expanatory variables 
+```{r}
+###############################################################################
+# #predicted vs trawl type w point shape as explanatory variables - not important for this project but saving for my thesis work 
+#mgmt_area
+
+
+re_plots <- function(x) {
+  
+  a <- x %>%
+  ggplot(aes(x = mgmt_area,
+             y = fitted)) +
+  geom_boxplot() +
+  coord_flip()
+
+#season
+b <- x %>%
+  ggplot(aes(x = season,
+             y = fitted)) +
+  geom_boxplot() +
+  coord_flip()
+
+#depth
+c <- x %>%
+  ggplot(aes(x = BOTTEMP,
+             y = fitted)) +
+  geom_point()
+
+#foot rope length 
+d <- x %>%
+  ggplot(aes(x = FTROPLEN,
+             y = fitted)) +
+  geom_point()
+
+
+#sweep diameter
+e <- x %>%
+  ggplot(aes(x = SWEEPDIA,
+             y = fitted)) +
+  geom_point()
+
+#n sweeps
+f <- x %>%
+  ggplot(aes(x = NSWEEPS,
+             y = fitted)) +
+  geom_point()
+
+#footrope type
+g <- x %>%
+  ggplot(aes(x = as.factor(FTROPTYP),
+             y = fitted)) +
+  geom_boxplot() +
+  coord_flip()
+
+#ground cable type
+h <- x %>%
+  ggplot(aes(x = as.factor(GRCABTYP),
+             y = fitted)) +
+  geom_boxplot() +
+  coord_flip()
+
+x %>%
+  ggplot(aes(x = AVGDEPTH,
+             y = fitted)) +
+  geom_point() +
+  coord_flip()
+
+
+grid.arrange(a,b,c,d)
+grid.arrange(e,f,g,h)
+
+}
+
+
+re_plots(cod_paired_tows_5mi_72hr_ob_re)
+re_plots(haddock_paired_tows_5mi_72hr_ob_re)
+re_plots(witchfl_paired_tows_5mi_72hr_ob_re)
+re_plots(yellowtailfl_paired_tows_5mi_72hr_ob_re)
+re_plots(plaice_paired_tows_5mi_72hr_ob_re)
+re_plots(winterfl_paired_tows_5mi_72hr_ob_re)
+re_plots(monkfish_paired_tows_5mi_72hr_ob_re)
+
+
+```
+
+
+
 
 # Playing Around 
 ```{r, eval=FALSE}
