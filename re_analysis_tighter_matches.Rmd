@@ -964,7 +964,7 @@ haddock_paired_tows_2mi_48hr_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #HADDOCK
 haddockm_2mi48hr <- fit.models(haddock_paired_tows_2mi_48hr_re)
 compare.models(haddockm_2mi48hr)
@@ -1128,7 +1128,7 @@ yellowtailfl_paired_tows_2mi_48hr_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #YELLOWTAIL FLOUNDER
 yellowtailflm_2mi48hr <- fit.models(yellowtailfl_paired_tows_2mi_48hr_re)
 compare.models(yellowtailflm_2mi48hr)
@@ -1295,7 +1295,7 @@ cod_paired_tows_3mi_72hr_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #COD
 codm_3mi72hr <- fit.models(cod_paired_tows_3mi_72hr_re)
 compare.models(codm_3mi72hr)
@@ -1456,7 +1456,7 @@ haddock_paired_tows_3mi_72hr_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #HADDOCK
 haddockm_3mi72hr <- fit.models(haddock_paired_tows_3mi_72hr_re)
 compare.models(haddockm_3mi72hr)
@@ -1614,7 +1614,7 @@ witchfl_paired_tows_3mi_72hr_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #WITCH FLOUNDER
 witchflm_3mi72hr <- fit.models(witchfl_paired_tows_3mi_72hr_re)
 compare.models(witchflm_3mi72hr)
@@ -1771,7 +1771,7 @@ yellowtailfl_paired_tows_3mi_72hr_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #WITCH FLOUNDER
 yellowtailflm_3mi72hr <- fit.models(yellowtailfl_paired_tows_3mi_72hr_re)
 compare.models(yellowtailflm_3mi72hr)
@@ -1941,8 +1941,8 @@ cod_paired_tows_2mi_48hr_ob_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
-#HADDOCK
+```{r, message = FALSE, warning = FALSE}
+#COD
 codm_ob_2mi48hr <- fit.models_ob(cod_paired_tows_2mi_48hr_ob_re)
 compare.models_ob(codm_ob_2mi48hr)
 
@@ -2075,7 +2075,7 @@ haddock_paired_tows_2mi_48hr_ob_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #HADDOCK
 haddockm_ob_2mi48hr <- fit.models_ob(haddock_paired_tows_2mi_48hr_ob_re)
 compare.models_ob(haddockm_ob_2mi48hr)
@@ -2210,7 +2210,7 @@ witchfl_paired_tows_2mi_48hr_ob_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #WITCH FLOUNDER
 witchflm_ob_2mi48hr <- fit.models_ob(witchfl_paired_tows_2mi_48hr_ob_re)
 compare.models_ob(witchflm_ob_2mi48hr)
@@ -2345,7 +2345,7 @@ yellowtailfl_paired_tows_2mi_48hr_ob_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #YELLOWTAIL FLOUNDER
 yellowtailflm_ob_2mi48hr <- fit.models_yt(yellowtailfl_paired_tows_2mi_48hr_ob_re)
 compare.models_yt(yellowtailflm_ob_2mi48hr)
@@ -2413,7 +2413,7 @@ yellowtailfl_paired_tows_2mi_48hr_ob_re %>%
 
 
 #plotting effects of each variable on RE
-plot(allEffects(yellowtailflm_ob_optimal_ob_2mi48hr))
+# plot(allEffects(yellowtailflm_ob_optimal_ob_2mi48hr))
 ```
 
 
@@ -2483,7 +2483,7 @@ cod_paired_tows_3mi_72hr_ob_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #COD
 codm_ob_3mi72hr <- fit.models_ob(cod_paired_tows_3mi_72hr_ob_re)
 compare.models_ob(codm_ob_3mi72hr)
@@ -2616,7 +2616,7 @@ haddock_paired_tows_3mi_72hr_ob_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #HADDOCK
 haddockm_ob_3mi72hr <- fit.models_ob(haddock_paired_tows_3mi_72hr_ob_re)
 compare.models_ob(haddockm_ob_3mi72hr)
@@ -2750,7 +2750,7 @@ witchfl_paired_tows_3mi_72hr_ob_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #WITCH FLOUNDER
 witchflm_ob_3mi72hr <- fit.models_ob(witchfl_paired_tows_3mi_72hr_ob_re)
 compare.models_ob(witchflm_ob_3mi72hr)
@@ -2881,7 +2881,7 @@ yellowtailfl_paired_tows_3mi_72hr_ob_re %>%
 
 #### T-test
 #### Model Runs
-```{r}
+```{r, message = FALSE, warning = FALSE}
 #YELLOWTAIL FLOUNDER
 yellowtailflm_ob_3mi72hr <- fit.models_ob(yellowtailfl_paired_tows_3mi_72hr_ob_re)
 compare.models_ob(yellowtailflm_ob_3mi72hr)
