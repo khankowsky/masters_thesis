@@ -2238,6 +2238,10 @@ winterfl_paired_tows_5mi_72hr_re %>%
   scale_color_discrete(labels=c("0" = "Diamond", "1" = "Square")) + 
   coord_flip()
 
+
+winterfl_paired_tows_5mi_72hr_re %>%
+  count(cruise_station_ID)
+
 ```
 
 
