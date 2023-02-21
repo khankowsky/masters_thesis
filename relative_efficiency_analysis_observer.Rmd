@@ -1,7 +1,10 @@
 ---
 title: "relative_efficiency_analysis_observer"
-output: html_document
 date: "2022-10-05"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
 ---
 
 
@@ -68,301 +71,6 @@ nefsc_strata <- st_read(dsn = "./data/strata") %>%
 
 
 ```
-
-
-
-
-
-# Observer and NEFSC Pairs
-## 1m and 24hr Paired Tows 
-### Comparing CPUA and Relative Efficiency 
-```{r}
-paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob %>%
-  filter(SVSPP == 73 & NESPP4 == 818 | #cod 
-         SVSPP == 74 & NESPP4 == 1477 | #haddock
-         SVSPP == 75 & NESPP4 == 2695 | #pollock
-         SVSPP == 105 & NESPP4 == 1230 | #yellowtail flounder
-         SVSPP == 102 & NESPP4 == 1240 | #american plaice
-         SVSPP == 107 & NESPP4 == 1220 | #witch flounder
-         SVSPP == 108 & NESPP4 == 1250 | #windowpane
-         SVSPP == 106 & NESPP4 == 1200 | #winter flounder
-         SVSPP == 155 & NESPP4 == 2400 | #acadian redfish
-         SVSPP == 197 & NESPP4 == 124    #monkfish
-        ) %>%
-  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
-  filter(CATCHWT_updated > 0) %>%
-  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
-  mutate(relative_efficiency = nefsc_species_cpua/(nefsc_species_cpua + ob_species_cpua)) %>%
-  mutate(mgmt_area = case_when(
-    AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
-    AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
-    AREA.x %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
-  )) %>%
-  mutate(season = case_when(
-    month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
-    month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
-  )) %>%
-  mutate(DayNight = case_when(
-    dayNight_ob == "night" & dayNight_nefsc == "night" ~ "Night",
-    dayNight_ob == "day" & dayNight_nefsc == "day" ~ "Day",
-    dayNight_ob == "night" & dayNight_nefsc =="day" ~ "Mismatch",
-    dayNight_ob == "day" & dayNight_nefsc == "night" ~ "Mismatch"
-  )) %>%
-  mutate(towTime = case_when(
-    time_dif > 0 ~ "nefsc_first", 
-    time_dif < 0 ~ "sf_first"
-  )) %>%
-  mutate(trawl_type = as.factor(trawl_type)) %>%
-  drop_na(trawl_type) %>%
-  drop_na(AVGDEPTH, BOTTEMP, DayNight, towTime) %>%
-  distinct()
-
-
-
-```
-
-### Species Datasets
-```{r}
-#creating a separate dataset for each species 
-#COD
-cod_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
-  filter(SVSPP == 73 & NESPP4 == 818) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#HADDOCK
-haddock_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
-  filter(SVSPP == 74 & NESPP4 == 1477) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#WITCH FLOUNDER
-witchfl_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
-  filter(SVSPP == 107 & NESPP4 == 1220) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#YELLLOWTAIL FLOUNDER
-yellowtailfl_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
-  filter(SVSPP == 105 & NESPP4 == 1230) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#AMERICAN PLAICE
-plaice_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
-  filter(SVSPP == 102 & NESPP4 == 1240) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#WINTER FLOUNDER
-winterfl_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
-  filter(SVSPP == 106 & NESPP4 == 1200) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#MONKFISH
-monkfish_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
-  filter(SVSPP == 197 & NESPP4 == 124) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-
-```
-
-### Exploratory Plots
-```{r}
-#COD
-cod_paired_tows_1mi_24hr_ob_re %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
-  labs(x = "Tow Number", y = CPUA_label, 
-       title = "Comparison of CPUA for Atlantic Cod", 
-       subtitle = "Pairs within 1 mi and 24 hrs") + 
-  scale_fill_manual(name = "", 
-                    values = c("Observer" = "red", "NEFSC" = "blue"), 
-                    labels = c("Observer", "NEFSC")) + 
-  theme_classic() + 
-  theme(axis.text.x=element_blank())
-
-
-#HADDOCK
-haddock_paired_tows_1mi_24hr_ob_re %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
-  labs(x = "Tow Number", y = CPUA_label, 
-       title = "Comparison of CPUA for Haddock", 
-       subtitle = "Pairs within 1 mi and 24 hrs") + 
-  scale_fill_manual(name = "", 
-                    values = c("Observer" = "red", "NEFSC" = "blue"), 
-                    labels = c("Observer", "NEFSC")) + 
-  theme_classic() + 
-  theme(axis.text.x=element_blank())
-
-
-#WITCH FLOUNDER
-witchfl_paired_tows_1mi_24hr_ob_re %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
-  labs(x = "Tow Number", y = CPUA_label, 
-       title = "Comparison of CPUA for Witch Flounder", 
-       subtitle = "Pairs within 1 mi and 24 hrs") + 
-  scale_fill_manual(name = "", 
-                    values = c("Observer" = "red", "NEFSC" = "blue"), 
-                    labels = c("Observer", "NEFSC")) + 
-  theme_classic() + 
-  theme(axis.text.x=element_blank())
-
-
-#YELLLOWTAIL FLOUNDER
-yellowtailfl_paired_tows_1mi_24hr_ob_re %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
-  labs(x = "Tow Number", y = CPUA_label, 
-       title = "Comparison of CPUA for Yellowtail Flounder", 
-       subtitle = "Pairs within 1 mi and 24 hrs") + 
-  scale_fill_manual(name = "", 
-                    values = c("Observer" = "red", "NEFSC" = "blue"), 
-                    labels = c("Observer", "NEFSC")) + 
-  theme_classic() + 
-  theme(axis.text.x=element_blank())
-
-
-#AMERICAN PLAICE
-plaice_paired_tows_1mi_24hr_ob_re %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
-  labs(x = "Tow Number", y = CPUA_label, 
-       title = "Comparison of CPUA for American Plaice", 
-       subtitle = "Pairs within 1 mi and 24 hrs") + 
-  scale_fill_manual(name = "", 
-                    values = c("Observer" = "red", "NEFSC" = "blue"), 
-                    labels = c("Observer", "NEFSC")) + 
-  theme_classic() + 
-  theme(axis.text.x=element_blank())
-
-
-#WINTER FLOUNDER
-winterfl_paired_tows_1mi_24hr_ob_re %>%
-  ggplot() + 
-  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
-  labs(x = "Tow Number", y = CPUA_label, 
-       title = "Comparison of CPUA for Winter Flounder", 
-       subtitle = "Pairs within 1 mi and 24 hrs") + 
-  scale_fill_manual(name = "", 
-                    values = c("Observer" = "red", "NEFSC" = "blue"), 
-                    labels = c("Observer", "NEFSC")) + 
-  theme_classic() + 
-  theme(axis.text.x=element_blank())
-
-
-#MONKFISH - NO MONKFISH MATCHES AT 1&1
-# monkfish_paired_tows_1mi_24hr_ob_re %>%
-#   ggplot() + 
-#   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-#   geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
-#   labs(x = "Tow Number", y = CPUA_label, 
-#        title = "Comparison of CPUA for Monkfish", 
-#        subtitle = "Pairs within 1 mi and 24 hrs") + 
-#   scale_fill_manual(name = "", 
-#                     values = c("Observer" = "red", "NEFSC" = "blue"), 
-#                     labels = c("Observer", "NEFSC")) + 
-#   theme_classic() + 
-#   theme(axis.text.x=element_blank())
-
-
-```
-
-
-
-
-
-## 5m and 72hr Paired Tows
-```{r}
-paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
-  filter(SVSPP == 73 & NESPP4 == 818 | #cod 
-         SVSPP == 74 & NESPP4 == 1477 | #haddock
-         SVSPP == 75 & NESPP4 == 2695 | #pollock
-         SVSPP == 105 & NESPP4 == 1230 | #yellowtail flounder
-         SVSPP == 102 & NESPP4 == 1240 | #american plaice
-         SVSPP == 107 & NESPP4 == 1220 | #witch flounder
-         SVSPP == 108 & NESPP4 == 1250 | #windowpane
-         SVSPP == 106 & NESPP4 == 1200 | #winter flounder
-         SVSPP == 155 & NESPP4 == 2400 | #acadian redfish
-         SVSPP == 197 & NESPP4 == 124    #monkfish
-        ) %>%
-  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
-  filter(CATCHWT_updated > 0) %>%
-  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
-  mutate(relative_efficiency = nefsc_species_cpua/(nefsc_species_cpua + ob_species_cpua)) %>%
-  mutate(mgmt_area = case_when(
-    AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
-    AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
-    AREA.x %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
-  )) %>%
-  mutate(season = case_when(
-    month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
-    month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
-  )) %>%
-  mutate(DayNight = case_when(
-    dayNight_ob == "night" & dayNight_nefsc == "night" ~ "Night",
-    dayNight_ob == "day" & dayNight_nefsc == "day" ~ "Day",
-    dayNight_ob == "night" & dayNight_nefsc =="day" ~ "Mismatch",
-    dayNight_ob == "day" & dayNight_nefsc == "night" ~ "Mismatch"
-  )) %>%
-  mutate(towTime = case_when(
-    time_dif > 0 ~ "nefsc_first", 
-    time_dif < 0 ~ "sf_first"
-  )) %>%
-  mutate(trawl_type = as.factor(trawl_type)) %>%
-  drop_na(trawl_type) %>%
-  drop_na(AVGDEPTH, BOTTEMP, DayNight, towTime) %>%
-  distinct()
-
-```
-
-
-
-
-
-# Statistical Analysis
-## Species Datasets
-```{r}
-#creating a separate dataset for each species 
-#COD
-cod_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 73 & NESPP4 == 818) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#HADDOCK
-haddock_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 74 & NESPP4 == 1477) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#WITCH FLOUNDER
-witchfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 107 & NESPP4 == 1220) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#YELLLOWTAIL FLOUNDER
-yellowtailfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 105 & NESPP4 == 1230) %>% 
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#AMERICAN PLAICE
-plaice_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 102 & NESPP4 == 1240) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#WINTER FLOUNDER
-winterfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 106 & NESPP4 == 1200) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE)
-
-#MONKFISH
-monkfish_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
-  filter(SVSPP == 197 & NESPP4 == 124) %>%
-  distinct(trip_haul_ID, .keep_all = TRUE)
-```
-
 
 ## Function Creation 
 ```{r}
@@ -755,9 +463,372 @@ grid.arrange(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10, ncol = 2, top = "Main")
 
 
 
+
+# Observer and NEFSC Pairs
+## 1m and 24hr Paired Tows 
+### Comparing CPUA and Relative Efficiency 
+```{r}
+paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob %>%
+  filter(SVSPP == 73 & NESPP4 == 818 | #cod 
+         SVSPP == 74 & NESPP4 == 1477 | #haddock
+         SVSPP == 75 & NESPP4 == 2695 | #pollock
+         SVSPP == 105 & NESPP4 == 1230 | #yellowtail flounder
+         SVSPP == 102 & NESPP4 == 1240 | #american plaice
+         SVSPP == 107 & NESPP4 == 1220 | #witch flounder
+         SVSPP == 108 & NESPP4 == 1250 | #windowpane
+         SVSPP == 106 & NESPP4 == 1200 | #winter flounder
+         SVSPP == 155 & NESPP4 == 2400 | #acadian redfish
+         SVSPP == 197 & NESPP4 == 124    #monkfish
+        ) %>%
+  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
+  filter(CATCHWT_updated > 0) %>%
+  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
+  mutate(relative_efficiency = nefsc_species_cpua/(nefsc_species_cpua + ob_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA.x %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  mutate(DayNight = case_when(
+    dayNight_ob == "night" & dayNight_nefsc == "night" ~ "Night",
+    dayNight_ob == "day" & dayNight_nefsc == "day" ~ "Day",
+    dayNight_ob == "night" & dayNight_nefsc =="day" ~ "Mismatch",
+    dayNight_ob == "day" & dayNight_nefsc == "night" ~ "Mismatch"
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  mutate(trawl_type = as.factor(trawl_type)) %>%
+  drop_na(trawl_type) %>%
+  drop_na(AVGDEPTH, BOTTEMP, DayNight, towTime) %>%
+  distinct()
+
+
+
+```
+
+### Species Datasets
+```{r}
+#creating a separate dataset for each species 
+#COD
+cod_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
+  filter(SVSPP == 73 & NESPP4 == 818) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#HADDOCK
+haddock_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
+  filter(SVSPP == 74 & NESPP4 == 1477) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#WITCH FLOUNDER
+witchfl_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
+  filter(SVSPP == 107 & NESPP4 == 1220) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#YELLLOWTAIL FLOUNDER
+yellowtailfl_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
+  filter(SVSPP == 105 & NESPP4 == 1230) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#AMERICAN PLAICE
+plaice_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
+  filter(SVSPP == 102 & NESPP4 == 1240) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#WINTER FLOUNDER
+winterfl_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
+  filter(SVSPP == 106 & NESPP4 == 1200) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#MONKFISH
+monkfish_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
+  filter(SVSPP == 197 & NESPP4 == 124) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+
+```
+
+### Exploratory Plots
+```{r}
+#COD
+cod_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Atlantic Cod", 
+       subtitle = "Pairs within 1 mi and 24 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#HADDOCK
+haddock_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Haddock", 
+       subtitle = "Pairs within 1 mi and 24 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#WITCH FLOUNDER
+witchfl_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Witch Flounder", 
+       subtitle = "Pairs within 1 mi and 24 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#YELLLOWTAIL FLOUNDER
+yellowtailfl_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Yellowtail Flounder", 
+       subtitle = "Pairs within 1 mi and 24 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#AMERICAN PLAICE
+plaice_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for American Plaice", 
+       subtitle = "Pairs within 1 mi and 24 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#WINTER FLOUNDER
+winterfl_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  labs(x = "Tow Number", y = CPUA_label, 
+       title = "Comparison of CPUA for Winter Flounder", 
+       subtitle = "Pairs within 1 mi and 24 hrs") + 
+  scale_fill_manual(name = "", 
+                    values = c("Observer" = "red", "NEFSC" = "blue"), 
+                    labels = c("Observer", "NEFSC")) + 
+  theme_classic() + 
+  theme(axis.text.x=element_blank())
+
+
+#MONKFISH - NO MONKFISH MATCHES AT 1&1
+# monkfish_paired_tows_1mi_24hr_ob_re %>%
+#   ggplot() + 
+#   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
+#   geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+#   labs(x = "Tow Number", y = CPUA_label, 
+#        title = "Comparison of CPUA for Monkfish", 
+#        subtitle = "Pairs within 1 mi and 24 hrs") + 
+#   scale_fill_manual(name = "", 
+#                     values = c("Observer" = "red", "NEFSC" = "blue"), 
+#                     labels = c("Observer", "NEFSC")) + 
+#   theme_classic() + 
+#   theme(axis.text.x=element_blank())
+
+
+```
+
+```{r, fig.height=15, fig.width=15}
+#COD
+p1 <- cod_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Atlantic Cod") + 
+  theme_classic()
+
+
+#HADDOCK
+p2 <- haddock_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Haddock") + 
+  theme_classic()
+
+
+#WITCH FLOUNDER
+p3 <- witchfl_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Witch Flounder") + 
+  theme_classic()
+
+
+#YELLLOWTAIL FLOUNDER
+p4 <- yellowtailfl_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Yellowtail Flounder") + 
+  theme_classic()
+
+
+#AMERICAN PLAICE
+p5 <- plaice_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "American Plaice") + 
+  theme_classic()
+
+
+#WINTER FLOUNDER
+p6 <- winterfl_paired_tows_1mi_24hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Winter Flounder") + 
+  theme_classic()
+
+
+
+grid.arrange(p1, p2, p3 ,p4 ,p5, p6, 
+             top = "Comparison of CPUA for 1 Mile & 1 Day Matches - Observer", 
+             left = "CPUA (lbs/km2)", bottom = "Tow Number") 
+
+```
+
+
+
+
+
+## 5m and 72hr Paired Tows
+```{r}
+paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
+  filter(SVSPP == 73 & NESPP4 == 818 | #cod 
+         SVSPP == 74 & NESPP4 == 1477 | #haddock
+         SVSPP == 75 & NESPP4 == 2695 | #pollock
+         SVSPP == 105 & NESPP4 == 1230 | #yellowtail flounder
+         SVSPP == 102 & NESPP4 == 1240 | #american plaice
+         SVSPP == 107 & NESPP4 == 1220 | #witch flounder
+         SVSPP == 108 & NESPP4 == 1250 | #windowpane
+         SVSPP == 106 & NESPP4 == 1200 | #winter flounder
+         SVSPP == 155 & NESPP4 == 2400 | #acadian redfish
+         SVSPP == 197 & NESPP4 == 124    #monkfish
+        ) %>%
+  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
+  filter(CATCHWT_updated > 0) %>%
+  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
+  mutate(relative_efficiency = nefsc_species_cpua/(nefsc_species_cpua + ob_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA.x %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  mutate(DayNight = case_when(
+    dayNight_ob == "night" & dayNight_nefsc == "night" ~ "Night",
+    dayNight_ob == "day" & dayNight_nefsc == "day" ~ "Day",
+    dayNight_ob == "night" & dayNight_nefsc =="day" ~ "Mismatch",
+    dayNight_ob == "day" & dayNight_nefsc == "night" ~ "Mismatch"
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  mutate(trawl_type = as.factor(trawl_type)) %>%
+  drop_na(trawl_type) %>%
+  drop_na(AVGDEPTH, BOTTEMP, DayNight, towTime) %>%
+  distinct()
+
+```
+
+
+
+
+
+# Statistical Analysis
+## Species Datasets
+```{r}
+#creating a separate dataset for each species 
+#COD
+cod_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 73 & NESPP4 == 818) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#HADDOCK
+haddock_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 74 & NESPP4 == 1477) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#WITCH FLOUNDER
+witchfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 107 & NESPP4 == 1220) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#YELLLOWTAIL FLOUNDER
+yellowtailfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 105 & NESPP4 == 1230) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#AMERICAN PLAICE
+plaice_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 102 & NESPP4 == 1240) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#WINTER FLOUNDER
+winterfl_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 106 & NESPP4 == 1200) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#MONKFISH
+monkfish_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
+  filter(SVSPP == 197 & NESPP4 == 124) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+```
+
+
+
+
+
 # Statisitical Analysis by Species 
 ## Cod
-#### Exploratory Plots 
+### Exploratory Plots 
 ```{r}
 #Looking at the cpua for the paired tows for each species 
 cod_paired_tows_5mi_72hr_ob_re %>%
@@ -817,7 +888,7 @@ cod_paired_tows_5mi_72hr_ob_re %>%
 ```
 
 
-#### T-test
+### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(cod_paired_tows_5mi_72hr_ob_re)
@@ -850,7 +921,7 @@ exp(cod_ob_ttest$conf.int)
 
 ```
 
-#### Model Run 
+### Model Run 
 ```{r, message = FALSE, warning = FALSE}
 #COD
 codm <- fit.models(cod_paired_tows_5mi_72hr_ob_re)
@@ -949,7 +1020,7 @@ re_plots(cod_paired_tows_5mi_72hr_ob_re)
 
 
 ## Haddock
-#### Exploratory Plots 
+### Exploratory Plots 
 ```{r}
 #Looking at the cpua for the paired tows for each species 
 haddock_paired_tows_5mi_72hr_ob_re %>%
@@ -1041,7 +1112,7 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
 ```
 
 
-#### T-test
+### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(haddock_paired_tows_5mi_72hr_ob_re)
@@ -1075,7 +1146,7 @@ exp(haddock_ob_ttest$conf.int)
 
 ```
 
-#### Model Run 
+### Model Run 
 ```{r, message = FALSE, warning = FALSE}
 #HADDOCK
 haddockm <- fit.models(haddock_paired_tows_5mi_72hr_ob_re)
@@ -1341,7 +1412,7 @@ re_plots(witchfl_paired_tows_5mi_72hr_ob_re)
 
 
 ## Yewllowtail Flounder
-#### Exploratory Plots 
+### Exploratory Plots 
 ```{r}
 #Looking at the cpua for the paired tows for each species 
 yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
@@ -1399,7 +1470,7 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
 ```
 
 
-#### T-test
+### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(yellowtailfl_paired_tows_5mi_72hr_ob_re)
@@ -1435,7 +1506,7 @@ exp(yellowtail_ob_ttest$conf.int)
 
 ```
 
-#### Model Run 
+### Model Run 
 ```{r, message = FALSE, warning = FALSE}
 #YELLOWTAIL FLOUNDER
 yellowtailflm <- fit.models(yellowtailfl_paired_tows_5mi_72hr_ob_re)
@@ -1521,7 +1592,7 @@ re_plots(yellowtailfl_paired_tows_5mi_72hr_ob_re)
 
 
 ## American Plaice
-#### Exploratory PLots 
+### Exploratory PLots 
 ```{r}
 #Looking at the cpua for the paired tows for each species 
 plaice_paired_tows_5mi_72hr_ob_re %>%
@@ -1579,7 +1650,7 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
 ```
 
 
-#### T-test
+### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(plaice_paired_tows_5mi_72hr_ob_re)
@@ -1616,7 +1687,7 @@ exp(plaice_ob_ttest$conf.int)
 ```
 
 
-#### Model Run 
+### Model Run 
 ```{r, message = FALSE, warning = FALSE}
 #AMERICAN PLAICE 
 plaicem <- fit.models(plaice_paired_tows_5mi_72hr_ob_re)
@@ -1703,7 +1774,7 @@ re_plots(plaice_paired_tows_5mi_72hr_ob_re)
 
 
 ## Winter Flounder
-#### Exploratory Plots 
+### Exploratory Plots 
 ```{r}
 #Looking at the cpua for the paired tows for each species 
 winterfl_paired_tows_5mi_72hr_ob_re %>%
@@ -1763,7 +1834,7 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
 ```
 
 
-#### T-test
+### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(winterfl_paired_tows_5mi_72hr_ob_re)
@@ -1799,7 +1870,7 @@ winterfl_ob_ttest
 
 ```
 
-#### Model Run 
+### Model Run 
 ```{r, message = FALSE, warning = FALSE}
 #WINTER FLOUNDER 
 winterflm <- fit.models(winterfl_paired_tows_5mi_72hr_ob_re)
@@ -1888,7 +1959,7 @@ re_plots(winterfl_paired_tows_5mi_72hr_ob_re)
 
 
 ## Monkfish 
-#### Exploratory Plots 
+### Exploratory Plots 
 ```{r}
 #Looking at the cpua for the paired tows for each species 
 monkfish_paired_tows_5mi_72hr_ob_re %>%
@@ -1949,7 +2020,7 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
 ```
 
 
-#### T-test
+### T-test
 ```{r}
 #looking at the boxplot and histograms of the catch per unit area 
 box.plot(monkfish_paired_tows_5mi_72hr_ob_re)
@@ -1984,7 +2055,7 @@ exp(monkfish_ob_ttest$conf.int)
 
 ```
 
-#### Model Run 
+### Model Run 
 ```{r, message = FALSE, warning = FALSE}
 #NOT SURE IF ITS FAIR TO RUN THIS ANALYSIS ON SUCH A SMALL SAMPLE SIZE (n=11)
 #MONKFISH 
@@ -2065,7 +2136,7 @@ plot(allEffects(monkfishm_ob_optimal))
 ```
 
 
-```{r, fig.width=10, fig.height=10}
+```{r, fig.width=15, fig.height=15}
 #plotting the relative efficency by trawl type and other explanatory variables 
 re_plots(monkfish_paired_tows_5mi_72hr_ob_re)
 ```
