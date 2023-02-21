@@ -1,7 +1,10 @@
 ---
 title: "re_analysis_tighter_matches"
-output: html_document
 date: "2023-01-30"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
 ---
 
 ```{r, message = FALSE, warning = FALSE}
@@ -587,6 +590,23 @@ yellowtailfl_paired_tows_2mi_48hr_re <- paired_tows_2mi_48hr_re %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
+#AMERICAN PLAICE
+plaice_paired_tows_2mi_48hr_re <- paired_tows_2mi_48hr_re %>%
+  filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#WINTER FLOUNDER
+winterfl_paired_tows_2mi_48hr_re <- paired_tows_2mi_48hr_re %>%
+  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#MONKFISH
+monkfish_paired_tows_2mi_48hr_re <- paired_tows_2mi_48hr_re %>%
+  filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+
+
 
 #3 mi and 72 hrs
 #COD
@@ -607,6 +627,22 @@ witchfl_paired_tows_3mi_72hr_re <- paired_tows_3mi_72hr_re %>%
 #YELLLOWTAIL FLOUNDER
 yellowtailfl_paired_tows_3mi_72hr_re <- paired_tows_3mi_72hr_re %>%
   filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+
+#AMERICAN PLAICE
+plaice_paired_tows_3mi_72hr_re <- paired_tows_3mi_72hr_re %>%
+  filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#WINTER FLOUNDER
+winterfl_paired_tows_3mi_72hr_re <- paired_tows_3mi_72hr_re %>%
+  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>% 
+  distinct(EFFORT_ID, .keep_all = TRUE)
+
+#MONKFISH
+monkfish_paired_tows_3mi_72hr_re <- paired_tows_3mi_72hr_re %>%
+  filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>% 
   distinct(EFFORT_ID, .keep_all = TRUE)
 
 
@@ -636,6 +672,21 @@ witchfl_paired_tows_2mi_48hr_ob_re <- paired_tows_2mi_48hr_ob_re %>%
   filter(SVSPP == 107 & NESPP4 == 1220) %>% 
   distinct(trip_haul_ID, .keep_all = TRUE)
 
+#AMERICAN PLAICE
+plaice_paired_tows_2mi_48hr_ob_re <- paired_tows_2mi_48hr_ob_re %>%
+  filter(SVSPP == 102 & NESPP4 == 1240) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#WINTER FLOUNDER
+winterfl_paired_tows_2mi_48hr_ob_re <- paired_tows_2mi_48hr_ob_re %>%
+  filter(SVSPP == 106 & NESPP4 == 1200) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#MONKFISH
+monkfish_paired_tows_2mi_48hr_ob_re <- paired_tows_2mi_48hr_ob_re %>%
+  filter(SVSPP == 197 & NESPP4 == 124) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
 
 #3 mi and 72 hrs
 #COD
@@ -656,6 +707,21 @@ witchfl_paired_tows_3mi_72hr_ob_re <- paired_tows_3mi_72hr_ob_re %>%
 #YELLLOWTAIL FLOUNDER
 yellowtailfl_paired_tows_3mi_72hr_ob_re <- paired_tows_3mi_72hr_ob_re %>%
   filter(SVSPP == 105 & NESPP4 == 1230) %>% 
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#AMERICAN PLAICE
+plaice_paired_tows_3mi_72hr_ob_re <- paired_tows_3mi_72hr_ob_re %>%
+  filter(SVSPP == 102 & NESPP4 == 1240) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#WINTER FLOUNDER
+winterfl_paired_tows_3mi_72hr_ob_re <- paired_tows_3mi_72hr_ob_re %>%
+  filter(SVSPP == 106 & NESPP4 == 1200) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE)
+
+#MONKFISH
+monkfish_paired_tows_3mi_72hr_ob_re <- paired_tows_3mi_72hr_ob_re %>%
+  filter(SVSPP == 197 & NESPP4 == 124) %>%
   distinct(trip_haul_ID, .keep_all = TRUE)
 
 
@@ -1870,6 +1936,9 @@ yellowtailfl_paired_tows_3mi_72hr_re %>%
 
 
 
+
+
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -2955,5 +3024,315 @@ plot(allEffects(yellowtailflm_ob_optimal_ob_3mi72hr))
 
 
 
+
+
+
+# All CPUA Plots 
+```{r, fig.height=15, fig.width=15}
+
+#exploratory plots as one figure - 2mile and 2 days 
+p1 <- cod_paired_tows_2mi_48hr_re %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Cod") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p2 <- haddock_paired_tows_2mi_48hr_re %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Haddock") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+p3 <- yellowtailfl_paired_tows_2mi_48hr_re %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Yellowtail Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+p4 <- plaice_paired_tows_2mi_48hr_re %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "American Plaice") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+p5 <- winterfl_paired_tows_2mi_48hr_re %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Winter Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+p6 <- monkfish_paired_tows_2mi_48hr_re %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Monkfish") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+grid.arrange(p1, p2, p3 ,p4 ,p5, p6, 
+             top = "Comparison of CPUA for 2 Mile & 2 Day Matches - Study Fleet", 
+             left = "CPUA (lbs/km2)", bottom = "Tow Number")
+
+
+###############################################################################
+
+
+#exploratory plots as one figure - 3mile and 3 days 
+p11 <- cod_paired_tows_3mi_72hr_re %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Cod") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p12 <- haddock_paired_tows_3mi_72hr_re %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Haddock") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p13 <- witchfl_paired_tows_3mi_72hr_re %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Witch Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+p14 <- yellowtailfl_paired_tows_3mi_72hr_re %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Yellowtail Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+p15 <- plaice_paired_tows_3mi_72hr_re %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity",  fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "American Plaice") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+p16 <- winterfl_paired_tows_3mi_72hr_re %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Winter Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+p17 <- monkfish_paired_tows_3mi_72hr_re %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua < 10000) %>%
+  ggplot() + 
+  geom_bar(aes(x = EFFORT_ID, y = sf_species_cpua, fill = "Study Fleet"), stat = "identity",  fill = "red") + 
+  geom_bar(aes(x = EFFORT_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Monkfish") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+grid.arrange(p11, p12, p13 ,p14 ,p15, p16, p17, 
+             top = "Comparison of CPUA for 3 Mile & 3 Day Matches - Study Fleet", 
+             left = "CPUA (lbs/km2)", bottom = "Tow Number")
+
+
+###############################################################################
+#######################                               #########################
+###############################################################################
+
+#exploratory plots as one figure - 2mile and 2 days - OBSERVER
+
+p21 <- cod_paired_tows_2mi_48hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Cod") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p22 <- haddock_paired_tows_2mi_48hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Haddock") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p23 <- witchfl_paired_tows_2mi_48hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Witch Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p24 <- yellowtailfl_paired_tows_2mi_48hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Yellowtail Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p25 <- plaice_paired_tows_2mi_48hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "American Plaice") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p26 <- winterfl_paired_tows_2mi_48hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Winter Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p27 <- monkfish_paired_tows_2mi_48hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Monkfish") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+grid.arrange(p21, p22, p23 ,p24 ,p25, p26, p27, 
+             top = "Comparison of CPUA for 2 Mile & 2 Day Matches - Observer", 
+             left = "CPUA (lbs/km2)", bottom = "Tow Number")
+
+
+
+###############################################################################
+
+p31 <- cod_paired_tows_3mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Cod") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p32 <- haddock_paired_tows_3mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Haddock") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p33 <- witchfl_paired_tows_3mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Witch Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p34 <- yellowtailfl_paired_tows_3mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Yellowtail Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p35 <- plaice_paired_tows_3mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "American Plaice") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p36 <- winterfl_paired_tows_3mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Winter Flounder") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+p37 <- monkfish_paired_tows_3mi_72hr_ob_re %>%
+  ggplot() + 
+  geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  labs(x = "", y = "", 
+       title = "Monkfish") + 
+  theme_classic() + 
+  theme(axis.text.x = element_blank())
+
+
+grid.arrange(p31, p32, p33 ,p34 ,p35, p36, p37, 
+             top = "Comparison of CPUA for 3 Mile & 3 Day Matches - Observer", 
+             left = "CPUA (lbs/km2)", bottom = "Tow Number")
+
+
+```
 
 
