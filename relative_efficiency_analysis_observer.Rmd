@@ -124,13 +124,13 @@ logCPUA_lable <- bquote("Log(CPUA [lb/"*km^2*"])")
 #boxplot of catch per unit area
 box.plot <- function(x) {
   x %>%
-  pivot_longer(cols = c(ob_species_cpua, nefsc_species_cpua),
+  pivot_longer(cols = c(ob_species_cpua, nefsc_species_cpua_LB),
                names_to = "Trawl",
                values_to = "CPUA") %>%
   ggplot() +
   geom_boxplot(aes(x = Trawl, y = CPUA)) +
   labs(x = "Trawl Type", y = CPUA_label) +
-  scale_x_discrete(labels = c("nefsc_species_cpua" = "NEFSC",
+  scale_x_discrete(labels = c("nefsc_species_cpua_LB" = "NEFSC",
                               "ob_species_cpua" = "Observer")) +
   theme_classic()
 }
@@ -141,7 +141,7 @@ hist_kh <- function(x) {
   ggplot() +
   geom_histogram(aes(x = ob_species_cpua, y = ..density.., fill = "Observer")) +
   # geom_label(aes(x = Inf, y = Inf, label = "Study Fleet CPUE", vjust =1 , hjust = 1), color = "red") +
-  geom_histogram(aes(x = nefsc_species_cpua, y = -..density.., fill = "NEFSC")) +
+  geom_histogram(aes(x = nefsc_species_cpua_LB, y = -..density.., fill = "NEFSC")) +
   # geom_label(aes(x = Inf, y = -Inf, label = "NEFSC CPUE", vjust = -1, hjust = 1), color = "blue") +
   labs(x = CPUA_label, y = "Density",
        # title = "Histogram of CPUE for x",
@@ -217,7 +217,7 @@ p1 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = mgmt_area)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -236,7 +236,7 @@ p2 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = season)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -255,7 +255,7 @@ p3 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = AVGDEPTH)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -274,7 +274,7 @@ p4 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = FTROPLEN)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -294,7 +294,7 @@ p5 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = SWEEPDIA)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -313,7 +313,7 @@ p6 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = NSWEEPS)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -332,7 +332,7 @@ p7 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(FTROPTYP))) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -362,7 +362,7 @@ p8 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(GRCABTYP))) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -393,7 +393,7 @@ p9 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(BRDLGTYP))) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -426,7 +426,7 @@ p10 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = BOTTEMP)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -480,10 +480,10 @@ paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob %>%
          SVSPP == 155 & NESPP4 == 2400 | #acadian redfish
          SVSPP == 197 & NESPP4 == 124    #monkfish
         ) %>%
-  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
+  drop_na(ob_species_cpua, nefsc_species_cpua_LB) %>%
   filter(CATCHWT_updated > 0) %>%
-  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
-  mutate(relative_efficiency = nefsc_species_cpua/(nefsc_species_cpua + ob_species_cpua)) %>%
+  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua_LB)) %>%
+  mutate(relative_efficiency = nefsc_species_cpua_LB/(nefsc_species_cpua_LB + ob_species_cpua)) %>%
   mutate(mgmt_area = case_when(
     AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
     AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
@@ -559,7 +559,7 @@ monkfish_paired_tows_1mi_24hr_ob_re <- paired_tows_1mi_24hr_ob_re %>%
 cod_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Atlantic Cod", 
        subtitle = "Pairs within 1 mi and 24 hrs") + 
@@ -574,7 +574,7 @@ cod_paired_tows_1mi_24hr_ob_re %>%
 haddock_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Haddock", 
        subtitle = "Pairs within 1 mi and 24 hrs") + 
@@ -589,7 +589,7 @@ haddock_paired_tows_1mi_24hr_ob_re %>%
 witchfl_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Witch Flounder", 
        subtitle = "Pairs within 1 mi and 24 hrs") + 
@@ -604,7 +604,7 @@ witchfl_paired_tows_1mi_24hr_ob_re %>%
 yellowtailfl_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Yellowtail Flounder", 
        subtitle = "Pairs within 1 mi and 24 hrs") + 
@@ -619,7 +619,7 @@ yellowtailfl_paired_tows_1mi_24hr_ob_re %>%
 plaice_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for American Plaice", 
        subtitle = "Pairs within 1 mi and 24 hrs") + 
@@ -634,7 +634,7 @@ plaice_paired_tows_1mi_24hr_ob_re %>%
 winterfl_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Winter Flounder", 
        subtitle = "Pairs within 1 mi and 24 hrs") + 
@@ -649,7 +649,7 @@ winterfl_paired_tows_1mi_24hr_ob_re %>%
 # monkfish_paired_tows_1mi_24hr_ob_re %>%
 #   ggplot() + 
 #   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-#   geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+#   geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
 #   labs(x = "Tow Number", y = CPUA_label, 
 #        title = "Comparison of CPUA for Monkfish", 
 #        subtitle = "Pairs within 1 mi and 24 hrs") + 
@@ -667,7 +667,7 @@ winterfl_paired_tows_1mi_24hr_ob_re %>%
 p1 <- cod_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity", fill = "blue") + 
   labs(x = "", y = "", 
        title = "Atlantic Cod") + 
   theme_classic()
@@ -677,7 +677,7 @@ p1 <- cod_paired_tows_1mi_24hr_ob_re %>%
 p2 <- haddock_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity", fill = "blue") + 
   labs(x = "", y = "", 
        title = "Haddock") + 
   theme_classic()
@@ -687,7 +687,7 @@ p2 <- haddock_paired_tows_1mi_24hr_ob_re %>%
 p3 <- witchfl_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity", fill = "blue") + 
   labs(x = "", y = "", 
        title = "Witch Flounder") + 
   theme_classic()
@@ -697,7 +697,7 @@ p3 <- witchfl_paired_tows_1mi_24hr_ob_re %>%
 p4 <- yellowtailfl_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity", fill = "blue") + 
   labs(x = "", y = "", 
        title = "Yellowtail Flounder") + 
   theme_classic()
@@ -707,7 +707,7 @@ p4 <- yellowtailfl_paired_tows_1mi_24hr_ob_re %>%
 p5 <- plaice_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity", fill = "blue") + 
   labs(x = "", y = "", 
        title = "American Plaice") + 
   theme_classic()
@@ -717,7 +717,7 @@ p5 <- plaice_paired_tows_1mi_24hr_ob_re %>%
 p6 <- winterfl_paired_tows_1mi_24hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity", fill = "red") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity", fill = "blue") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity", fill = "blue") + 
   labs(x = "", y = "", 
        title = "Winter Flounder") + 
   theme_classic()
@@ -748,10 +748,10 @@ paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
          SVSPP == 155 & NESPP4 == 2400 | #acadian redfish
          SVSPP == 197 & NESPP4 == 124    #monkfish
         ) %>%
-  drop_na(ob_species_cpua, nefsc_species_cpua) %>%
+  drop_na(ob_species_cpua, nefsc_species_cpua_LB) %>%
   filter(CATCHWT_updated > 0) %>%
-  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua)) %>%
-  mutate(relative_efficiency = nefsc_species_cpua/(nefsc_species_cpua + ob_species_cpua)) %>%
+  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua_LB)) %>%
+  mutate(relative_efficiency = ob_species_cpua/(nefsc_species_cpua_LB + ob_species_cpua)) %>%
   mutate(mgmt_area = case_when(
     AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
     AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
@@ -834,7 +834,7 @@ monkfish_paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob_re %>%
 cod_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Atlantic Cod", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
@@ -877,7 +877,7 @@ cod_paired_tows_5mi_72hr_ob_re %>%
 #looking at scatterplot of CPUAs 
 cod_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = ob_species_cpua, 
-             y = nefsc_species_cpua)) + 
+             y = nefsc_species_cpua_LB)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) +
   labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '') + 
@@ -896,10 +896,10 @@ hist_kh(cod_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 cod_paired_tows_5mi_72hr_ob_re <- cod_paired_tows_5mi_72hr_ob_re %>%
-  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+  mutate(diff = ob_species_cpua - nefsc_species_cpua_LB,
          log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua), 
-         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua_LB)
 
 #looking at the boxplot and histograms of the difference between CPUA
 box.plot_diff(cod_paired_tows_5mi_72hr_ob_re)
@@ -911,7 +911,7 @@ hist_kh_diff_log(cod_paired_tows_5mi_72hr_ob_re)
 
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
-cod_ob_ttest <- t.test(cod_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, cod_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
+cod_ob_ttest <- t.test(cod_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, cod_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua_LB, paired = TRUE)
 cod_ob_ttest
 
 
@@ -978,7 +978,7 @@ cod_paired_tows_5mi_72hr_ob_re %>%
 cod_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1026,7 +1026,7 @@ re_plots(cod_paired_tows_5mi_72hr_ob_re)
 haddock_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Haddock", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
@@ -1052,14 +1052,14 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
 # Looks like there are some unrealistic outliers from the science center trawl 
 haddock_paired_tows_5mi_72hr_ob_re <- haddock_paired_tows_5mi_72hr_ob_re %>%
   filter(ob_species_cpua < 10000) %>%
-  filter(nefsc_species_cpua < 10000)
+  filter(nefsc_species_cpua_LB < 10000)
   
   
 #Looking at the cpua for the paired tows for each species with outliers removed 
 haddock_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Haddock", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
@@ -1102,7 +1102,7 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
 #looking at scatterplot of CPUAs 
 haddock_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = ob_species_cpua, 
-             y = nefsc_species_cpua)) + 
+             y = nefsc_species_cpua_LB)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) +
   labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '') + 
@@ -1120,10 +1120,10 @@ hist_kh(haddock_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 haddock_paired_tows_5mi_72hr_ob_re <- haddock_paired_tows_5mi_72hr_ob_re %>%
-  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+  mutate(diff = ob_species_cpua - nefsc_species_cpua_LB,
          log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua), 
-         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua_LB)
 
 #looking at the boxplot and histograms of the difference between CPUA
 box.plot_diff(haddock_paired_tows_5mi_72hr_ob_re)
@@ -1136,7 +1136,7 @@ hist_kh_diff_log(haddock_paired_tows_5mi_72hr_ob_re)
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
 
-haddock_ob_ttest <- t.test(haddock_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, haddock_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
+haddock_ob_ttest <- t.test(haddock_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, haddock_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua_LB, paired = TRUE)
 haddock_ob_ttest
 
 
@@ -1203,7 +1203,7 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
 haddock_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1239,7 +1239,7 @@ re_plots(haddock_paired_tows_5mi_72hr_ob_re)
 witchfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua,  fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB,  fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Witch Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
@@ -1282,7 +1282,7 @@ witchfl_paired_tows_5mi_72hr_ob_re %>%
 #looking at scatterplot of CPUAs 
 witchfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = ob_species_cpua, 
-             y = nefsc_species_cpua)) + 
+             y = nefsc_species_cpua_LB)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) +
   labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '') + 
@@ -1300,10 +1300,10 @@ hist_kh(witchfl_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 witchfl_paired_tows_5mi_72hr_ob_re <- witchfl_paired_tows_5mi_72hr_ob_re %>%
-  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+  mutate(diff = ob_species_cpua - nefsc_species_cpua_LB,
          log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua), 
-         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua_LB)
 
 #looking at the boxplot and histograms of the difference between CPUA
 box.plot_diff(witchfl_paired_tows_5mi_72hr_ob_re)
@@ -1316,7 +1316,7 @@ hist_kh_diff_log(witchfl_paired_tows_5mi_72hr_ob_re)
 #assumptions of normality and equal variance are met with the log transformed data, 
 #so the t-test was conducted with the log-transformed data
 
-witchfl_ob_ttest <- t.test(witchfl_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, witchfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, paired = TRUE)
+witchfl_ob_ttest <- t.test(witchfl_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, witchfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua_LB, paired = TRUE)
 witchfl_ob_ttest
 
 #back transform the estimate
@@ -1382,7 +1382,7 @@ witchfl_paired_tows_5mi_72hr_ob_re %>%
 witchfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1418,7 +1418,7 @@ re_plots(witchfl_paired_tows_5mi_72hr_ob_re)
 yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Yellowtail Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
@@ -1460,7 +1460,7 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
 #looking at scatterplot of CPUAs 
 yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = ob_species_cpua, 
-             y = nefsc_species_cpua)) + 
+             y = nefsc_species_cpua_LB)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) +
   labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '') + 
@@ -1478,10 +1478,10 @@ hist_kh(yellowtailfl_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 yellowtailfl_paired_tows_5mi_72hr_ob_re <- yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
-  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+  mutate(diff = ob_species_cpua - nefsc_species_cpua_LB,
          log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua), 
-         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua_LB)
 
 #looking at the boxplot and histograms of the difference between CPUA
 box.plot_diff(yellowtailfl_paired_tows_5mi_72hr_ob_re)
@@ -1495,7 +1495,7 @@ hist_kh_diff_log(yellowtailfl_paired_tows_5mi_72hr_ob_re)
 #so the t-test was conducted with the log-transformed data
 
 yellowtail_ob_ttest <- t.test(yellowtailfl_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua,
-                              yellowtailfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, 
+                              yellowtailfl_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua_LB, 
                               paired = TRUE)
 yellowtail_ob_ttest
 
@@ -1563,7 +1563,7 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
 yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1598,7 +1598,7 @@ re_plots(yellowtailfl_paired_tows_5mi_72hr_ob_re)
 plaice_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua,  fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB,  fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for American Plaice", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
@@ -1640,7 +1640,7 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
 #looking at scatterplot of CPUAs 
 plaice_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = ob_species_cpua, 
-             y = nefsc_species_cpua)) + 
+             y = nefsc_species_cpua_LB)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) +
   labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '') + 
@@ -1658,10 +1658,10 @@ hist_kh(plaice_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 plaice_paired_tows_5mi_72hr_ob_re <- plaice_paired_tows_5mi_72hr_ob_re %>%
-  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+  mutate(diff = ob_species_cpua - nefsc_species_cpua_LB,
          log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua), 
-         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua_LB)
 
 #looking at the boxplot and histograms of the difference between CPUA
 box.plot_diff(plaice_paired_tows_5mi_72hr_ob_re)
@@ -1675,7 +1675,7 @@ hist_kh_diff_log(plaice_paired_tows_5mi_72hr_ob_re)
 #so the t-test was conducted with the log-transformed data
 
 plaice_ob_ttest <- t.test(plaice_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, 
-                       plaice_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, 
+                       plaice_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua_LB, 
                        paired = TRUE)
 plaice_ob_ttest
 
@@ -1744,7 +1744,7 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
 plaice_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1780,7 +1780,7 @@ re_plots(plaice_paired_tows_5mi_72hr_ob_re)
 winterfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = CPUA_label, 
        title = "Comparison of CPUA for Winter Flounder", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
@@ -1824,7 +1824,7 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
 #looking at scatterplot of CPUAs 
 winterfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = ob_species_cpua, 
-             y = nefsc_species_cpua)) + 
+             y = nefsc_species_cpua_LB)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) +
   labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '') + 
@@ -1842,10 +1842,10 @@ hist_kh(winterfl_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 winterfl_paired_tows_5mi_72hr_ob_re <- winterfl_paired_tows_5mi_72hr_ob_re %>%
-  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+  mutate(diff = ob_species_cpua - nefsc_species_cpua_LB,
          log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua), 
-         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua_LB)
 
 #looking at the boxplot and histograms of the difference between CPUA
 box.plot_diff(winterfl_paired_tows_5mi_72hr_ob_re)
@@ -1859,7 +1859,7 @@ hist_kh_diff(winterfl_paired_tows_5mi_72hr_ob_re)
 #so the t-test was conducted with the raw CPUA data
 
 winterfl_ob_ttest <- t.test(winterfl_paired_tows_5mi_72hr_ob_re$ob_species_cpua, 
-                            winterfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua, 
+                            winterfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua_LB, 
                             paired = TRUE)
 winterfl_ob_ttest
 
@@ -1928,7 +1928,7 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
 winterfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1965,7 +1965,7 @@ re_plots(winterfl_paired_tows_5mi_72hr_ob_re)
 monkfish_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
   geom_bar(aes(x = trip_haul_ID, y = ob_species_cpua, fill = "Observer"), stat = "identity") + 
-  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua, fill = "NEFSC"), stat = "identity") + 
+  geom_bar(aes(x = trip_haul_ID, y = -nefsc_species_cpua_LB, fill = "NEFSC"), stat = "identity") + 
   labs(x = "Tow Number", y = "CPUA (lbs/km2)", 
        title = "Comparison of CPUA for Monkfish", 
        subtitle = "Pairs within 5 mi and 72 hrs") + 
@@ -2009,7 +2009,7 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
 #looking at scatterplot of CPUAs 
 monkfish_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = ob_species_cpua, 
-             y = nefsc_species_cpua)) + 
+             y = nefsc_species_cpua_LB)) + 
   geom_point() + 
   geom_abline(intercept = 0, slope = 1) +
   labs(x = 'Observer CPUA', y = 'NEFSC CPUA', title = '') + 
@@ -2028,10 +2028,10 @@ hist_kh(monkfish_paired_tows_5mi_72hr_ob_re)
 
 #log-transforming the data
 monkfish_paired_tows_5mi_72hr_ob_re <- monkfish_paired_tows_5mi_72hr_ob_re %>%
-  mutate(diff = ob_species_cpua - nefsc_species_cpua,
+  mutate(diff = ob_species_cpua - nefsc_species_cpua_LB,
          log_ob_species_cpua = log(ob_species_cpua), 
-         log_nefsc_species_cpua = log(nefsc_species_cpua), 
-         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua)
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB), 
+         diff_of_logs = log_ob_species_cpua - log_nefsc_species_cpua_LB)
 
 #looking at the boxplot and histograms of the difference between CPUA
 box.plot_diff(monkfish_paired_tows_5mi_72hr_ob_re)
@@ -2045,7 +2045,7 @@ hist_kh_diff_log(monkfish_paired_tows_5mi_72hr_ob_re)
 #so the t-test was conducted with the log-transformed data
 
 monkfish_ob_ttest <- t.test(monkfish_paired_tows_5mi_72hr_ob_re$log_ob_species_cpua, 
-                         monkfish_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua, 
+                         monkfish_paired_tows_5mi_72hr_ob_re$log_nefsc_species_cpua_LB, 
                          paired = TRUE)
 monkfish_ob_ttest
 
@@ -2113,7 +2113,7 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
 monkfish_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2141,6 +2141,58 @@ plot(allEffects(monkfishm_ob_optimal))
 re_plots(monkfish_paired_tows_5mi_72hr_ob_re)
 ```
 
+# Correlation Tests
+```{r}
+#COD
+cort_cod <- cor.test(cod_paired_tows_5mi_72hr_ob_re$ob_species_cpua, cod_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua_LB, method = "pearson")
+
+cort_cod
+(cort_cod$estimate)^2
+
+
+#HADDOCK
+cort_haddock <- cor.test(haddock_paired_tows_5mi_72hr_ob_re$ob_species_cpua, haddock_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua_LB, method = "pearson")
+
+cort_haddock
+(cort_haddock$estimate)^2
+
+
+#WITCH FLOUNDER
+cort_witchfl <- cor.test(witchfl_paired_tows_5mi_72hr_ob_re$ob_species_cpua, witchfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua_LB, method = "pearson")
+
+cort_witchfl
+(cort_witchfl$estimate)^2
+
+
+#YELLOWTAIL FLOUDNER
+cort_yellowtailfl <- cor.test(yellowtailfl_paired_tows_5mi_72hr_ob_re$ob_species_cpua, yellowtailfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua_LB, method = "pearson")
+
+cort_yellowtailfl
+(cort_yellowtailfl$estimate)^2
+
+
+#AMERICAN PLAICE 
+cort_plaice <- cor.test(plaice_paired_tows_5mi_72hr_ob_re$ob_species_cpua, plaice_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua_LB, method = "pearson")
+
+cort_plaice
+(cort_plaice$estimate)^2
+
+
+#WINTER FLOUNDER 
+cort_winterfl <- cor.test(winterfl_paired_tows_5mi_72hr_ob_re$ob_species_cpua, winterfl_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua_LB, method = "pearson")
+
+cort_winterfl
+(cort_winterfl$estimate)^2
+
+
+#MONKFISH 
+cort_monkfish <- cor.test(monkfish_paired_tows_5mi_72hr_ob_re$ob_species_cpua, monkfish_paired_tows_5mi_72hr_ob_re$nefsc_species_cpua_LB, method = "pearson")
+
+cort_monkfish
+(cort_monkfish$estimate)^2
+
+```
+
 
 
 # plotting relative efficiency with expanatory variables 
@@ -2156,7 +2208,7 @@ p1 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = mgmt_area)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2175,7 +2227,7 @@ p2 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = season)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2194,7 +2246,7 @@ p3 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = AVGDEPTH)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2213,7 +2265,7 @@ p4 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = FTROPLEN)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2233,7 +2285,7 @@ p5 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = SWEEPDIA)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2252,7 +2304,7 @@ p6 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = NSWEEPS)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2271,7 +2323,7 @@ p7 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(FTROPTYP))) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2301,7 +2353,7 @@ p8 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(GRCABTYP))) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2332,7 +2384,7 @@ p9 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(BRDLGTYP))) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2365,7 +2417,7 @@ p10 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = BOTTEMP)) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2385,7 +2437,7 @@ p11 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(CODHUNG))) + 
-  geom_jitter() + 
+  geom_jitter(width=0.2, height=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2559,7 +2611,7 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
 
 
 haddock_paired_tows_5mi_72hr_ob_re %>%
-  select(trawl_type, relative_efficiency, nefsc_species_cpua, ob_species_cpua)
+  select(trawl_type, relative_efficiency, nefsc_species_cpua_LB, ob_species_cpua)
 
 haddock_paired_tows_5mi_72hr_ob_re %>%
   ggplot() + 
