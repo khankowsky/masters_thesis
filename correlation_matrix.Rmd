@@ -1,0 +1,349 @@
+---
+title: "correlation_matrix"
+author: "Keith Hankowsky"
+date: "2023-02-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(skimr)
+library(data.table)
+library(fuzzyjoin)
+library(lubridate)
+library(kableExtra)
+library(modEvA)
+library(GGally)
+library(readr)
+
+library(maps) # land masses
+library(rgdal) # read OGR vector maps into Spatial objects
+library(viridis) # for customizing scale bars
+library(mapproj)
+library(hexbin)
+library(sf)
+library(scales)
+library(gridExtra)
+library(openxlsx)
+library(beepr)
+library(purrr)
+library(rsq)
+library(asht)
+library(car)
+library(effects)
+library(ggpubr)
+
+```
+
+
+```{r}
+paired_tows_1mi_24hr <- read.csv('./data/paired_tows_1mi_24hr.csv')
+paired_tows_5mi_72hr <- read.csv('./data/paired_tows_5mi_72hr.csv')
+```
+
+
+# Functions 
+```{r}
+#creating a function to filter each dataset for just cod
+cod.filter <- function(x) {
+  cod_x <- x %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  drop_na(sf_species_cpua, nefsc_species_cpua_LB) %>%
+  filter(CATCHWT_updated > 0) %>%
+  filter(sf_species_cpua > 0) %>%
+  distinct() %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua_LB < 10000)
+}
+
+#creating a function to do a correlation test for each dataset and spit out the R^2 value 
+cor_test_sf <- function(x) {
+  cort_cod_x <- cor.test(x$sf_species_cpua, x$nefsc_species_cpua_LB, method = "pearson")
+  
+  cort_cod_x
+  (cort_cod_x$estimate)^2
+}
+
+
+
+```
+
+
+
+```{r}
+#reading in the list of files, and then reading in all the datasets to a list 
+filenames <- list.files(path = "data/sf_paired_data", recursive = TRUE, full.names = TRUE)
+datasets <- lapply(filenames, read_csv)
+
+
+#filter all the datasets for just cod
+cod_datasets <- lapply(datasets, cod.filter)
+
+
+#run a correlation test for each dataset and pull out the R^2
+cod_r2 <- lapply(cod_datasets, cor_test_sf)
+
+
+#creating a dataset to store the r2 info 
+codr <- as_tibble_col(filenames, column_name = "dataset") %>%
+  mutate(dataset = str_sub(dataset, 21, -5), 
+         r2 = cod_r2) %>%
+  unnest(cols = c(r2))
+
+
+
+
+
+```
+
+
+
+
+```{r}
+datasets <- list(paired_tows_1mi_24hr, 
+                 paired_tows_5mi_72hr)
+
+
+
+
+cod_paired_tows_1mi_24hr <- paired_tows_1mi_24hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  drop_na(sf_species_cpua, nefsc_species_cpua_LB) %>%
+  filter(CATCHWT_updated > 0) %>%
+  filter(sf_species_cpua > 0) %>%
+  mutate(old_relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua_LB)) %>%
+  mutate(relative_efficiency = sf_species_cpua/(nefsc_species_cpua_LB + sf_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  mutate(dayNight = case_when(
+    dayNight_sf == "day" & dayNight_nefsc == "day" ~ "day", 
+    dayNight_sf == "night" & dayNight_nefsc == "night" ~ "night", 
+    dayNight_sf == "day" & dayNight_nefsc == "night" ~ "mismatch",
+    dayNight_sf == "night" & dayNight_nefsc == "day" ~ "mismatch", 
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  drop_na(AVGDEPTH, BOTTEMP, dayNight, towTime, mgmt_area) %>%
+  distinct() %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua_LB < 10000)
+  
+cod_paired_tows_5mi_72hr <- paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  drop_na(sf_species_cpua, nefsc_species_cpua_LB) %>%
+  filter(CATCHWT_updated > 0) %>%
+  filter(sf_species_cpua > 0) %>%
+  mutate(old_relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua_LB)) %>%
+  mutate(relative_efficiency = sf_species_cpua/(nefsc_species_cpua_LB + sf_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  mutate(dayNight = case_when(
+    dayNight_sf == "day" & dayNight_nefsc == "day" ~ "day", 
+    dayNight_sf == "night" & dayNight_nefsc == "night" ~ "night", 
+    dayNight_sf == "day" & dayNight_nefsc == "night" ~ "mismatch",
+    dayNight_sf == "night" & dayNight_nefsc == "day" ~ "mismatch", 
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  drop_na(AVGDEPTH, BOTTEMP, dayNight, towTime, mgmt_area) %>%
+  distinct() %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua_LB < 10000)
+  
+  
+  
+
+  
+  
+  
+cort_cod <- cor.test(cod_paired_tows_5mi_72hr$sf_species_cpua, cod_paired_tows_5mi_72hr$nefsc_species_cpua_LB, method = "pearson")
+
+cort_cod
+(cort_cod$estimate)^2
+
+
+
+cort_cod1 <- cor.test(cod_paired_tows_5mi_72hr_re$sf_species_cpua, cod_paired_tows_5mi_72hr_re$nefsc_species_cpua_LB, 
+                     method = "pearson")
+cort_cod1
+(cort_cod1$estimate)^2
+
+
+
+
+
+
+paired_tows_1mi_24hr <- read.csv('./data/paired_tows_1mi_24hr.csv')
+paired_tows_1mi_24hr_1 <- read.csv('./data/sf_paired_data/paired_tows_1mi_24hr.csv')
+
+paired_tows_2mi_48hr <- read.csv('./data/paired_tows_2mi_48hr.csv')
+paired_tows_2mi_48hr_1 <- read.csv('./data/sf_paired_data/paired_tows_2mi_48hr.csv')
+
+paired_tows_3mi_72hr <- read.csv('./data/paired_tows_3mi_72hr.csv')
+paired_tows_3mi_72hr_1 <- read.csv('./data/sf_paired_data/paired_tows_3mi_72hr.csv')
+
+
+
+paired_tows_5mi_72hr <- read.csv('./data/paired_tows_5mi_72hr.csv')
+paired_tows_5mi_72hr_1 <- read.csv('./data/sf_paired_data/paired_tows_5mi_72hr.csv')
+
+cod_paired_tows_5mi_72hr <- paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) 
+
+cod_paired_tows_5mi_72hr1 <- paired_tows_5mi_72hr_1 %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) 
+
+cod_paired_tows_5mi_72hr2 <- paired_tows_5mi_72hr %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  drop_na(sf_species_cpua, nefsc_species_cpua_LB) %>%
+  filter(CATCHWT_updated > 0) %>%
+  filter(sf_species_cpua > 0) %>%
+  mutate(old_relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua_LB)) %>%
+  mutate(relative_efficiency = sf_species_cpua/(nefsc_species_cpua_LB + sf_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  mutate(dayNight = case_when(
+    dayNight_sf == "day" & dayNight_nefsc == "day" ~ "day", 
+    dayNight_sf == "night" & dayNight_nefsc == "night" ~ "night", 
+    dayNight_sf == "day" & dayNight_nefsc == "night" ~ "mismatch",
+    dayNight_sf == "night" & dayNight_nefsc == "day" ~ "mismatch", 
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  drop_na(AVGDEPTH, BOTTEMP, dayNight, towTime, mgmt_area) %>%
+  distinct() %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua_LB < 10000)
+
+
+cod_paired_tows_5mi_72hr3 <- paired_tows_5mi_72hr_1 %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  drop_na(sf_species_cpua, nefsc_species_cpua_LB) %>%
+  filter(CATCHWT_updated > 0) %>%
+  filter(sf_species_cpua > 0) %>%
+  mutate(old_relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua_LB)) %>%
+  mutate(relative_efficiency = sf_species_cpua/(nefsc_species_cpua_LB + sf_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  mutate(dayNight = case_when(
+    dayNight_sf == "day" & dayNight_nefsc == "day" ~ "day", 
+    dayNight_sf == "night" & dayNight_nefsc == "night" ~ "night", 
+    dayNight_sf == "day" & dayNight_nefsc == "night" ~ "mismatch",
+    dayNight_sf == "night" & dayNight_nefsc == "day" ~ "mismatch", 
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  drop_na(AVGDEPTH, BOTTEMP, dayNight, towTime, mgmt_area) %>%
+  distinct() %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  filter(sf_species_cpua < 10000) %>%
+  filter(nefsc_species_cpua_LB < 10000)
+
+
+
+
+paired_tows_1mi_24hr %>%
+  filter(CATCHWT_updated > 0)
+
+paired_tows_1mi_24hr_1 %>%
+  filter(CATCHWT_updated > 0)
+
+
+
+all.equal(paired_tows_1mi_24hr, paired_tows_1mi_24hr_1)
+all.equal(paired_tows_5mi_72hr, paired_tows_5mi_72hr_1)
+
+
+cod_paired_tows_5mi_72hr %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua_LB)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = '') + 
+  stat_cor(aes(label = paste(..rr.label..)))  + 
+  theme_classic()
+
+cod_paired_tows_5mi_72hr1 %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua_LB)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = '') + 
+  stat_cor(aes(label = paste(..rr.label..)))  + 
+  theme_classic()
+
+cod_paired_tows_5mi_72hr2 %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua_LB)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = '') + 
+  stat_cor(aes(label = paste(..rr.label..)))  + 
+  theme_classic()
+
+cod_paired_tows_5mi_72hr3 %>%
+  ggplot(aes(x = sf_species_cpua, 
+             y = nefsc_species_cpua_LB)) + 
+  geom_point() + 
+  geom_abline(intercept = 0, slope = 1) +
+  labs(x = 'Study Fleet CPUA', y = 'NEFSC CPUA', title = '') + 
+  stat_cor(aes(label = paste(..rr.label..)))  + 
+  theme_classic()
+
+
+```
+
+
+
+
+
+
+
+
