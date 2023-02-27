@@ -1212,7 +1212,7 @@ haddockm <- fit.models(haddock_paired_tows_5mi_72hr_re)
 compare.models(haddockm)
 
 #storing the optimal model and plotting the diagnostics
-haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + mgmt_area + towTime,
+haddockm_optimal <- glm(relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime,
                         family = binomial, data = haddock_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))
@@ -1434,7 +1434,7 @@ witchflm <- fit.models(witchfl_paired_tows_5mi_72hr_re)
 compare.models(witchflm)
 
 #storing the optimal model and plotting the diagnostics
-witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area, 
+witchflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + mgmt_area + towTime, 
                         family = binomial, data = witchfl_paired_tows_5mi_72hr_re) # Model w mgmt_area had NAs in coefficient table 
 
 par(mfrow=c(2,2))
@@ -2136,7 +2136,7 @@ compare.models(winterflm)
 
 
 #storing the optimal model and plotting the diagnostics
-winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + season + AVGDEPTH + BOTTEMP, 
+winterflm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + AVGDEPTH + BOTTEMP, 
                          family = binomial, data = winterfl_paired_tows_5mi_72hr_re) # Model w mgmt_area had NAs in coefficient table 
 
 par(mfrow=c(2,2))
@@ -2387,7 +2387,7 @@ compare.models(monkfishm)
 
 
 #storing the optimal model and plotting the diagnostics
-monkfishm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + BOTTEMP, 
+monkfishm_optimal <- glm(relative_efficiency ~ VESSEL_NAME + BOTTEMP + dayNight, 
                          family = binomial, data = monkfish_paired_tows_5mi_72hr_re)
 
 par(mfrow=c(2,2))

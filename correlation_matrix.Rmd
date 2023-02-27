@@ -39,7 +39,7 @@ library(ggpubr)
 
 
 ```{r}
-paired_tows_1mi_24hr <- read.csv('./data/paired_tows_1mi_24hr.csv')
+paired_tows_1mi_24hr <- read.csv('./data/sf_paired_data/paired_tows_1mi_24hr.csv')
 paired_tows_5mi_72hr <- read.csv('./data/paired_tows_5mi_72hr.csv')
 ```
 
@@ -69,15 +69,43 @@ cor_test_sf <- function(x) {
 }
 
 
+#creating a function to get the sample size at each match
+match_sample <- function(x) {
+  x_1 <- x %>%
+    filter(CATCHWT_updated > 0) %>%
+    count(EFFORT_ID)
+  
+  nrow(x_1)
+}
+
+
+
+#creating a function to run a t-test and pull out the t-statistic, p-value, and mean difference 
+
+
 
 ```
 
 
-
+# Study Fleet
 ```{r}
 #reading in the list of files, and then reading in all the datasets to a list 
 filenames <- list.files(path = "data/sf_paired_data", recursive = TRUE, full.names = TRUE)
 datasets <- lapply(filenames, read_csv)
+
+
+#creating a dataset with all the sample size at each match 
+datasets_tibble <- as_tibble_col(filenames, column_name = "dataset") %>%
+  mutate(dataset = str_sub(dataset, 21, -5))
+
+dataset_sample <- lapply(datasets, match_sample)
+
+datasets_tibble <- datasets_tibble %>%
+  mutate(n = dataset_sample) %>%
+  unnest(cols = n)
+
+
+###############################################################################
 
 
 #filter all the datasets for just cod
@@ -93,6 +121,23 @@ codr <- as_tibble_col(filenames, column_name = "dataset") %>%
   mutate(dataset = str_sub(dataset, 21, -5), 
          r2 = cod_r2) %>%
   unnest(cols = c(r2))
+
+
+#run a t-test for each dataset and pull out the t-statistic, p-value, and mean difference 
+cod_ttests_stat <- lapply(cod_datasets, cod_ttests_stat)
+cod_ttests_pval <- lapply(cod_datasets, cod_ttests_pval)
+cod_ttests_est <- lapply(cod_datasets, cod_ttests_est)
+
+
+
+
+#add a column for the t-test results 
+codr <- codr %>%
+  mutate(t_stat = cod_ttests_stat, 
+         pval = cod_ttests_pval, 
+         mean_diff = cod_ttests_est) %>%
+  unnest(cols = c(t_stat, pval, mean_diff))
+
 
 
 
@@ -338,10 +383,144 @@ cod_paired_tows_5mi_72hr3 %>%
   theme_classic()
 
 
+
+
+
+
+
+
+
+
+
+
+###############################################################################
+#running t-test
+paired_tows_5mi_72hr_1 <- paired_tows_5mi_72hr_1 %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
+
+
+cort_cod <- cor.test(cod_paired_tows_5mi_72hr$sf_species_cpua, cod_paired_tows_5mi_72hr$nefsc_species_cpua_LB, method = "pearson")
+
+cort_cod
+(cort_cod$estimate)^2
+
+
+
+cod_ttest_x <- t.test(paired_tows_5mi_72hr_1$log_sf_species_cpua, paired_tows_5mi_72hr_1$log_nefsc_species_cpua_LB, paired = TRUE)
+cod_ttest_x
+
+
+#back transform the estimate
+exp(cod_ttest$estimate)
+exp(cod_ttest$conf.int)
+
+
+
+
+
 ```
 
 
 
+```{r}
+cod_paired_tows_1mi_24hr <- paired_tows_1mi_24hr %>%
+    filter(SVSPP == 73 & SPECIES_ITIS == 164712)
+
+cort_cod <- cor.test(cod_paired_tows_1mi_24hr$sf_species_cpua, cod_paired_tows_1mi_24hr$nefsc_species_cpua_LB, method = "pearson")
+
+cort_cod
+(cort_cod$estimate)^2
+
+
+cod_paired_tows_1mi_24hr <- cod_paired_tows_1mi_24hr %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
+
+cod_ttest_x <- t.test(cod_paired_tows_1mi_24hr$log_sf_species_cpua, cod_paired_tows_1mi_24hr$log_nefsc_species_cpua_LB, paired = TRUE)
+cod_ttest_x
+
+
+cod_ttest_x$statistic
+cod_ttest_x$p.value
+
+
+#back transform the estimate
+exp(cod_ttest$estimate)
+exp(cod_ttest$conf.int)
+  
+
+
+
+cod_ttests <- function(x) {
+  x <- x %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
+
+  cod_ttest_x <- t.test(x$log_sf_species_cpua, x$log_nefsc_species_cpua_LB, paired = TRUE)
+  cod_ttest_x
+
+
+  cod_stat <- cod_ttest_x$statistic
+  cod_pval <- cod_ttest_x$p.value
+
+
+  #back transform the estimate
+  cod_est <- exp(cod_ttest_x$estimate)
+  exp(cod_ttest_x$conf.int)
+  
+  cod_stat
+  cod_pval
+  cod_est
+  
+}
+
+
+################################################################################
+cod_ttests_stat <- function(x) {
+  x <- x %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
+
+  cod_ttest_x <- t.test(x$log_sf_species_cpua, x$log_nefsc_species_cpua_LB, paired = TRUE)
+  cod_ttest_x
+
+
+  cod_stat <- cod_ttest_x$statistic
+
+  
+  cod_stat
+}
+
+
+cod_ttests_pval <- function(x) {
+  x <- x %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
+
+  cod_ttest_x <- t.test(x$log_sf_species_cpua, x$log_nefsc_species_cpua_LB, paired = TRUE)
+
+  cod_pval <- cod_ttest_x$p.value
+
+  cod_pval
+}
+
+
+cod_ttests_est <- function(x) {
+  x <- x %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
+
+  cod_ttest_x <- t.test(x$log_sf_species_cpua, x$log_nefsc_species_cpua_LB, paired = TRUE)
+
+  #back transform the estimate
+  cod_est <- exp(cod_ttest_x$estimate)
+
+  cod_est
+}
+
+
+```
 
 
 

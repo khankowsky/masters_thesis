@@ -217,7 +217,7 @@ p1 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = mgmt_area)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -236,7 +236,7 @@ p2 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = season)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -255,7 +255,7 @@ p3 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = AVGDEPTH)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -274,7 +274,7 @@ p4 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = FTROPLEN)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -294,7 +294,7 @@ p5 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = SWEEPDIA)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -313,7 +313,7 @@ p6 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = NSWEEPS)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -332,7 +332,7 @@ p7 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(FTROPTYP))) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -362,7 +362,7 @@ p8 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(GRCABTYP))) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -393,7 +393,7 @@ p9 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(BRDLGTYP))) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -426,7 +426,7 @@ p10 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = BOTTEMP)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -758,7 +758,7 @@ paired_tows_5mi_72hr_ob_re <- paired_tows_5mi_72hr_ob %>%
     AREA.x %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
   )) %>%
   mutate(season = case_when(
-    month(START_TOW_DATE_GMT) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT) %in% c(02, 03, 04, 05) ~ "Spring", 
     month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
   )) %>%
   mutate(DayNight = case_when(
@@ -978,7 +978,7 @@ cod_paired_tows_5mi_72hr_ob_re %>%
 cod_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -988,7 +988,7 @@ cod_paired_tows_5mi_72hr_ob_re %>%
     fill = "red"
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
-  geom_hline(yintercept = 0.6005787, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = mean(cod_paired_tows_5mi_72hr_ob_re$fitted), linetype = "dashed", color = "red") + 
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
@@ -1012,7 +1012,7 @@ plot(allEffects(codm_ob_optimal))
 
 ```
 
-```{r, fig.width=15, fig.height=30}
+```{r, fig.width=15, fig.height=15}
 #plotting the relative efficency by trawl type and other explanatory variables 
 re_plots(cod_paired_tows_5mi_72hr_ob_re)
 ```
@@ -1203,7 +1203,7 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
 haddock_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1213,7 +1213,7 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
     fill = "red"
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
-  geom_hline(yintercept = 0.5871872, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = mean(haddock_paired_tows_5mi_72hr_ob_re$fitted), linetype = "dashed", color = "red") + 
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
@@ -1226,7 +1226,7 @@ plot(allEffects(haddockm_ob_optimal))
 
 ```
 
-```{r, fig.width=15, fig.height=30}
+```{r, fig.width=15, fig.height=15}
 #plotting the relative efficency by trawl type and other explanatory variables 
 re_plots(haddock_paired_tows_5mi_72hr_ob_re)
 ```
@@ -1336,7 +1336,7 @@ compare.models(witchflm)
 witchflm_ob_full <- glm(relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + BOTTEMP + DayNight + towTime, 
                     family = binomial, data = witchfl_paired_tows_5mi_72hr_ob_re)
 
-witchflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + towTime, 
+witchflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + AVGDEPTH + towTime, 
                            family = binomial, data = witchfl_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
@@ -1382,7 +1382,7 @@ witchfl_paired_tows_5mi_72hr_ob_re %>%
 witchfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1392,7 +1392,7 @@ witchfl_paired_tows_5mi_72hr_ob_re %>%
     fill = "red"
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
-  geom_hline(yintercept = 0.4874408, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = mean(witchfl_paired_tows_5mi_72hr_ob_re$fitted), linetype = "dashed", color = "red") + 
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
@@ -1404,7 +1404,7 @@ plot(allEffects(witchflm_ob_optimal))
 
 ```
 
-```{r, fig.width=15, fig.height=30}
+```{r, fig.width=15, fig.height=15}
 #plotting the relative efficency by trawl type and other explanatory variables 
 re_plots(witchfl_paired_tows_5mi_72hr_ob_re)
 ```
@@ -1563,7 +1563,7 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
 yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1573,7 +1573,7 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
     fill = "red"
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
-  geom_hline(yintercept = 0.6146174, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = mean(yellowtailfl_paired_tows_5mi_72hr_ob_re$fitted), linetype = "dashed", color = "red") + 
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
@@ -1585,7 +1585,7 @@ plot(allEffects(yellowtailflm_ob_optimal))
 
 ```
 
-```{r, fig.width=15, fig.height=30}
+```{r, fig.width=15, fig.height=15}
 #plotting the relative efficency by trawl type and other explanatory variables 
 re_plots(yellowtailfl_paired_tows_5mi_72hr_ob_re)
 ```
@@ -1744,7 +1744,7 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
 plaice_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1754,7 +1754,7 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
     fill = "red"
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
-  geom_hline(yintercept = 0.5975078, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = mean(plaice_paired_tows_5mi_72hr_ob_re$fitted), linetype = "dashed", color = "red") + 
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
@@ -1766,7 +1766,7 @@ plot(allEffects(plaicem_ob_optimal))
 
 ```
 
-```{r, fig.width=15}
+```{r, fig.width=15, fig.height=15}
 #plotting the relative efficency by trawl type and other explanatory variables 
 re_plots(plaice_paired_tows_5mi_72hr_ob_re)
 ```
@@ -1881,7 +1881,7 @@ compare.models(winterflm)
 winterflm_ob_full <- glm(relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + BOTTEMP + DayNight + towTime, 
                     family = binomial, data = winterfl_paired_tows_5mi_72hr_ob_re)
 
-winterflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season + BOTTEMP + towTime, 
+winterflm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season + BOTTEMP, 
                             family = binomial, data = winterfl_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
@@ -1928,7 +1928,7 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
 winterfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -1938,7 +1938,7 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
     fill = "red"
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
-  geom_hline(yintercept = 0.5122059, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = mean(winterfl_paired_tows_5mi_72hr_ob_re$fitted), linetype = "dashed", color = "red") + 
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
@@ -1950,7 +1950,7 @@ plot(allEffects(winterflm_ob_optimal))
 ```
 
 
-```{r, fig.width=15, fig.height=30}
+```{r, fig.width=15, fig.height=15}
 #plotting the relative efficency by trawl type and other explanatory variables 
 re_plots(winterfl_paired_tows_5mi_72hr_ob_re)
 ```
@@ -2067,7 +2067,7 @@ compare.models(monkfishm)
 monkfishm_ob_full <- glm(relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + BOTTEMP + DayNight + towTime, 
                             family = binomial, data = monkfish_paired_tows_5mi_72hr_ob_re)
 
-monkfishm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season + AVGDEPTH, 
+monkfishm_ob_optimal <- glm(relative_efficiency ~ trawl_type + season + mgmt_area, 
                             family = binomial, data = monkfish_paired_tows_5mi_72hr_ob_re)
 
 par(mfrow=c(2,2))
@@ -2113,7 +2113,7 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
 monkfish_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
              y = fitted)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2123,7 +2123,7 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
     fill = "red"
   ) + 
   labs(x = "Trawl Type", y = "Fitted Values of Relative Efficiency") + 
-  geom_hline(yintercept = 0.631298, linetype = "dashed", color = "red") + 
+  geom_hline(yintercept = mean(monkfish_paired_tows_5mi_72hr_ob_re$fitted), linetype = "dashed", color = "red") + 
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") + 
   scale_x_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
@@ -2208,7 +2208,7 @@ p1 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = mgmt_area)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2227,7 +2227,7 @@ p2 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = season)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2246,7 +2246,7 @@ p3 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = AVGDEPTH)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2265,7 +2265,7 @@ p4 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = FTROPLEN)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2285,7 +2285,7 @@ p5 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = SWEEPDIA)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2304,7 +2304,7 @@ p6 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = NSWEEPS)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2323,7 +2323,7 @@ p7 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(FTROPTYP))) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2353,7 +2353,7 @@ p8 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(GRCABTYP))) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2384,7 +2384,7 @@ p9 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(BRDLGTYP))) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2417,7 +2417,7 @@ p10 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = BOTTEMP)) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",
@@ -2437,7 +2437,7 @@ p11 <- x %>%
   ggplot(aes(x = trawl_type, 
              y = fitted, 
              col = as.factor(CODHUNG))) + 
-  geom_jitter(width=0.2, height=0.2) + 
+  geom_jitter(width=0.2) + 
   stat_summary(
     geom = "point",
     fun = "mean",

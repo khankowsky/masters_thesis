@@ -38,8 +38,8 @@ library(effects)
 # Read-In the Data
 ```{r}
 #study fleet
-paired_tows_2mi_48hr <- read.csv('./data/paired_tows_2mi_48hr.csv')
-paired_tows_3mi_72hr <- read.csv('./data/paired_tows_3mi_72hr.csv')
+paired_tows_2mi_48hr <- read.csv('./data/sf_paired_data/paired_tows_2mi_48hr.csv')
+paired_tows_3mi_72hr <- read.csv('./data/sf_paired_data/paired_tows_3mi_72hr.csv')
 
 #observer
 paired_tows_2mi_48hr_ob <- read.csv('./data/paired_tows_2mi_48hr_ob.csv')
