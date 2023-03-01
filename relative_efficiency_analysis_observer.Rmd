@@ -974,6 +974,11 @@ cod_paired_tows_5mi_72hr_ob_re %>%
 cod_paired_tows_5mi_72hr_ob_re %>%
   summarise(mean(fitted), n = n())
 
+#RE estimate and Standard deviation 
+cod_paired_tows_5mi_72hr_ob_re %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
+
 #plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
 cod_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
@@ -1199,6 +1204,11 @@ haddock_paired_tows_5mi_72hr_ob_re %>%
 haddock_paired_tows_5mi_72hr_ob_re %>%
   summarise(mean(fitted), n = n())
 
+#RE estimate and Standard deviation 
+haddock_paired_tows_5mi_72hr_ob_re %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
+
 #plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
 haddock_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
@@ -1377,6 +1387,16 @@ witchfl_paired_tows_5mi_72hr_ob_re %>%
 
 witchfl_paired_tows_5mi_72hr_ob_re %>%
   summarise(mean(fitted), n = n())
+
+#RE estimate and Standard deviation 
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
+
+witchfl_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
 
 #plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
 witchfl_paired_tows_5mi_72hr_ob_re %>%
@@ -1559,6 +1579,16 @@ yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
 yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
   summarise(mean(fitted), n = n())
 
+#RE estimate and Standard deviation 
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
+
+yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
+
 #plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
 yellowtailfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
@@ -1739,6 +1769,16 @@ plaice_paired_tows_5mi_72hr_ob_re %>%
 
 plaice_paired_tows_5mi_72hr_ob_re %>%
   summarise(mean(fitted), n = n())
+
+#RE estimate and Standard deviation 
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
+
+plaice_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
 
 #plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
 plaice_paired_tows_5mi_72hr_ob_re %>%
@@ -1924,6 +1964,16 @@ winterfl_paired_tows_5mi_72hr_ob_re %>%
 winterfl_paired_tows_5mi_72hr_ob_re %>%
   summarise(mean(fitted), n = n())
 
+#RE estimate and Standard deviation 
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
+
+winterfl_paired_tows_5mi_72hr_ob_re %>%
+  group_by(trawl_type) %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
+
 #plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
 winterfl_paired_tows_5mi_72hr_ob_re %>%
   ggplot(aes(x = trawl_type, 
@@ -2108,6 +2158,11 @@ monkfish_paired_tows_5mi_72hr_ob_re %>%
 
 monkfish_paired_tows_5mi_72hr_ob_re %>%
   summarise(mean(fitted), n = n())
+
+#RE estimate and Standard deviation 
+monkfish_paired_tows_5mi_72hr_ob_re %>%
+  summarise((mean(fitted))*2,  
+            SD = sd(fitted))
 
 #plot of trawl type and relative efficiency estimates from the model and the mean for each trawl type 
 monkfish_paired_tows_5mi_72hr_ob_re %>%
