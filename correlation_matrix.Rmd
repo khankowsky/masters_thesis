@@ -81,7 +81,47 @@ match_sample <- function(x) {
 
 
 #creating a function to run a t-test and pull out the t-statistic, p-value, and mean difference 
+cod_ttests_stat <- function(x) {
+  x <- x %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
 
+  cod_ttest_x <- t.test(x$log_sf_species_cpua, x$log_nefsc_species_cpua_LB, paired = TRUE)
+  cod_ttest_x
+
+
+  cod_stat <- cod_ttest_x$statistic
+
+  
+  cod_stat
+}
+
+
+cod_ttests_pval <- function(x) {
+  x <- x %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
+
+  cod_ttest_x <- t.test(x$log_sf_species_cpua, x$log_nefsc_species_cpua_LB, paired = TRUE)
+
+  cod_pval <- cod_ttest_x$p.value
+
+  cod_pval
+}
+
+
+cod_ttests_est <- function(x) {
+  x <- x %>%
+  mutate(log_sf_species_cpua = log(sf_species_cpua), 
+         log_nefsc_species_cpua_LB = log(nefsc_species_cpua_LB))
+
+  cod_ttest_x <- t.test(x$log_sf_species_cpua, x$log_nefsc_species_cpua_LB, paired = TRUE)
+
+  #back transform the estimate
+  cod_est <- exp(cod_ttest_x$estimate)
+
+  cod_est
+}
 
 
 ```
@@ -129,8 +169,6 @@ cod_ttests_pval <- lapply(cod_datasets, cod_ttests_pval)
 cod_ttests_est <- lapply(cod_datasets, cod_ttests_est)
 
 
-
-
 #add a column for the t-test results 
 codr <- codr %>%
   mutate(t_stat = cod_ttests_stat, 
@@ -139,15 +177,15 @@ codr <- codr %>%
   unnest(cols = c(t_stat, pval, mean_diff))
 
 
-
-
-
+#print the datasets of interest
+datasets_tibble
+codr
 
 ```
 
 
 
-
+# Junk 
 ```{r}
 datasets <- list(paired_tows_1mi_24hr, 
                  paired_tows_5mi_72hr)
