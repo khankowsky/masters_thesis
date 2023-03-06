@@ -499,14 +499,13 @@ sf_trawl <- study_fleet %>%
       #OTO - otter trawl, bottom, other
       #OTR - otter trawl, ruhle 
       #OTS - otter trawl, bottom, shrimp
-  mutate(survey_comercial_ID = 2) %>%
+  mutate(survey_commerical_ID = 2) %>%
   rename(START_TOW_DATE_GMT = START_HAUL_DATE_GMT) %>%
   rename(END_TOW_DATE_GMT = END_SET_DATE_GMT) %>%
   rename(START_TOW_LAT = START_HAUL_LAT) %>% 
   rename(START_TOW_LON = START_HAUL_LON) %>%
   rename(END_TOW_LAT = END_SET_LAT) %>%
   rename(END_TOW_LON = END_SET_LON) %>%
-  rename(trawl_type = VTR_GEAR_CODE) %>%
   drop_na(END_TOW_LAT) %>%
   drop_na(END_TOW_LON)
 
@@ -530,7 +529,7 @@ observer_trawl <- observer %>%
   relocate(START_TOW_DATE, .after = TIMEHBEG) %>%
   mutate(END_TOW_DATE = make_datetime(YEARHEND, MONTHEND, DAYHEND, TIMEHEND %/% 100, TIMEHEND %% 100)) %>%
   relocate(END_TOW_DATE, .after = TIMEHEND) %>%
-  mutate(survey_comercial_ID = 3) %>%
+  mutate(survey_commerical_ID = 3) %>%
   rename(START_TOW_LAT = GIS_LATHBEG) %>% 
   rename(START_TOW_LON = GIS_LONHBEG) %>%
   rename(END_TOW_LAT = GIS_LATHEND) %>%
@@ -775,6 +774,52 @@ observer_trawl <- observer_trawl %>%
 
   ))
 
+
+###############################################################################
+
+sf_trawl <- sf_trawl %>% 
+  mutate(trawl_type = case_when(
+    VTR_GEAR_CODE %in% c("OHS") ~ 3, #Separator Trawls
+    VTR_GEAR_CODE %in% c("OTR") ~ 4 #Eliminator Trawls
+  ))
+
+
+
+
+###############################################################################
+#trying to figure out how to do it for study fleet
+
+sf_trawl %>%
+  mutate(target_catch = case_when(
+    sf_species_catch >= 50 ~ ">50LB",
+    sf_species_catch < 50 ~ "<50LB"
+  )) %>%
+  filter(trawl_type == "OTF") %>%
+  count(TARGET_SPECIES, MESH_TYPE, target_catch)
+
+sf_trawl %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  count(trawl_type, MESH_TYPE)
+
+sf_trawl %>%
+  count(MESH_SIZE)
+
+sf_trawl %>%
+  count(GEAR_SIZE)
+
+sf_trawl %>%
+  filter(SPECIES_ITIS %in% c(164712, #cod
+                             164744, #haddock
+                             172909, #yellowtail
+                             172877, #plaice
+                             172873, #witch fl 
+                             172905, #winter fl 
+                             164499  #monkfish
+                             )) %>%
+  # count(VTR_GEAR_CODE, MESH_TYPE)
+  count(GEAR_SIZE)
+
+
 ```
 
 ## Calculating catch per swept area
@@ -803,7 +848,8 @@ nefsc <- nefsc %>%
   mutate(CATCHWT_updated_LB = 2.2046226218*CATCHWT_updated) %>%     #going from kilograms to pounds 
   rename(SWEPT_AREA = AREA_SWEPT_DOORS_MEAN_KM2) %>% 
   mutate(nefsc_species_cpua = CATCHWT_updated/SWEPT_AREA) %>%
-  mutate(nefsc_species_cpua_LB = CATCHWT_updated_LB/SWEPT_AREA)
+  mutate(nefsc_species_cpua_LB = CATCHWT_updated_LB/SWEPT_AREA) %>%
+  filter(SVVESSEL %in% c("AL", "HB"))
 
 ```
 
@@ -811,35 +857,49 @@ nefsc <- nefsc %>%
 # Getting Data in Order for GAMs 
 ```{r}
 
-sf_trawl %>%
-  mutate(target_catch = case_when(
-    sf_species_catch >= 50 ~ ">50LB",
-    sf_species_catch < 50 ~ "<50LB"
-  )) %>%
-  filter(trawl_type == "OTF") %>%
-  count(TARGET_SPECIES, MESH_TYPE, target_catch)
+  
+  
+###############################################################################
+#selecting just the variables of interest for each dataset and organizing the datasets to be merged into one dataset
+sf_gam <- sf_trawl %>%
+  mutate(START_TOW_DATE_GMT = with_tz(START_TOW_DATE_GMT, tzone = "GMT"), 
+         END_TOW_DATE_GMT = with_tz(END_TOW_DATE_GMT, tzone = "GMT")) %>%
+  mutate(START_TOW_DATE = with_tz(START_TOW_DATE_GMT, tzone = "America/New_York"), 
+         END_TOW_DATE = with_tz(END_TOW_DATE_GMT, tzone = "America/New_York")) %>%
+  select(EFFORT_ID, VESSEL_NAME, 
+         START_TOW_DATE, END_TOW_DATE, 
+         START_TOW_LAT, START_TOW_LON, END_TOW_LAT, END_TOW_LON, 
+         SPECIES_ITIS, COMMON_NAME, survey_commerical_ID, 
+         swept_area, trawl_type, sf_species_catch) %>%
+  mutate(dataset = "SF") %>%
+  rename(CATCH = sf_species_catch, 
+         TOW_ID = EFFORT_ID, 
+         SPECIES_NAME = COMMON_NAME, 
+         VESSEL = VESSEL_NAME) %>%
+  relocate(dataset, 
+           TOW_ID) %>%
+  relocate(VESSEL, .after = TOW_ID) %>%
+  drop_na(trawl_type, swept_area)
 
-sf_trawl %>%
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  filter
-  count(trawl_type, MESH_TYPE)
-  
-  
+
 
 
 observer_gam <- observer_trawl %>%
-  select(trip_haul_ID, START_TOW_DATE, END_TOW_DATE, 
+  select(trip_haul_ID, VESSELNAME, START_TOW_DATE, END_TOW_DATE, 
          START_TOW_LAT, START_TOW_LON, END_TOW_LAT, END_TOW_LON, 
-         NESPP4, COMNAME, survey_comercial_ID, 
+         NESPP4, COMNAME, survey_commerical_ID, 
          swept_area, trawl_type, ob_species_catch) %>%
   mutate(dataset = "Obs") %>%
   rename(CATCH = ob_species_catch, 
          TOW_ID = trip_haul_ID, 
-         SPECIES_NAME = COMNAME) %>%
+         SPECIES_NAME = COMNAME, 
+         VESSEL = VESSELNAME) %>%
   relocate(dataset, 
            TOW_ID) %>%
+  relocate(VESSEL, .after = TOW_ID) %>%
   drop_na(trawl_type, swept_area)
   
+
 
 nefsc_gam <- nefsc %>%
   select(cruise_station_ID, SVVESSEL, SVGEAR, 
@@ -850,16 +910,71 @@ nefsc_gam <- nefsc %>%
   mutate(dataset = "NEFSC") %>%
   rename(CATCH = CATCHWT_updated_LB, 
          TOW_ID = cruise_station_ID, 
-         SPECIES_NAME = LOGGED_SPECIES_NAME) %>% 
+         SPECIES_NAME = LOGGED_SPECIES_NAME, 
+         VESSEL = SVVESSEL, 
+         trawl_type = SVGEAR, 
+         START_TOW_DATE = START_TOW_DATE_EST, 
+         END_TOW_DATE = END_TOW_DATE_EST, 
+         swept_area = SWEPT_AREA) %>% 
   relocate(dataset, 
-           TOW_ID)
+           TOW_ID) %>%
+  relocate(trawl_type, .after = swept_area) %>%
+  relocate(SVSPP, .after = END_TOW_LON) %>%
+  drop_na(trawl_type, swept_area)
 
 
-nefsc_gam %>%
-  count(SVVESSEL, SVGEAR)
 
+###############################################################################
+#making sure the species_id codes are the same 
+sf_gam <- sf_gam %>%
+  mutate(SVSPP = case_when(
+    SPECIES_ITIS == 164712 ~ 73, #cod
+    SPECIES_ITIS == 164744 ~ 74, #haddock
+    SPECIES_ITIS == 172909 ~ 105, #yellowtail flounder
+    SPECIES_ITIS == 172877 ~ 102, #american plaice
+    SPECIES_ITIS == 172873 ~ 107, #witch flounder
+    SPECIES_ITIS == 172905 ~ 106, #winter flounder
+    SPECIES_ITIS == 164499 ~ 197  #goosefish
+  )) %>%
+  relocate(SVSPP, .after = END_TOW_LON)
+
+
+observer_gam <- observer_gam %>% 
+  mutate(SVSPP = case_when(
+    NESPP4 == 818 ~ 73,  #cod 
+    NESPP4 == 1477 ~ 74,  #haddock
+    NESPP4 == 1230 ~ 105,  #yellowtail flounder
+    NESPP4 == 1240 ~ 102,  #american plaice
+    NESPP4 == 1220 ~ 107,  #witch flounder
+    NESPP4 == 1200 ~ 106,  #winter flounder
+    NESPP4 == 124 ~ 197    #monkfish
+  )) %>%
+  relocate(SVSPP, .after = END_TOW_LON)
+
+
+
+#rbind the datasets 
+gam_datset <- bind_rows(nefsc_gam, sf_gam, observer_gam)
+
+
+#creating a new variable for trawl_type idk why 
+gam_datset <- gam_datset %>%
+  mutate(trawl_type1 = case_when(
+    trawl_type == 1 ~ "GRNDF_TRWL", 
+    trawl_type == 2 ~ "FLATF_TRWL", 
+    trawl_type == 3 ~ "SEP_TRWL", 
+    trawl_type == 4 ~ "ELIM_TRWL", 
+    trawl_type == 10 ~ "HB", 
+    trawl_type == 11 ~ "AB", 
+  )) %>%
+  relocate(trawl_type1, .after = trawl_type) %>%
+  filter(SVSPP %in% c(73, 74, 105, 102, 107, 106, 197))
 
 ```
+
+
+
+
 
 
 
