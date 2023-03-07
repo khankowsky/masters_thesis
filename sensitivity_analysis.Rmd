@@ -1,0 +1,208 @@
+---
+title: "sensitivity_analysis"
+output: html_document
+date: "2023-03-06"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(skimr)
+library(data.table)
+library(fuzzyjoin)
+library(lubridate)
+library(kableExtra)
+library(modEvA)
+library(GGally)
+library(readr)
+
+library(maps) # land masses
+library(rgdal) # read OGR vector maps into Spatial objects
+library(viridis) # for customizing scale bars
+library(mapproj)
+library(hexbin)
+library(sf)
+library(scales)
+library(gridExtra)
+library(openxlsx)
+library(beepr)
+library(purrr)
+library(rsq)
+library(asht)
+library(car)
+library(effects)
+library(ggpubr)
+
+```
+
+
+# Functions 
+```{r}
+
+#creating a function to filter for the species of interest and create the explanatory variables 
+rel_eff_func <- function(x) {
+  x <- x %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712 | #cod 
+         SVSPP == 74 & SPECIES_ITIS == 164744 | #haddock
+         SVSPP == 105 & SPECIES_ITIS == 172909 | #yellowtail flounder
+         SVSPP == 102 & SPECIES_ITIS == 172877 | #american plaice
+         SVSPP == 107 & SPECIES_ITIS == 172873 | #witch flounder
+         SVSPP == 106 & SPECIES_ITIS == 172905 | #winter flounder
+         SVSPP == 197 & SPECIES_ITIS == 164499   #goosefish
+        ) %>%
+  drop_na(sf_species_cpua, nefsc_species_cpua_LB) %>%
+  filter(CATCHWT_updated > 0) %>%
+  filter(sf_species_cpua > 0) %>%
+  mutate(old_relative_efficiency = log(sf_species_cpua)/log(nefsc_species_cpua_LB)) %>%
+  mutate(relative_efficiency = sf_species_cpua/(nefsc_species_cpua_LB + sf_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA_CODE %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA_CODE %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA_CODE %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT.x) %in% c(03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT.x) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  mutate(dayNight = case_when(
+    dayNight_sf == "day" & dayNight_nefsc == "day" ~ "day", 
+    dayNight_sf == "night" & dayNight_nefsc == "night" ~ "night", 
+    dayNight_sf == "day" & dayNight_nefsc == "night" ~ "mismatch",
+    dayNight_sf == "night" & dayNight_nefsc == "day" ~ "mismatch", 
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  drop_na(AVGDEPTH, BOTTEMP, dayNight, towTime, mgmt_area) %>%
+  distinct() 
+}
+
+
+
+#trying to  create functions because I will be running the same models for every species dataset 
+covars <- c("season", "mgmt_area", "AVGDEPTH", "BOTTEMP", "dayNight", "towTime")
+combos <- purrr::map(1:6, ~as.data.frame(t(combn(covars, .x))))
+
+formulae <- combos %>%
+  map_dfr(unite, col="formula", sep = " + ") %>%
+  mutate(formula = paste0("relative_efficiency ~  VESSEL_NAME +", formula))
+
+
+#fit models (takes dataset)
+fit.models <- function(x) {
+  formulae$formula %>% purrr::map( ~glm(.x, family = binomial, data=x))
+}
+
+
+#compare models (takes list of models created by fit.models())
+compare.models <- function(x) {
+  formulae %>%
+  mutate(aic =  purrr::map_dbl(x, AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[63]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE)
+}
+
+
+#creating a function to extract the optimal model 
+extract_optimal_model <- function(x) {
+  formulae %>%
+  mutate(aic =  purrr::map_dbl(x, AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[63]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+}
+
+
+#get the mean RE values, sample size, and CVs for each dataset and optimal model 
+get_RE_values <- function(x) {
+  x_opt <- x$optimal_model %>%
+  purrr::map( ~glm(.x, family = binomial, data=x$dataset))
+
+  fitted_m <- fitted(x_opt)
+
+  x$mean_re <- fitted_m %>%
+    summarise(mean(fitted_m))
+
+  x$n <- fitted_m %>%
+    summarise(n = n())
+
+  x$cv <- fitted_m %>%
+    mutate(sd(fitted)/mean(fitted))
+}
+
+
+
+
+```
+
+
+
+# Running the relative efficiency analysis for all the datasets 
+```{r}
+#reading in the list of files, and then reading in all the datasets to a list 
+filenames <- list.files(path = "data/sf_paired_data", recursive = TRUE, full.names = TRUE)
+datasets <- lapply(filenames, read_csv)
+
+
+#creating a dataset with all the sample size at each match 
+datasets_tibble <- as_tibble_col(filenames, column_name = "dataset") %>%
+  mutate(dataset = str_sub(dataset, 21, -5))
+
+
+#running the relative efficiency calculation and filtering 
+datasets_re <- lapply(datasets, rel_eff_func)
+
+
+
+
+#fitting all the models to each dataset 
+models_all <- lapply(datasets_re, fit.models)
+
+
+#comparing all the models for all the datasets 
+compared_all <- lapply(models_all, compare.models)
+
+
+#extract the optimal model from each table 
+optimal_models <- lapply(models_all, extract_optimal_model)
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset 
+datasets_tibble <- datasets_tibble %>%
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season + towTime"))
+
+
+#run the optimal model for each dataset from the data_tibble 
+
+x_opt <- x$optimal_model %>%
+  purrr::map( ~glm(.x, family = binomial, data=x$dataset))
+
+x$fitted <- fitted(x_opt)
+
+datasets_tibble$mean_re <- x %>%
+  summarise(mean(fitted))
+
+datasets_tibble$n <- x %>%
+  summarise(n = n())
+
+datasets_tibble$cv <- x %>%
+  mutate(sd(fitted)/mean(fitted))
+
+
+datasets_tibble1 <- lapply(datasets_tibble, get_RE_values)
+
+
+
+```
+
