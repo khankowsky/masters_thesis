@@ -124,21 +124,62 @@ extract_optimal_model <- function(x) {
 }
 
 
-#get the mean RE values, sample size, and CVs for each dataset and optimal model 
-get_RE_values <- function(x, y) {
-  x_opt <- datasets_tibble$optimal_model %>%
-  purrr::map( ~glm(.x, family = binomial, data=y))
-
-  fitted_m <- fitted(x_opt)
-
-  datasets_tibble$mean_re <- mean(fitted_m)
-
-  datasets_tibble$n <- n(fitted_m)
-
-  datasets_tibble$cv <- (sd(fitted)/mean(fitted))
+##############################################################################
+#creating a function to filter for the species of interest and create the explanatory variables 
+rel_eff_func_ob <- function(x) {
+  x <- x %>%
+  filter(SVSPP == 73 & NESPP4 == 818 | #cod 
+         SVSPP == 74 & NESPP4 == 1477 | #haddock
+         SVSPP == 105 & NESPP4 == 1230 | #yellowtail flounder
+         SVSPP == 102 & NESPP4 == 1240 | #american plaice
+         SVSPP == 107 & NESPP4 == 1220 | #witch flounder
+         SVSPP == 106 & NESPP4 == 1200 | #winter flounder
+         SVSPP == 197 & NESPP4 == 124    #monkfish
+        ) %>%
+  drop_na(ob_species_cpua, nefsc_species_cpua_LB) %>%
+  filter(CATCHWT_updated > 0) %>%
+  mutate(old_relative_efficiency = log(ob_species_cpua)/log(nefsc_species_cpua_LB)) %>%
+  mutate(relative_efficiency = ob_species_cpua/(nefsc_species_cpua_LB + ob_species_cpua)) %>%
+  mutate(mgmt_area = case_when(
+    AREA.x %in% c(511, 512, 513, 514, 515) ~ "GOM", 
+    AREA.x %in% c(521, 522, 526, 525, 561, 562, 551, 552) ~ "GB", 
+    AREA.x %in% c(611, 612, 613, 539, 538, 537) ~ "SNE"
+  )) %>%
+  mutate(season = case_when(
+    month(START_TOW_DATE_GMT) %in% c(02, 03, 04, 05) ~ "Spring", 
+    month(START_TOW_DATE_GMT) %in% c(09, 10, 11) ~ "Fall", 
+  )) %>%
+  mutate(DayNight = case_when(
+    dayNight_ob == "night" & dayNight_nefsc == "night" ~ "Night",
+    dayNight_ob == "day" & dayNight_nefsc == "day" ~ "Day",
+    dayNight_ob == "night" & dayNight_nefsc =="day" ~ "Mismatch",
+    dayNight_ob == "day" & dayNight_nefsc == "night" ~ "Mismatch"
+  )) %>%
+  mutate(towTime = case_when(
+    time_dif > 0 ~ "nefsc_first", 
+    time_dif < 0 ~ "sf_first"
+  )) %>%
+  mutate(trawl_type = as.factor(trawl_type)) %>%
+  drop_na(trawl_type) %>%
+  drop_na(AVGDEPTH, BOTTEMP, DayNight, towTime) %>%
+  distinct()
 }
 
 
+#creating a function for fitting the observer dataset models 
+#trying to  create functions because I will be running the same models for every species dataset 
+covars_ob <- c("season", "mgmt_area", "AVGDEPTH", "BOTTEMP", "DayNight", "towTime")
+combos_ob <- purrr::map(1:6, ~as.data.frame(t(combn(covars_ob, .x))))
+
+formulae_ob <- combos_ob %>%
+  map_dfr(unite, col="formula_ob", sep = " + ") %>%
+  mutate(formula_ob = paste0("relative_efficiency ~  trawl_type + ", formula_ob))
+
+
+#fit models (takes dataset)
+fit.models_ob <- function(x) {
+  formulae_ob$formula_ob %>% purrr::map( ~glm(.x, family = binomial(link='logit'), data=x))
+}
 
 
 ```
@@ -161,50 +202,231 @@ datasets_tibble <- as_tibble_col(filenames, column_name = "dataset") %>%
 datasets_re <- lapply(datasets, rel_eff_func)
 
 
+#adding the individual datasets to the overall dataset 
+datasets_tibble <- datasets_tibble %>%
+  mutate(data = datasets_re)
+
+```
+
+# Run Sensitivity Analysis for Each Species and for Both Study Fleet and Observer Matches 
+
+# Study Fleet & NEFSC 
+## Cod
+```{r}
+#filtering the datasets for just cod
+datasets_tibble_cod <- datasets_tibble %>%
+  unnest(data) %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
 
 
 #fitting all the models to each dataset 
-models_all <- lapply(datasets_re, fit.models)
+models_all_cod <- lapply(datasets_tibble_cod$data, fit.models)
 
 
 #comparing all the models for all the datasets 
-compared_all <- lapply(models_all, compare.models)
+compared_all_cod <- lapply(models_all_cod, compare.models)
 
 
 #extract the optimal model from each table 
-optimal_models <- lapply(models_all, extract_optimal_model)
+optimal_models_cod <- lapply(models_all_cod, extract_optimal_model)
+
+optimal_models_cod
 
 
 #adding a column to the dataframe of the optimal model formula for each dataset 
-datasets_tibble <- datasets_tibble %>%
+datasets_tibble_cod <- datasets_tibble %>%
   mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season + towTime"))
 
 
 #run the optimal model for each dataset from the data_tibble 
-
-x_opt <- x$optimal_model %>%
-  purrr::map( ~glm(.x, family = binomial, data=paste(x$dataset)))
-
-x$fitted <- fitted(x_opt)
-
-datasets_tibble$mean_re <- x %>%
-  summarise(mean(fitted))
-
-datasets_tibble$n <- x %>%
-  summarise(n = n())
-
-datasets_tibble$cv <- x %>%
-  mutate(sd(fitted)/mean(fitted))
+dataset_final_cod <- datasets_tibble_cod %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  summarise(mean_re = mean(fitted), 
+         n = n(), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted))))
 
 
-datasets_tibble1 <- lapply(X = datasets_tibble, FUN = get_RE_values,  y = datasets_re)
+dataset_final_cod
 
-
-datasets_tibble %>%
-  purrr::map( ~glm(optimal_model, family = binomial, data=dataset))
+#plotting the RE estimate and CV and sample size 
+dataset_final_cod %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  ggplot() + 
+  geom_point(aes(x = match_crit, y = mean_re)) + 
+  geom_errorbar(aes(x = match_crit, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip()
   
-paste(datasets_tibble$dataset)
 
+
+
+###############################################################################
+#trying to figure out issue with categorical variables with only one level 
+datasets_tibble_cod %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  distinct(mgmt_area) %>%
+  count()
+
+datasets_tibble_cod %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  summarize(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime)) 
 
 ```
 
+
+## Haddock 
+```{r}
+#filtering the datasets for just cod
+datasets_tibble_haddock <- datasets_tibble %>%
+  unnest(data) %>%
+  filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#fitting all the models to each dataset 
+models_all_haddock <- lapply(datasets_tibble_haddock$data, fit.models)
+
+
+#comparing all the models for all the datasets 
+compared_all_haddock <- lapply(models_all_haddock, compare.models)
+
+
+#extract the optimal model from each table 
+optimal_models_haddock <- lapply(models_all_haddock, extract_optimal_model)
+
+optimal_models_haddock
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset 
+datasets_tibble_cod <- datasets_tibble %>%
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season + towTime"))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_haddock <- datasets_tibble_cod %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  summarise(mean_re = mean(fitted), 
+         n = n(), 
+         cv = (sd(fitted)/mean(fitted)))
+
+
+dataset_final_haddock
+
+###############################################################################
+datasets_tibble_haddock %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  summarize(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime)) 
+
+```
+
+
+
+
+## Witch Flounder 
+
+
+## Yellowtail Flounder 
+
+
+## American Plaice 
+
+
+## Winter Flounder 
+
+
+## Monkfish 
+
+
+
+
+###############################################################################
+########################                            ###########################
+###############################################################################
+
+# Running Sensitivity Analysis for Observer Data
+```{r}
+#reading in the list of files, and then reading in all the datasets to a list 
+filenames_ob <- list.files(path = "data/ob_paired_data", recursive = TRUE, full.names = TRUE)
+datasets_ob <- lapply(filenames_ob, read_csv)
+
+
+#creating a dataset with all the sample size at each match 
+datasets_tibble_ob <- as_tibble_col(filenames_ob, column_name = "dataset") %>%
+  mutate(dataset = str_sub(dataset, 21, -5))
+
+#adding the individual datasets into the datasets_tibble and cleaning up the data
+datasets_tibble_ob <- datasets_tibble_ob %>%
+  mutate(data = datasets_ob) %>%
+  mutate(data = purrr::map(data, rel_eff_func_ob))
+
+```
+
+
+# Observer & NEFSC 
+## Cod
+```{r}
+datasets_tibble_ob_cod <- datasets_tibble_ob %>%
+  unnest(data) %>%
+  filter(SVSPP == 73 & NESPP4 == 818) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+#fitting all the models to each dataset 
+models_all_ob_cod <- lapply(datasets_tibble_ob_cod$data, fit.models_ob)
+
+
+###############################################################################
+datasets_tibble_ob_cod %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  summarize(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(DayNight), 
+            towTime_n = n_distinct(towTime)) 
+
+```
+
+
+
+
+## Haddock 
+
+
+## Witch Flounder 
+
+
+## Yellowtail Flounder 
+
+
+## American Plaice 
+
+
+## Winter Flounder 
+
+
+## Monkfish 
