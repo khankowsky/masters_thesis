@@ -125,20 +125,17 @@ extract_optimal_model <- function(x) {
 
 
 #get the mean RE values, sample size, and CVs for each dataset and optimal model 
-get_RE_values <- function(x) {
-  x_opt <- x$optimal_model %>%
-  purrr::map( ~glm(.x, family = binomial, data=x$dataset))
+get_RE_values <- function(x, y) {
+  x_opt <- datasets_tibble$optimal_model %>%
+  purrr::map( ~glm(.x, family = binomial, data=y))
 
   fitted_m <- fitted(x_opt)
 
-  x$mean_re <- fitted_m %>%
-    summarise(mean(fitted_m))
+  datasets_tibble$mean_re <- mean(fitted_m)
 
-  x$n <- fitted_m %>%
-    summarise(n = n())
+  datasets_tibble$n <- n(fitted_m)
 
-  x$cv <- fitted_m %>%
-    mutate(sd(fitted)/mean(fitted))
+  datasets_tibble$cv <- (sd(fitted)/mean(fitted))
 }
 
 
@@ -186,7 +183,7 @@ datasets_tibble <- datasets_tibble %>%
 #run the optimal model for each dataset from the data_tibble 
 
 x_opt <- x$optimal_model %>%
-  purrr::map( ~glm(.x, family = binomial, data=x$dataset))
+  purrr::map( ~glm(.x, family = binomial, data=paste(x$dataset)))
 
 x$fitted <- fitted(x_opt)
 
@@ -200,8 +197,13 @@ datasets_tibble$cv <- x %>%
   mutate(sd(fitted)/mean(fitted))
 
 
-datasets_tibble1 <- lapply(datasets_tibble, get_RE_values)
+datasets_tibble1 <- lapply(X = datasets_tibble, FUN = get_RE_values,  y = datasets_re)
 
+
+datasets_tibble %>%
+  purrr::map( ~glm(optimal_model, family = binomial, data=dataset))
+  
+paste(datasets_tibble$dataset)
 
 
 ```
