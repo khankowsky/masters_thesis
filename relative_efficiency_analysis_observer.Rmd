@@ -41,8 +41,8 @@ library(ggpubr)
 
 # Read-In the Data
 ```{r}
-paired_tows_1mi_24hr_ob <- read.csv('./data/paired_tows_1mi_24hr_ob.csv')
-paired_tows_5mi_72hr_ob <- read.csv('./data/paired_tows_5mi_72hr_ob.csv')
+paired_tows_1mi_24hr_ob <- read.csv('./data/ob_paired_data/paired_tows_1mi_24hr_ob.csv')
+paired_tows_5mi_72hr_ob <- read.csv('./data/ob_paired_data/paired_tows_5mi_72hr_ob.csv')
 ```
 
 
