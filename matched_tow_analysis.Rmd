@@ -271,6 +271,18 @@ paired_tows_1mi_192hr %>%
 
 gc()
 
+
+#Save the datasets
+write.csv(paired_tows_1mi_24hr, './data/paired_tows_1mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_48hr, './data/paired_tows_1mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_72hr, './data/paired_tows_1mi_72hr.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_96hr, './data/paired_tows_1mi_96hr.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_120hr, './data/paired_tows_1mi_120hr.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_144hr, './data/paired_tows_1mi_144hr.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_168hr, './data/paired_tows_1mi_168hr.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_192hr, './data/paired_tows_1mi_192hr.csv', row.names = FALSE)
+
+
 beep(8)
 
 ```
@@ -412,6 +424,18 @@ paired_tows_2mi_168hr %>%
 paired_tows_2mi_192hr %>%
   filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
+
+
+#save the datasets
+write.csv(paired_tows_2mi_24hr, './data/paired_tows_2mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_48hr, './data/paired_tows_2mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_72hr, './data/paired_tows_2mi_72hr.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_96hr, './data/paired_tows_2mi_96hr.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_120hr, './data/paired_tows_2mi_120hr.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_144hr, './data/paired_tows_2mi_144hr.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_168hr, './data/paired_tows_2mi_168hr.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_192hr, './data/paired_tows_2mi_192hr.csv', row.names = FALSE)
+
 
 beep(8)
 
@@ -555,6 +579,18 @@ paired_tows_3mi_192hr %>%
   filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
+
+#save the datasets
+write.csv(paired_tows_3mi_24hr, './data/paired_tows_3mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_48hr, './data/paired_tows_3mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_72hr, './data/paired_tows_3mi_72hr.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_96hr, './data/paired_tows_3mi_96hr.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_120hr, './data/paired_tows_3mi_120hr.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_144hr, './data/paired_tows_3mi_144hr.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_168hr, './data/paired_tows_3mi_168hr.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_192hr, './data/paired_tows_3mi_192hr.csv', row.names = FALSE)
+
+
 beep(8)
 
 ```
@@ -696,6 +732,18 @@ paired_tows_4mi_168hr %>%
 paired_tows_4mi_192hr %>%
   filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
+
+
+#save the datasets
+write.csv(paired_tows_4mi_24hr, './data/paired_tows_4mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_48hr, './data/paired_tows_4mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_72hr, './data/paired_tows_4mi_72hr.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_96hr, './data/paired_tows_4mi_96hr.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_120hr, './data/paired_tows_4mi_120hr.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_144hr, './data/paired_tows_4mi_144hr.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_168hr, './data/paired_tows_4mi_168hr.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_192hr, './data/paired_tows_4mi_192hr.csv', row.names = FALSE)
+
 
 beep(8)
 
@@ -839,6 +887,19 @@ paired_tows_5mi_192hr %>%
   filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
+
+#save the datasets
+write.csv(paired_tows_5mi_24hr, './data/paired_tows_5mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_48hr, './data/paired_tows_5mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_72hr, './data/paired_tows_5mi_72hr.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_96hr, './data/paired_tows_5mi_96hr.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_120hr, './data/paired_tows_5mi_120hr.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_144hr, './data/paired_tows_5mi_144hr.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_168hr, './data/paired_tows_5mi_168hr.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_192hr, './data/paired_tows_5mi_192hr.csv', row.names = FALSE)
+
+
+
 beep(8)
 
 ```
@@ -980,6 +1041,19 @@ paired_tows_6mi_168hr %>%
 paired_tows_6mi_192hr %>%
   filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
+
+
+#save the datasets
+write.csv(paired_tows_6mi_24hr, './data/paired_tows_6mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_48hr, './data/paired_tows_6mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_72hr, './data/paired_tows_6mi_72hr.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_96hr, './data/paired_tows_6mi_96hr.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_120hr, './data/paired_tows_6mi_120hr.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_144hr, './data/paired_tows_6mi_144hr.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_168hr, './data/paired_tows_6mi_168hr.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_192hr, './data/paired_tows_6mi_192hr.csv', row.names = FALSE)
+
+
 
 beep(8)
 
@@ -1123,6 +1197,21 @@ paired_tows_7mi_192hr %>%
   filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
 
+
+#save the datasets
+write.csv(paired_tows_7mi_24hr, './data/paired_tows_7mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_48hr, './data/paired_tows_7mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_72hr, './data/paired_tows_7mi_72hr.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_96hr, './data/paired_tows_7mi_96hr.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_120hr, './data/paired_tows_7mi_120hr.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_144hr, './data/paired_tows_7mi_144hr.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_168hr, './data/paired_tows_7mi_168hr.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_192hr, './data/paired_tows_7mi_192hr.csv', row.names = FALSE)
+
+
+
+
+
 beep(8)
 
 ```
@@ -1264,6 +1353,18 @@ paired_tows_8mi_168hr %>%
 paired_tows_8mi_192hr %>%
   filter(CATCHWT_updated > 0) %>%
   count(EFFORT_ID)
+
+
+#save the datasets
+write.csv(paired_tows_8mi_24hr, './data/paired_tows_8mi_24hr.csv', row.names = FALSE)
+write.csv(paired_tows_8mi_48hr, './data/paired_tows_8mi_48hr.csv', row.names = FALSE)
+write.csv(paired_tows_8mi_72hr, './data/paired_tows_8mi_72hr.csv', row.names = FALSE)
+write.csv(paired_tows_8mi_96hr, './data/paired_tows_8mi_96hr.csv', row.names = FALSE)
+write.csv(paired_tows_8mi_120hr, './data/paired_tows_8mi_120hr.csv', row.names = FALSE)
+write.csv(paired_tows_8mi_144hr, './data/paired_tows_8mi_144hr.csv', row.names = FALSE)
+write.csv(paired_tows_8mi_168hr, './data/paired_tows_8mi_168hr.csv', row.names = FALSE)
+write.csv(paired_tows_8mi_192hr, './data/paired_tows_8mi_192hr.csv', row.names = FALSE)
+
 
 beep(8)
 
@@ -1475,6 +1576,16 @@ paired_tows_1mi_192hr_ob %>%
 
 gc()
 
+#save the datasets
+write.csv(paired_tows_1mi_24hr_ob, './data/paired_tows_1mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_48hr_ob, './data/paired_tows_1mi_48hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_72hr_ob, './data/paired_tows_1mi_72hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_96hr_ob, './data/paired_tows_1mi_96hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_120hr_ob, './data/paired_tows_1mi_120hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_144hr_ob, './data/paired_tows_1mi_144hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_168hr_ob, './data/paired_tows_1mi_168hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_1mi_192hr_ob, './data/paired_tows_1mi_192hr_ob.csv', row.names = FALSE)
+
 beep(8)
 
 ```
@@ -1519,7 +1630,7 @@ gc()
 
 
 
-#Fuzzy joining sf tows that are within 2mi and 4days of nefsc tows
+#Fuzzy joining sf tows that are within 2mi and 4days of nefsc tow
 paired_tows_2mi_96hr_ob <- nefsc_slim %>% 
   fuzzyjoin::geo_inner_join(ob_trawl_slim, by = c("END_TOW_LAT", 
                                                    "END_TOW_LON"),
@@ -1616,6 +1727,21 @@ paired_tows_2mi_168hr_ob %>%
 paired_tows_2mi_192hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
+
+
+#save the datasets
+write.csv(paired_tows_2mi_24hr_ob, './data/paired_tows_2mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_48hr_ob, './data/paired_tows_2mi_48hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_72hr_ob, './data/paired_tows_2mi_72hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_96hr_ob, './data/paired_tows_2mi_96hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_120hr_ob, './data/paired_tows_2mi_120hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_144hr_ob, './data/paired_tows_2mi_144hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_168hr_ob, './data/paired_tows_2mi_168hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_2mi_192hr_ob, './data/paired_tows_2mi_192hr_ob.csv', row.names = FALSE)
+
+beep(8)
+
+
 
 ```
 
@@ -1728,7 +1854,7 @@ gc()
 paired_tows_3mi_24hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
-
+132
 paired_tows_3mi_48hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
@@ -1756,6 +1882,18 @@ paired_tows_3mi_168hr_ob %>%
 paired_tows_3mi_192hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
+
+
+#save the datasets
+write.csv(paired_tows_3mi_24hr_ob, './data/paired_tows_3mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_48hr_ob, './data/paired_tows_3mi_48hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_72hr_ob, './data/paired_tows_3mi_72hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_96hr_ob, './data/paired_tows_3mi_96hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_120hr_ob, './data/paired_tows_3mi_120hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_144hr_ob, './data/paired_tows_3mi_144hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_168hr_ob, './data/paired_tows_3mi_168hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_3mi_192hr_ob, './data/paired_tows_3mi_192hr_ob.csv', row.names = FALSE)
+
 
 beep(8)
 
@@ -1899,6 +2037,19 @@ paired_tows_4mi_192hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
+
+#save the datasets
+write.csv(paired_tows_4mi_24hr_ob, './data/paired_tows_4mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_48hr_ob, './data/paired_tows_4mi_48hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_72hr_ob, './data/paired_tows_4mi_72hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_96hr_ob, './data/paired_tows_4mi_96hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_120hr_ob, './data/paired_tows_4mi_120hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_144hr_ob, './data/paired_tows_4mi_144hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_168hr_ob, './data/paired_tows_4mi_168hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_4mi_192hr_ob, './data/paired_tows_4mi_192hr_ob.csv', row.names = FALSE)
+
+beep(8)
+
 ```
 
 ### 5 mile matches 
@@ -2038,6 +2189,20 @@ paired_tows_5mi_168hr_ob %>%
 paired_tows_5mi_192hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
+
+
+#save the datasets
+write.csv(paired_tows_5mi_24hr_ob, './data/paired_tows_5mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_48hr_ob, './data/paired_tows_5mi_48hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_72hr_ob, './data/paired_tows_5mi_72hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_96hr_ob, './data/paired_tows_5mi_96hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_120hr_ob, './data/paired_tows_5mi_120hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_144hr_ob, './data/paired_tows_5mi_144hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_168hr_ob, './data/paired_tows_5mi_168hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_5mi_192hr_ob, './data/paired_tows_5mi_192hr_ob.csv', row.names = FALSE)
+
+beep(8)
+
 
 ```
 
@@ -2179,6 +2344,19 @@ paired_tows_6mi_192hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
+
+#save the datasets
+write.csv(paired_tows_6mi_24hr_ob, './data/paired_tows_6mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_48hr_ob, './data/paired_tows_6mi_48hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_72hr_ob, './data/paired_tows_6mi_72hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_96hr_ob, './data/paired_tows_6mi_96hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_120hr_ob, './data/paired_tows_6mi_120hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_144hr_ob, './data/paired_tows_6mi_144hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_168hr_ob, './data/paired_tows_6mi_168hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_6mi_192hr_ob, './data/paired_tows_6mi_192hr_ob.csv', row.names = FALSE)
+
+beep(8)
+
 ```
 
 ### 7 mile matches 
@@ -2318,6 +2496,19 @@ paired_tows_7mi_168hr_ob %>%
 paired_tows_7mi_192hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
+
+
+#save the datasets
+write.csv(paired_tows_7mi_24hr_ob, './data/paired_tows_7mi_24hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_48hr_ob, './data/paired_tows_7mi_48hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_72hr_ob, './data/paired_tows_7mi_72hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_96hr_ob, './data/paired_tows_7mi_96hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_120hr_ob, './data/paired_tows_7mi_120hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_144hr_ob, './data/paired_tows_7mi_144hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_168hr_ob, './data/paired_tows_7mi_168hr_ob.csv', row.names = FALSE)
+write.csv(paired_tows_7mi_192hr_ob, './data/paired_tows_7mi_192hr_ob.csv', row.names = FALSE)
+
+beep(8)
 
 ```
 
@@ -2460,150 +2651,8 @@ paired_tows_8mi_192hr_ob %>%
   filter(CATCHWT_updated > 0) %>%
   count(trip_haul_ID)
 
-```
 
-
-# Save the Datasets to CSV
-```{r}
-#study fleet paired tows 
-write.csv(paired_tows_1mi_24hr, './data/paired_tows_1mi_24hr.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_48hr, './data/paired_tows_1mi_48hr.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_72hr, './data/paired_tows_1mi_72hr.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_96hr, './data/paired_tows_1mi_96hr.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_120hr, './data/paired_tows_1mi_120hr.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_144hr, './data/paired_tows_1mi_144hr.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_168hr, './data/paired_tows_1mi_168hr.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_192hr, './data/paired_tows_1mi_192hr.csv', row.names = FALSE)
-
-write.csv(paired_tows_2mi_24hr, './data/paired_tows_2mi_24hr.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_48hr, './data/paired_tows_2mi_48hr.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_72hr, './data/paired_tows_2mi_72hr.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_96hr, './data/paired_tows_2mi_96hr.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_120hr, './data/paired_tows_2mi_120hr.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_144hr, './data/paired_tows_2mi_144hr.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_168hr, './data/paired_tows_2mi_168hr.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_192hr, './data/paired_tows_2mi_192hr.csv', row.names = FALSE)
-
-write.csv(paired_tows_3mi_24hr, './data/paired_tows_3mi_24hr.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_48hr, './data/paired_tows_3mi_48hr.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_72hr, './data/paired_tows_3mi_72hr.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_96hr, './data/paired_tows_3mi_96hr.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_120hr, './data/paired_tows_3mi_120hr.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_144hr, './data/paired_tows_3mi_144hr.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_168hr, './data/paired_tows_3mi_168hr.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_192hr, './data/paired_tows_3mi_192hr.csv', row.names = FALSE)
-
-write.csv(paired_tows_4mi_24hr, './data/paired_tows_4mi_24hr.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_48hr, './data/paired_tows_4mi_48hr.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_72hr, './data/paired_tows_4mi_72hr.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_96hr, './data/paired_tows_4mi_96hr.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_120hr, './data/paired_tows_4mi_120hr.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_144hr, './data/paired_tows_4mi_144hr.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_168hr, './data/paired_tows_4mi_168hr.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_192hr, './data/paired_tows_4mi_192hr.csv', row.names = FALSE)
-
-write.csv(paired_tows_5mi_24hr, './data/paired_tows_5mi_24hr.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_48hr, './data/paired_tows_5mi_48hr.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_72hr, './data/paired_tows_5mi_72hr.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_96hr, './data/paired_tows_5mi_96hr.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_120hr, './data/paired_tows_5mi_120hr.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_144hr, './data/paired_tows_5mi_144hr.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_168hr, './data/paired_tows_5mi_168hr.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_192hr, './data/paired_tows_5mi_192hr.csv', row.names = FALSE)
-
-write.csv(paired_tows_6mi_24hr, './data/paired_tows_6mi_24hr.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_48hr, './data/paired_tows_6mi_48hr.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_72hr, './data/paired_tows_6mi_72hr.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_96hr, './data/paired_tows_6mi_96hr.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_120hr, './data/paired_tows_6mi_120hr.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_144hr, './data/paired_tows_6mi_144hr.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_168hr, './data/paired_tows_6mi_168hr.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_192hr, './data/paired_tows_6mi_192hr.csv', row.names = FALSE)
-
-write.csv(paired_tows_7mi_24hr, './data/paired_tows_7mi_24hr.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_48hr, './data/paired_tows_7mi_48hr.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_72hr, './data/paired_tows_7mi_72hr.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_96hr, './data/paired_tows_7mi_96hr.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_120hr, './data/paired_tows_7mi_120hr.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_144hr, './data/paired_tows_7mi_144hr.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_168hr, './data/paired_tows_7mi_168hr.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_192hr, './data/paired_tows_7mi_192hr.csv', row.names = FALSE)
-
-write.csv(paired_tows_8mi_24hr, './data/paired_tows_8mi_24hr.csv', row.names = FALSE)
-write.csv(paired_tows_8mi_48hr, './data/paired_tows_8mi_48hr.csv', row.names = FALSE)
-write.csv(paired_tows_8mi_72hr, './data/paired_tows_8mi_72hr.csv', row.names = FALSE)
-write.csv(paired_tows_8mi_96hr, './data/paired_tows_8mi_96hr.csv', row.names = FALSE)
-write.csv(paired_tows_8mi_120hr, './data/paired_tows_8mi_120hr.csv', row.names = FALSE)
-write.csv(paired_tows_8mi_144hr, './data/paired_tows_8mi_144hr.csv', row.names = FALSE)
-write.csv(paired_tows_8mi_168hr, './data/paired_tows_8mi_168hr.csv', row.names = FALSE)
-write.csv(paired_tows_8mi_192hr, './data/paired_tows_8mi_192hr.csv', row.names = FALSE)
-
-
-################################################################################
-#observer paired tows 
-write.csv(paired_tows_1mi_24hr_ob, './data/paired_tows_1mi_24hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_48hr_ob, './data/paired_tows_1mi_48hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_72hr_ob, './data/paired_tows_1mi_72hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_96hr_ob, './data/paired_tows_1mi_96hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_120hr_ob, './data/paired_tows_1mi_120hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_144hr_ob, './data/paired_tows_1mi_144hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_168hr_ob, './data/paired_tows_1mi_168hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_1mi_192hr_ob, './data/paired_tows_1mi_192hr_ob.csv', row.names = FALSE)
-
-write.csv(paired_tows_2mi_24hr_ob, './data/paired_tows_2mi_24hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_48hr_ob, './data/paired_tows_2mi_48hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_72hr_ob, './data/paired_tows_2mi_72hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_96hr_ob, './data/paired_tows_2mi_96hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_120hr_ob, './data/paired_tows_2mi_120hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_144hr_ob, './data/paired_tows_2mi_144hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_168hr_ob, './data/paired_tows_2mi_168hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_2mi_192hr_ob, './data/paired_tows_2mi_192hr_ob.csv', row.names = FALSE)
-
-write.csv(paired_tows_3mi_24hr_ob, './data/paired_tows_3mi_24hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_48hr_ob, './data/paired_tows_3mi_48hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_72hr_ob, './data/paired_tows_3mi_72hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_96hr_ob, './data/paired_tows_3mi_96hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_120hr_ob, './data/paired_tows_3mi_120hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_144hr_ob, './data/paired_tows_3mi_144hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_168hr_ob, './data/paired_tows_3mi_168hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_3mi_192hr_ob, './data/paired_tows_3mi_192hr_ob.csv', row.names = FALSE)
-
-write.csv(paired_tows_4mi_24hr_ob, './data/paired_tows_4mi_24hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_48hr_ob, './data/paired_tows_4mi_48hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_72hr_ob, './data/paired_tows_4mi_72hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_96hr_ob, './data/paired_tows_4mi_96hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_120hr_ob, './data/paired_tows_4mi_120hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_144hr_ob, './data/paired_tows_4mi_144hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_168hr_ob, './data/paired_tows_4mi_168hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_4mi_192hr_ob, './data/paired_tows_4mi_192hr_ob.csv', row.names = FALSE)
-
-write.csv(paired_tows_5mi_24hr_ob, './data/paired_tows_5mi_24hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_48hr_ob, './data/paired_tows_5mi_48hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_72hr_ob, './data/paired_tows_5mi_72hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_96hr_ob, './data/paired_tows_5mi_96hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_120hr_ob, './data/paired_tows_5mi_120hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_144hr_ob, './data/paired_tows_5mi_144hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_168hr_ob, './data/paired_tows_5mi_168hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_5mi_192hr_ob, './data/paired_tows_5mi_192hr_ob.csv', row.names = FALSE)
-
-write.csv(paired_tows_6mi_24hr_ob, './data/paired_tows_6mi_24hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_48hr_ob, './data/paired_tows_6mi_48hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_72hr_ob, './data/paired_tows_6mi_72hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_96hr_ob, './data/paired_tows_6mi_96hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_120hr_ob, './data/paired_tows_6mi_120hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_144hr_ob, './data/paired_tows_6mi_144hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_168hr_ob, './data/paired_tows_6mi_168hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_6mi_192hr_ob, './data/paired_tows_6mi_192hr_ob.csv', row.names = FALSE)
-
-write.csv(paired_tows_7mi_24hr_ob, './data/paired_tows_7mi_24hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_48hr_ob, './data/paired_tows_7mi_48hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_72hr_ob, './data/paired_tows_7mi_72hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_96hr_ob, './data/paired_tows_7mi_96hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_120hr_ob, './data/paired_tows_7mi_120hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_144hr_ob, './data/paired_tows_7mi_144hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_168hr_ob, './data/paired_tows_7mi_168hr_ob.csv', row.names = FALSE)
-write.csv(paired_tows_7mi_192hr_ob, './data/paired_tows_7mi_192hr_ob.csv', row.names = FALSE)
-
+#save the datasets
 write.csv(paired_tows_8mi_24hr_ob, './data/paired_tows_8mi_24hr_ob.csv', row.names = FALSE)
 write.csv(paired_tows_8mi_48hr_ob, './data/paired_tows_8mi_48hr_ob.csv', row.names = FALSE)
 write.csv(paired_tows_8mi_72hr_ob, './data/paired_tows_8mi_72hr_ob.csv', row.names = FALSE)
@@ -2612,6 +2661,32 @@ write.csv(paired_tows_8mi_120hr_ob, './data/paired_tows_8mi_120hr_ob.csv', row.n
 write.csv(paired_tows_8mi_144hr_ob, './data/paired_tows_8mi_144hr_ob.csv', row.names = FALSE)
 write.csv(paired_tows_8mi_168hr_ob, './data/paired_tows_8mi_168hr_ob.csv', row.names = FALSE)
 write.csv(paired_tows_8mi_192hr_ob, './data/paired_tows_8mi_192hr_ob.csv', row.names = FALSE)
+
+beep(8)
+
+
+```
+
+
+# Save the Datasets to CSV
+```{r}
+#study fleet paired tows 
+
+
+
+
+
+
+
+################################################################################
+#observer paired tows 
+
+
+
+
+
+
+
 
 ```
 
