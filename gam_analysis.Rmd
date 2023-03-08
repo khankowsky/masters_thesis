@@ -789,35 +789,35 @@ sf_trawl <- sf_trawl %>%
 ###############################################################################
 #trying to figure out how to do it for study fleet
 
-sf_trawl %>%
-  mutate(target_catch = case_when(
-    sf_species_catch >= 50 ~ ">50LB",
-    sf_species_catch < 50 ~ "<50LB"
-  )) %>%
-  filter(trawl_type == "OTF") %>%
-  count(TARGET_SPECIES, MESH_TYPE, target_catch)
-
-sf_trawl %>%
-  distinct(EFFORT_ID, .keep_all = TRUE) %>%
-  count(trawl_type, MESH_TYPE)
-
-sf_trawl %>%
-  count(MESH_SIZE)
-
-sf_trawl %>%
-  count(GEAR_SIZE)
-
-sf_trawl %>%
-  filter(SPECIES_ITIS %in% c(164712, #cod
-                             164744, #haddock
-                             172909, #yellowtail
-                             172877, #plaice
-                             172873, #witch fl 
-                             172905, #winter fl 
-                             164499  #monkfish
-                             )) %>%
-  # count(VTR_GEAR_CODE, MESH_TYPE)
-  count(GEAR_SIZE)
+# sf_trawl %>%
+#   mutate(target_catch = case_when(
+#     sf_species_catch >= 50 ~ ">50LB",
+#     sf_species_catch < 50 ~ "<50LB"
+#   )) %>%
+#   filter(trawl_type == "OTF") %>%
+#   count(TARGET_SPECIES, MESH_TYPE, target_catch)
+# 
+# sf_trawl %>%
+#   distinct(EFFORT_ID, .keep_all = TRUE) %>%
+#   count(trawl_type, MESH_TYPE)
+# 
+# sf_trawl %>%
+#   count(MESH_SIZE)
+# 
+# sf_trawl %>%
+#   count(GEAR_SIZE)
+# 
+# sf_trawl %>%
+#   filter(SPECIES_ITIS %in% c(164712, #cod
+#                              164744, #haddock
+#                              172909, #yellowtail
+#                              172877, #plaice
+#                              172873, #witch fl 
+#                              172905, #winter fl 
+#                              164499  #monkfish
+#                              )) %>%
+#   # count(VTR_GEAR_CODE, MESH_TYPE)
+#   count(GEAR_SIZE)
 
 
 ```
