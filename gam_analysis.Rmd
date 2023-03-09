@@ -26,6 +26,7 @@ library(sf)
 library(scales)
 library(beepr)
 library(lubridate)
+library(mgcv)
 ```
 
 
@@ -954,11 +955,11 @@ observer_gam <- observer_gam %>%
 
 
 #rbind the datasets 
-gam_datset <- bind_rows(nefsc_gam, sf_gam, observer_gam)
+gam_dataset <- bind_rows(nefsc_gam, observer_gam)
 
 
 #creating a new variable for trawl_type idk why 
-gam_datset <- gam_datset %>%
+gam_dataset <- gam_datset %>%
   mutate(trawl_type1 = case_when(
     trawl_type == 1 ~ "GRNDF_TRWL", 
     trawl_type == 2 ~ "FLATF_TRWL", 
@@ -970,10 +971,42 @@ gam_datset <- gam_datset %>%
   relocate(trawl_type1, .after = trawl_type) %>%
   filter(SVSPP %in% c(73, 74, 105, 102, 107, 106, 197))
 
+
+#creatng a midpoint for each tow 
+gam_dataset <- gam_dataset %>%
+  mutate(midpoint_lat = rowMeans(across(c(START_TOW_LAT, END_TOW_LAT)))) %>%
+  mutate(midpoint_long = rowMeans(across(c(START_TOW_LON, END_TOW_LON)))) %>%
+  relocate(midpoint_lat, .after = START_TOW_LON) %>%
+  relocate(midpoint_long, .after = midpoint_lat) %>%
+  mutate(days_from = difftime(START_TOW_DATE, "2009-01-01 12:00:01", units = "days")) %>%
+  relocate(days_from, .after = START_TOW_DATE)
+
+
+```
+
+
+# Species Datasets 
+```{r}
+#COD
+gam_dataset_cod <- gam_dataset %>%
+  filter(SVSPP == 73)
+
+#HADDOCK
+
+
 ```
 
 
 
+
+# Run GAM 
+```{r}
+#COD GAM
+cod_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+                     family = nb, data = gam_dataset_cod)
+
+
+```
 
 
 
