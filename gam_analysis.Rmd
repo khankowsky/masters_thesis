@@ -979,8 +979,19 @@ gam_dataset <- gam_dataset %>%
   relocate(midpoint_lat, .after = START_TOW_LON) %>%
   relocate(midpoint_long, .after = midpoint_lat) %>%
   mutate(days_from = difftime(START_TOW_DATE, "2009-01-01 12:00:01", units = "days")) %>%
-  relocate(days_from, .after = START_TOW_DATE)
+  mutate(days_from = as.numeric(days_from, units = "days")) %>%
+  relocate(days_from, .after = START_TOW_DATE) %>%
+  filter(swept_area > 0) %>%
+  drop_na(swept_area, midpoint_lat, midpoint_long, days_from) %>%
+  mutate(trawl_type1 = relevel(trawl_type1, ref = "HB"))
 
+
+#converting to eastings and northings (stolen from Walker et al 2017)
+cord.dec <- SpatialPoints(cbind(gam_dataset$midpoint_long, gam_dataset$midpoint_lat), proj4string=CRS("+proj=longlat"))
+cord.UTM <- spTransform(cord.dec, CRS("+init=epsg:2960"))
+gam_dataset$LONG <- cord.UTM$coords.x1
+gam_dataset$LAT <- cord.UTM$coords.x2
+rm(cord.dec,cord.UTM)
 
 ```
 
@@ -991,8 +1002,33 @@ gam_dataset <- gam_dataset %>%
 gam_dataset_cod <- gam_dataset %>%
   filter(SVSPP == 73)
 
-#HADDOCK
+#Haddock 
+gam_dataset_haddock <- gam_dataset %>%
+  filter(SVSPP == 74)
 
+#Witch Flounder 
+gam_dataset_witchfl <- gam_dataset %>%
+  filter(SVSPP == 107)
+
+
+#Yellowtail Flounder 
+gam_dataset_yellowtailfl <- gam_dataset %>%
+  filter(SVSPP == 105)
+
+
+#American Plaice 
+gam_dataset_plaice <- gam_dataset %>%
+  filter(SVSPP == 102)
+
+
+#Winter Flounder 
+gam_dataset_winterfl <- gam_dataset %>%
+  filter(SVSPP == 106)
+
+
+#Monkfish 
+gam_dataset_monkfish <- gam_dataset %>%
+  filter(SVSPP == 197)
 
 ```
 
@@ -1000,14 +1036,110 @@ gam_dataset_cod <- gam_dataset %>%
 
 
 # Run GAM 
+
+## Cod
 ```{r}
 #COD GAM
-cod_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
-                     family = nb, data = gam_dataset_cod)
+cod_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from, bs="cs") + factor(trawl_type1) + offset(log(swept_area)), 
+                     data = gam_dataset_cod, family = nb)
 
+m0 <- mgcv::gam(CATCH ~ 1, data = gam_dataset_cod, family = nb)
+
+m1 <- mgcv::gam(CATCH ~ trawl_type1, data = gam_dataset_cod, family = nb)
+
+m2 <- mgcv::gam(CATCH ~ trawl_type1 + log(swept_area), data = gam_dataset_cod, family = nb)
+
+m3 <- mgcv::gam(CATCH ~ trawl_type1 + te(midpoint_lat, midpoint_long) + log(swept_area), data = gam_dataset_cod, family = nb)
+
+m4 <- mgcv::gam(CATCH ~ trawl_type1 + te(midpoint_lat, midpoint_long, days_from) + log(swept_area), data = gam_dataset_cod, family = nb)
+
+m5 <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from, bs="cs") + factor(trawl_type1) + log(swept_area), data = gam_dataset_cod, family = nb)
+
+m6 <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from, bs="cs") + factor(trawl_type1) + offset(log(swept_area)), 
+                     data = gam_dataset_cod, family = nb)
+
+m7 <- mgcv::gam(CATCH ~ te(LAT, LONG, days_from, bs="cs") + factor(trawl_type1) + offset(log(swept_area)), 
+                     data = gam_dataset_cod, family = nb)
+
+
+
+summary(cod_gam)
+plot(cod_gam)
+gam.check(cod_gam)
+
+cod_gam_sum <- exp(coef(cod_gam))
 
 ```
 
+
+## Haddock 
+```{r}
+haddock_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+                     data = gam_dataset_haddock, family = nb)
+
+summary(haddock_gam)
+plot(haddock_gam)
+gam.check(haddock_gam)
+```
+
+
+
+
+## Witch Flounder 
+```{r}
+witchfl_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+                     data = gam_dataset_witchfl, family = nb)
+
+summary(witchfl_gam)
+plot(witchfl_gam)
+gam.check(witchfl_gam)
+
+exp(coef(witchfl_gam))
+```
+
+
+## Yellowtail Flounder 
+```{r}
+yellowtailfl_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+                     data = gam_dataset_yellowtailfl, family = nb)
+
+summary(yellowtailfl_gam)
+plot(yellowtailfl_gam)
+gam.check(yellowtailfl_gam)
+```
+
+
+## American Plaice 
+```{r}
+plaice_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+                     data = gam_dataset_plaice, family = nb)
+
+summary(plaice_gam)
+plot(plaice_gam)
+gam.check(plaice_gam)
+```
+
+
+## Winter Flounder 
+```{r}
+winterfl_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+                     data = gam_dataset_winterfl, family = nb)
+
+summary(winterfl_gam)
+plot(winterfl_gam)
+gam.check(winterfl_gam)
+```
+
+
+## Monkfish 
+```{r}
+monkfish_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+                     data = gam_dataset_monkfish, family = nb)
+
+summary(monkfish_gam)
+plot(monkfish_gam)
+gam.check(monkfish_gam)
+```
 
 
 
