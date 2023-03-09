@@ -225,6 +225,11 @@ datasets_tibble_cod <- datasets_tibble %>%
 #fitting all the models to each dataset 
 models_all_cod <- lapply(datasets_tibble_cod$data, fit.models)
 
+###############################################################################
+
+  
+
+
 
 #comparing all the models for all the datasets 
 compared_all_cod <- lapply(models_all_cod, compare.models)
@@ -280,10 +285,29 @@ datasets_tibble_cod %>%
 datasets_tibble_cod %>%
   unnest(data) %>%
   group_by(dataset) %>%
-  summarize(mgmt_area_n = n_distinct(mgmt_area), 
+  summarise(mgmt_area_n = n_distinct(mgmt_area), 
             season_n = n_distinct(season), 
             dayNight_n = n_distinct(dayNight), 
             towTime_n = n_distinct(towTime)) 
+
+
+
+
+
+
+list_of_models <- rep(list(formulae),64)
+
+datasets_tibble_cod %>% 
+  mutate(list_of_models = list_of_models) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime)) %>%
+  unnest(list_of_models) %>% 
+  mutate(formula = ifelse(mgmt_area_n == 1, filter(!str_contains('mgmt_area', formula)), formula))
+  
 
 ```
 
