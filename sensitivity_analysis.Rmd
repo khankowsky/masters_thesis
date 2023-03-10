@@ -90,19 +90,20 @@ formulae <- combos %>%
   mutate(formula = paste0("relative_efficiency ~  VESSEL_NAME +", formula))
 
 
+
 #fit models (takes dataset)
-fit.models <- function(x) {
-  formulae$formula %>% purrr::map( ~glm(.x, family = binomial, data=x))
+fit.models_cod <- function(x, y) {
+  y$formula %>% purrr::map( ~glm(.x, family = binomial, data=x))
 }
 
 
 #compare models (takes list of models created by fit.models())
-compare.models <- function(x) {
-  formulae %>%
+compare.models <- function(x, y) {
+  y %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[63]) %>%
+  mutate(deltaAIC = aic - aic[length(x)]) %>%
   relocate(rsq, .after = deltaAIC) %>%
   mutate(rsq = sprintf("%0.2f", rsq)) %>%
   mutate(aic = sprintf("%1.0f", aic)) %>%
@@ -118,7 +119,7 @@ extract_optimal_model <- function(x) {
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[63]) %>%
+  mutate(deltaAIC = aic - aic[count(x)]) %>%
   filter(deltaAIC <= 2) %>%
   arrange(desc(rsq))
 }
@@ -184,6 +185,29 @@ fit.models_ob <- function(x) {
 
 ```
 
+```{r}
+#fit models (takes dataset)
+fit.models_old <- function(x) {
+  formulae$formula %>% purrr::map( ~glm(.x, family = binomial, data=x))
+}
+
+#compare models (takes list of models created by fit.models())
+compare.models_old <- function(x) {
+  formulae %>%
+  mutate(aic =  purrr::map_dbl(x, AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(x)]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE)
+}
+```
+
+
 
 
 # Running the relative efficiency analysis for all the datasets 
@@ -222,8 +246,11 @@ datasets_tibble_cod <- datasets_tibble %>%
   ungroup()
 
 
+
 #fitting all the models to each dataset 
-models_all_cod <- lapply(datasets_tibble_cod$data, fit.models)
+models_all_cod_old <- lapply(datasets_tibble$data, fit.models_old)
+
+models_all_cod <- mapply(fit.models_cod, datasets_tibble_cod$data, clean_list_of_models)
 
 ###############################################################################
 
@@ -232,7 +259,10 @@ models_all_cod <- lapply(datasets_tibble_cod$data, fit.models)
 
 
 #comparing all the models for all the datasets 
-compared_all_cod <- lapply(models_all_cod, compare.models)
+compared_all_old <- lapply(models_all_cod_old, compare.models_old)
+
+compared_all_cod <- lapply(compare.models, models_all_cod, clean_list_of_models)
+
 
 
 #extract the optimal model from each table 
@@ -288,25 +318,49 @@ datasets_tibble_cod %>%
   summarise(mgmt_area_n = n_distinct(mgmt_area), 
             season_n = n_distinct(season), 
             dayNight_n = n_distinct(dayNight), 
-            towTime_n = n_distinct(towTime)) 
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME)) 
 
 
 
 
 
 
-list_of_models <- rep(list(formulae),64)
+list_of_models1 <- rep(list(formulae),64)
 
-datasets_tibble_cod %>% 
-  mutate(list_of_models = list_of_models) %>%
+datasets_tibble_cod <- datasets_tibble_cod %>% 
+  mutate(list_of_models = list_of_models1) %>%
   unnest(data) %>%
   group_by(dataset) %>%
   mutate(mgmt_area_n = n_distinct(mgmt_area), 
             season_n = n_distinct(season), 
             dayNight_n = n_distinct(dayNight), 
-            towTime_n = n_distinct(towTime)) %>%
-  unnest(list_of_models) %>% 
-  mutate(formula = ifelse(mgmt_area_n == 1, filter(!str_contains('mgmt_area', formula)), formula))
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME)) %>%
+  nest(data = 2:78) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula, "mgmt_area"), 
+         season_dtc = str_detect(formula, "season"), 
+         dayNight_dtc = str_detect(formula, "dayNight"), 
+         towTime_dtc = str_detect(formula, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
+  mutate(formula = str_replace(formula, "~ +", " ~ ")) %>%
+  select(dataset, data, formula) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula) %>%
+  ungroup()
+  
+
+clean_list_of_models <- datasets_tibble_cod$list_of_models
+
+datasets_tibble_cod %>%
+  mutate(all_models = purrr::map2(list_of_models, data, ~glm(.x, family = binomial, data = .y)))
+
   
 
 ```
