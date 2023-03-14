@@ -98,8 +98,8 @@ fit.models_cod <- function(x, y) {
 
 
 #compare models (takes list of models created by fit.models())
-compare.models <- function(x, y) {
-  y %>%
+compare.models <- function(x) {
+  clean_list_of_models[1:63][1] %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   arrange(desc(aic)) %>%
@@ -261,8 +261,26 @@ models_all_cod <- mapply(fit.models_cod, datasets_tibble_cod$data, clean_list_of
 #comparing all the models for all the datasets 
 compared_all_old <- lapply(models_all_cod_old, compare.models_old)
 
-compared_all_cod <- mapply(compare.models, models_all_cod, clean_list_of_models)
 
+compare.models <- function(x, y) {
+  clean_list_of_models[[y]] %>%
+  mutate(aic =  purrr::map_dbl(x[[y]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(x[[y]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(x)]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE)
+}
+
+
+compared_all_cod <- mapply(compare.models, models_all_cod, clean_list_of_models)
+compared_all_cod <- mapply(compare.models, models_all_cod, 1:64)
+
+length(models_all_cod[[1:64]])
 
 
 #extract the optimal model from each table 
@@ -283,10 +301,12 @@ dataset_final_cod <- datasets_tibble_cod %>%
   mutate(fitted = purrr::map(model, fitted)) %>%
   unnest(fitted) %>%
   group_by(dataset) %>%
-  summarise(mean_re = mean(fitted), 
+  mutate(mean_re = mean(fitted), 
          n = n(), 
          cv = (sd(fitted)/mean(fitted)), 
-         se = sd(fitted)/(sqrt(length(fitted))))
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
 
 
 dataset_final_cod
@@ -326,7 +346,7 @@ datasets_tibble_cod %>%
 
 
 
-list_of_models1 <- rep(list(formulae),56)
+list_of_models1 <- rep(list(formulae),64)
 
 datasets_tibble_cod <- datasets_tibble_cod %>% 
   mutate(list_of_models = list_of_models1) %>%
@@ -359,13 +379,107 @@ datasets_tibble_cod <- datasets_tibble_cod %>%
 clean_list_of_models <- datasets_tibble_cod$list_of_models
 
 datasets_tibble_cod <- datasets_tibble_cod %>%
-  group_by(dataset) %>%
-  mutate(all_models = purrr::map2(list_of_models, data, ~glm(.x$formula_clean, family = binomial, data = .y))) %>%
+  mutate(all_models = purrr::map2(list_of_models, data, ~glm(.x, family = binomial, data = .y)))
+
+
   mutate(model_comparison_tbl = purrr::map2(list_of_models, all_models, compare.models))
   
+
+datasets_tibble_cod$list_of_models[[1]][[1]]
+
+
+
 models1 <- datasets_tibble_cod$all_models[[1]]
 
-  
+
+sapply(clean_list_of_models,"[[", c(1, 1:64))
+
+clean_list_of_models[[1]]
+
+models_all_cod[[1]]
+models_all_cod_old[[1]]
+
+```
+
+
+
+```{r}
+# only the stuff that actually works for cod 
+#filtering the datasets for just cod
+datasets_tibble_cod <- datasets_tibble %>%
+  unnest(data) %>%
+  filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_cod <- datasets_tibble_cod %>% 
+  mutate(list_of_models = rep(list(formulae),64)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME)) %>%
+  nest(data = 2:78) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula, "mgmt_area"), 
+         season_dtc = str_detect(formula, "season"), 
+         dayNight_dtc = str_detect(formula, "dayNight"), 
+         towTime_dtc = str_detect(formula, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+
+
+
+
+
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset 
+datasets_tibble_cod <- datasets_tibble %>%
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season + towTime"))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_cod <- datasets_tibble_cod %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         n = n(), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+dataset_final_cod
+
+#plotting the RE estimate and CV and sample size 
+dataset_final_cod %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  ggplot() + 
+  geom_point(aes(x = match_crit, y = mean_re)) + 
+  geom_errorbar(aes(x = match_crit, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip()
+
 
 ```
 
