@@ -959,7 +959,7 @@ gam_dataset <- bind_rows(nefsc_gam, observer_gam)
 
 
 #creating a new variable for trawl_type idk why 
-gam_dataset <- gam_datset %>%
+gam_dataset <- gam_dataset %>%
   mutate(trawl_type1 = case_when(
     trawl_type == 1 ~ "GRNDF_TRWL", 
     trawl_type == 2 ~ "FLATF_TRWL", 
@@ -968,6 +968,7 @@ gam_dataset <- gam_datset %>%
     trawl_type == 10 ~ "HB", 
     trawl_type == 11 ~ "AB", 
   )) %>%
+  mutate(trawl_type1 = as.factor(trawl_type1)) %>%
   relocate(trawl_type1, .after = trawl_type) %>%
   filter(SVSPP %in% c(73, 74, 105, 102, 107, 106, 197))
 
@@ -1000,7 +1001,8 @@ rm(cord.dec,cord.UTM)
 ```{r}
 #COD
 gam_dataset_cod <- gam_dataset %>%
-  filter(SVSPP == 73)
+  filter(SVSPP == 73) %>%
+  filter(CATCH > 0)
 
 #Haddock 
 gam_dataset_haddock <- gam_dataset %>%
@@ -1065,6 +1067,8 @@ m7 <- mgcv::gam(CATCH ~ te(LAT, LONG, days_from, bs="cs") + factor(trawl_type1) 
 
 summary(cod_gam)
 plot(cod_gam)
+
+par(mfrow = c(2,2))
 gam.check(cod_gam)
 
 cod_gam_sum <- exp(coef(cod_gam))
@@ -1087,7 +1091,7 @@ gam.check(haddock_gam)
 
 ## Witch Flounder 
 ```{r}
-witchfl_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+witchfl_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + offset(log(swept_area)), 
                      data = gam_dataset_witchfl, family = nb)
 
 summary(witchfl_gam)
@@ -1100,12 +1104,14 @@ exp(coef(witchfl_gam))
 
 ## Yellowtail Flounder 
 ```{r}
-yellowtailfl_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + log(swept_area), 
+yellowtailfl_gam <- mgcv::gam(CATCH ~ te(midpoint_lat, midpoint_long, days_from) + factor(trawl_type1) + offset(log(swept_area)), 
                      data = gam_dataset_yellowtailfl, family = nb)
 
 summary(yellowtailfl_gam)
 plot(yellowtailfl_gam)
 gam.check(yellowtailfl_gam)
+
+exp(coef(yellowtailfl_gam))
 ```
 
 
