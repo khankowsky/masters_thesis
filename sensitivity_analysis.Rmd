@@ -93,13 +93,13 @@ formulae <- combos %>%
 
 #fit models (takes dataset)
 fit.models_cod <- function(x, y) {
-  y$formula %>% purrr::map( ~glm(.x, family = binomial, data=x))
+  y$formula_clean %>% purrr::map( ~glm(.x, family = binomial, data=x))
 }
 
 
 #compare models (takes list of models created by fit.models())
 compare.models <- function(x, y) {
-  y$formula_clean %>%
+  y %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   arrange(desc(aic)) %>%
@@ -266,7 +266,7 @@ compared_all_cod <- mapply(compare.models, models_all_cod, clean_list_of_models)
 
 
 #extract the optimal model from each table 
-optimal_models_cod <- lapply(models_all_cod, extract_optimal_model)
+optimal_models_old <- lapply(compared_all_old, extract_optimal_model)
 
 optimal_models_cod
 
@@ -358,8 +358,12 @@ datasets_tibble_cod <- datasets_tibble_cod %>%
 
 clean_list_of_models <- datasets_tibble_cod$list_of_models
 
-datasets_tibble_cod %>%
-  mutate(all_models = purrr::map2(list_of_models, data, ~glm(.x, family = binomial, data = .y)))
+datasets_tibble_cod <- datasets_tibble_cod %>%
+  group_by(dataset) %>%
+  mutate(all_models = purrr::map2(list_of_models, data, ~glm(.x$formula_clean, family = binomial, data = .y))) %>%
+  mutate(model_comparison_tbl = purrr::map2(list_of_models, all_models, compare.models))
+  
+models1 <- datasets_tibble_cod$all_models[[1]]
 
   
 
