@@ -99,7 +99,7 @@ fit.models_cod <- function(x, y) {
 
 #compare models (takes list of models created by fit.models())
 compare.models <- function(x, y) {
-  y %>%
+  y$formula_clean %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   arrange(desc(aic)) %>%
@@ -261,7 +261,7 @@ models_all_cod <- mapply(fit.models_cod, datasets_tibble_cod$data, clean_list_of
 #comparing all the models for all the datasets 
 compared_all_old <- lapply(models_all_cod_old, compare.models_old)
 
-compared_all_cod <- lapply(compare.models, models_all_cod, clean_list_of_models)
+compared_all_cod <- mapply(compare.models, models_all_cod, clean_list_of_models)
 
 
 
@@ -326,7 +326,7 @@ datasets_tibble_cod %>%
 
 
 
-list_of_models1 <- rep(list(formulae),64)
+list_of_models1 <- rep(list(formulae),56)
 
 datasets_tibble_cod <- datasets_tibble_cod %>% 
   mutate(list_of_models = list_of_models1) %>%
@@ -349,10 +349,10 @@ datasets_tibble_cod <- datasets_tibble_cod %>%
          !(dayNight_n == 1 & dayNight_dtc == TRUE), 
          !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
   mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
-  mutate(formula = str_replace(formula, "~ +", " ~ ")) %>%
-  select(dataset, data, formula) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean) %>%
   group_by(dataset) %>%
-  nest(list_of_models = formula) %>%
+  nest(list_of_models = formula_clean) %>%
   ungroup()
   
 
