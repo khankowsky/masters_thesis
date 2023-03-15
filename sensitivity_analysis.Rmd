@@ -263,23 +263,42 @@ compared_all_old <- lapply(models_all_cod_old, compare.models_old)
 
 
 compare.models <- function(x, y) {
-  datasets_tibble_cod$list_of_models[[y]] %>%
+  y %>%
   mutate(aic =  purrr::map_dbl(x, AIC)) %>%
   mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[length(x[1:64])]) %>%
+  mutate(deltaAIC = aic - aic[length(x)]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) #%>%
+  # kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  # kable_classic("striped", full_width = FALSE)
+}
+
+
+
+clean_list_of_models %>%
+  mutate(aic =  purrr::map_dbl(models_all_cod, AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_cod, Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_cod[1:64])]) %>%
   relocate(rsq, .after = deltaAIC) %>%
   mutate(rsq = sprintf("%0.2f", rsq)) %>%
   mutate(aic = sprintf("%1.0f", aic)) %>%
   mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
   kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
   kable_classic("striped", full_width = FALSE)
-}
+
 
 
 compared_all_cod <- mapply(compare.models, models_all_cod, clean_list_of_models)
+compared_all_cod1 <- as.tibble(compared_all_cod)
+
+
 compared_all_cod <- mapply(compare.models, models_all_cod, 1:64)
 
+compared_all_cod <- lapply(models_all_cod, compare.models)
 length(models_all_cod[1:64])
 
 
