@@ -263,11 +263,11 @@ compared_all_old <- lapply(models_all_cod_old, compare.models_old)
 
 
 compare.models <- function(x, y) {
-  clean_list_of_models[[y]] %>%
-  mutate(aic =  purrr::map_dbl(x[[y]], AIC)) %>%
-  mutate(rsq =  purrr::map_dbl(x[[y]], Dsquared)) %>% 
+  datasets_tibble_cod$list_of_models[[y]] %>%
+  mutate(aic =  purrr::map_dbl(x, AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(x, Dsquared)) %>% 
   arrange(desc(aic)) %>%
-  mutate(deltaAIC = aic - aic[length(x)]) %>%
+  mutate(deltaAIC = aic - aic[length(x[1:64])]) %>%
   relocate(rsq, .after = deltaAIC) %>%
   mutate(rsq = sprintf("%0.2f", rsq)) %>%
   mutate(aic = sprintf("%1.0f", aic)) %>%
@@ -280,7 +280,7 @@ compare.models <- function(x, y) {
 compared_all_cod <- mapply(compare.models, models_all_cod, clean_list_of_models)
 compared_all_cod <- mapply(compare.models, models_all_cod, 1:64)
 
-length(models_all_cod[[1:64]])
+length(models_all_cod[1:64])
 
 
 #extract the optimal model from each table 
@@ -290,12 +290,12 @@ optimal_models_cod
 
 
 #adding a column to the dataframe of the optimal model formula for each dataset 
-datasets_tibble_cod <- datasets_tibble %>%
+datasets_tibble_cod1 <- datasets_tibble %>%
   mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season + towTime"))
 
 
 #run the optimal model for each dataset from the data_tibble 
-dataset_final_cod <- datasets_tibble_cod %>%
+dataset_final_cod <- datasets_tibble_cod1 %>%
   mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
   mutate(results = purrr::map(model, broom::tidy)) %>%
   mutate(fitted = purrr::map(model, fitted)) %>%
@@ -349,7 +349,7 @@ datasets_tibble_cod %>%
 list_of_models1 <- rep(list(formulae),64)
 
 datasets_tibble_cod <- datasets_tibble_cod %>% 
-  mutate(list_of_models = list_of_models1) %>%
+  mutate(list_of_models = rep(list(formulae),64)) %>%
   unnest(data) %>%
   group_by(dataset) %>%
   mutate(mgmt_area_n = n_distinct(mgmt_area), 
@@ -378,6 +378,19 @@ datasets_tibble_cod <- datasets_tibble_cod %>%
 
 clean_list_of_models <- datasets_tibble_cod$list_of_models
 
+###Lu's attempt
+fun.glm <- function(form, data) {
+  glm(form, family = binomial, data)
+}
+datasets_tibble_cod <- datasets_tibble_cod %>%
+  mutate(all_models = purrr::map2(list_of_models, data, map2(list_of_models, ~fun.glm)))
+
+ ## Lu's other attempt
+ for(i in nrow(datasets_tibble_cod)){
+ purrr::map(datasets_tibble_cod$list_of_models, ~glm(.x, family = binomial, data = datasets_tibble_cod$data))
+ }
+                                  
+  ####                               
 datasets_tibble_cod <- datasets_tibble_cod %>%
   mutate(all_models = purrr::map2(list_of_models, data, ~glm(.x, family = binomial, data = .y)))
 
@@ -442,6 +455,11 @@ datasets_tibble_cod <- datasets_tibble_cod %>%
   ungroup()
 
 
+#fitting all the models to each dataset 
+models_all_cod <- mapply(fit.models_cod, datasets_tibble_cod$data, clean_list_of_models)
+
+#comparing all the models for all the datasets 
+compared_all_cod <- mapply(compare.models, models_all_cod, clean_list_of_models)
 
 
 
