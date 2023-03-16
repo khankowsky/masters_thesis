@@ -92,7 +92,7 @@ formulae <- combos %>%
 
 
 #fit models (takes dataset)
-fit.models_cod <- function(x, y) {
+fit.models <- function(x, y) {
   y$formula_clean %>% purrr::map( ~glm(.x, family = binomial, data=x))
 }
 
@@ -286,6 +286,11 @@ datasets_tibble_cod <- datasets_tibble %>%
   unnest(data) %>%
   filter(SVSPP == 73 & SPECIES_ITIS == 164712) %>%
   group_by(dataset) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         sf_species_cpua < 10000) %>%
+  group_by(dataset) %>%
   nest() %>%
   ungroup()
 
@@ -299,7 +304,8 @@ datasets_tibble_cod <- datasets_tibble_cod %>%
             season_n = n_distinct(season), 
             dayNight_n = n_distinct(dayNight), 
             towTime_n = n_distinct(towTime), 
-            vessel_n = n_distinct(VESSEL_NAME)) %>%
+            vessel_n = n_distinct(VESSEL_NAME), 
+            n = n_distinct(EFFORT_ID)) %>%
   nest(data = 2:78) %>%
   ungroup() %>%
   unnest(list_of_models) %>%  
@@ -313,21 +319,21 @@ datasets_tibble_cod <- datasets_tibble_cod %>%
          !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
   mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
   mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
-  select(dataset, data, formula_clean) %>%
+  select(dataset, data, formula_clean, n) %>%
   group_by(dataset) %>%
   nest(list_of_models = formula_clean) %>%
   ungroup()
 
-clean_list_of_models <- datasets_tibble_cod$list_of_models
+clean_list_of_models_cod <- datasets_tibble_cod$list_of_models
 
 
 #fitting all the models to each dataset 
-models_all_cod <- mapply(fit.models_cod, datasets_tibble_cod$data, clean_list_of_models)
+models_all_cod <- mapply(fit.models, datasets_tibble_cod$data, clean_list_of_models_cod)
 
 
 #comparing all the models for all the datasets 
 for (i in 1:64) {
-comparison_tables <- clean_list_of_models[[i]] %>%
+comparison_tables <- clean_list_of_models_cod[[i]] %>%
   mutate(aic =  purrr::map_dbl(models_all_cod[[i]], AIC)) %>%
   mutate(rsq =  purrr::map_dbl(models_all_cod[[i]], Dsquared)) %>% 
   arrange(desc(aic)) %>%
@@ -347,7 +353,7 @@ print(comparison_tables)
 
 #extract the optimal model from each table 
 for (i in 1:64) {
-optimal_models <- clean_list_of_models[[i]] %>%
+optimal_models <- clean_list_of_models_cod[[i]] %>%
   mutate(aic =  purrr::map_dbl(models_all_cod[[i]], AIC)) %>%
   mutate(rsq =  purrr::map_dbl(models_all_cod[[i]], Dsquared)) %>% 
   arrange(desc(aic)) %>%
@@ -362,7 +368,7 @@ print(optimal_models)
 
 #adding a column to the dataframe of the optimal model formula for each dataset
 #doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
-datasets_tibble_cod <- datasets_tibble %>%
+datasets_tibble_cod <- datasets_tibble_cod %>%
   mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
                            "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
                            "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
@@ -438,7 +444,6 @@ dataset_final_cod <- datasets_tibble_cod %>%
   unnest(fitted) %>%
   group_by(dataset) %>%
   mutate(mean_re = mean(fitted), 
-         n = n(), 
          cv = (sd(fitted)/mean(fitted)), 
          se = sd(fitted)/(sqrt(length(fitted)))) %>%
   nest(fitted = fitted) %>%
@@ -455,71 +460,233 @@ dataset_final_cod
 dataset_final_cod %>%
   mutate(match_crit = str_sub(dataset, 13)) %>%
   mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
   ggplot() + 
-  geom_point(aes(x = fct_inorder(match_crit), y = mean_re)) + 
-  geom_errorbar(aes(x = match_crit, ymin = mean_re - se, ymax = mean_re + se)) + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip()
-
-###############################################################################
+  coord_flip() 
 
 
+#table for the important information 
+dataset_final_cod %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+  
 
 ```
 
 
 ## Haddock 
 ```{r}
-#filtering the datasets for just cod
+# only the stuff that actually works for haddock 
+#filtering the datasets for just haddock
 datasets_tibble_haddock <- datasets_tibble %>%
   unnest(data) %>%
   filter(SVSPP == 74 & SPECIES_ITIS == 164744) %>%
+  group_by(dataset) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         sf_species_cpua < 10000) %>%
   group_by(dataset) %>%
   nest() %>%
   ungroup()
 
 
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_haddock <- datasets_tibble_haddock %>% 
+  mutate(list_of_models = rep(list(formulae),64)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME), 
+            n = n_distinct(EFFORT_ID)) %>%
+  nest(data = 2:78) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula, "mgmt_area"), 
+         season_dtc = str_detect(formula, "season"), 
+         dayNight_dtc = str_detect(formula, "dayNight"), 
+         towTime_dtc = str_detect(formula, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_haddock <- datasets_tibble_haddock$list_of_models
+
+
 #fitting all the models to each dataset 
-models_all_haddock <- lapply(datasets_tibble_haddock$data, fit.models)
+models_all_haddock <- mapply(fit.models, datasets_tibble_haddock$data, clean_list_of_models_haddock)
 
 
 #comparing all the models for all the datasets 
-compared_all_haddock <- lapply(models_all_haddock, compare.models)
+for (i in 1:64) {
+comparison_tables_haddock <- clean_list_of_models_haddock[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_haddock[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_haddock[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_haddock[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_haddock)
+
+}
 
 
 #extract the optimal model from each table 
-optimal_models_haddock <- lapply(models_all_haddock, extract_optimal_model)
+for (i in 1:64) {
+optimal_models_haddock <- clean_list_of_models_haddock[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_haddock[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_haddock[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_haddock[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
 
-optimal_models_haddock
+print(optimal_models_haddock)
+
+}
 
 
-#adding a column to the dataframe of the optimal model formula for each dataset 
-datasets_tibble_cod <- datasets_tibble %>%
-  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season + towTime"))
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_haddock <- datasets_tibble_haddock %>%
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area",
+                           "relative_efficiency ~ AVGDEPTH",                                                           #5
+                           "relative_efficiency ~ AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area",                                       #10
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season",                                                #15
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime",
+                           "relative_efficiency ~ VESSEL_NAME +towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime",            #20
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",                      #25
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime",                         #30
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime",               #35
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP",                           #40
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area",                                              #45
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + towTime",    #50
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime",                          #55
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime",                #60
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime"
+                           ))
 
 
 #run the optimal model for each dataset from the data_tibble 
-dataset_final_haddock <- datasets_tibble_cod %>%
+dataset_final_haddock <- datasets_tibble_haddock %>%
   mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
   mutate(results = purrr::map(model, broom::tidy)) %>%
   mutate(fitted = purrr::map(model, fitted)) %>%
   unnest(fitted) %>%
   group_by(dataset) %>%
-  summarise(mean_re = mean(fitted), 
-         n = n(), 
-         cv = (sd(fitted)/mean(fitted)))
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_haddock <- dataset_final_haddock[match(paired_tow_levels, dataset_final_haddock$dataset), ]
 
 
 dataset_final_haddock
 
-###############################################################################
-datasets_tibble_haddock %>%
-  unnest(data) %>%
-  group_by(dataset) %>%
-  summarize(mgmt_area_n = n_distinct(mgmt_area), 
-            season_n = n_distinct(season), 
-            dayNight_n = n_distinct(dayNight), 
-            towTime_n = n_distinct(towTime)) 
+#plotting the RE estimate and CV and sample size 
+dataset_final_haddock %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#table for the important information 
+dataset_final_haddock %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
 
 ```
 
@@ -527,18 +694,1028 @@ datasets_tibble_haddock %>%
 
 
 ## Witch Flounder 
+```{r}
+# only the stuff that actually works for witch flounder  
+#filtering the datasets for just witch flounder 
+datasets_tibble_witchfl <- datasets_tibble %>%
+  unnest(data) %>%
+  filter(SVSPP == 107 & SPECIES_ITIS == 172873) %>%
+  group_by(dataset) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         sf_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_witchfl <- datasets_tibble_witchfl %>% 
+  mutate(list_of_models = rep(list(formulae),64)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME), 
+            n = n_distinct(EFFORT_ID)) %>%
+  nest(data = 2:78) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula, "mgmt_area"), 
+         season_dtc = str_detect(formula, "season"), 
+         dayNight_dtc = str_detect(formula, "dayNight"), 
+         towTime_dtc = str_detect(formula, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_witchfl <- datasets_tibble_witchfl$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_witchfl <- mapply(fit.models, datasets_tibble_witchfl$data, clean_list_of_models_witchfl)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:64) {
+comparison_tables_witchfl <- clean_list_of_models_witchfl[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_witchfl[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_witchfl[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_witchfl[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_witchfl)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:64) {
+optimal_models_witchfl <- clean_list_of_models_witchfl[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_witchfl[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_witchfl[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_witchfl[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_witchfl)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_witchfl <- datasets_tibble_witchfl %>%
+  mutate(optimal_model = c("", 
+                           "", 
+                           "", 
+                           "",
+                           "",                                                           #5
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                                       #10
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                                                #15
+                           "", 
+                           "", 
+                           "",
+                           "", 
+                           "",            #20
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                      #25
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                         #30
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",               #35
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                           #40
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                                              #45
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",    #50
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                          #55
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                #60
+                           "", 
+                           "", 
+                           "", 
+                           ""
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_witchfl <- datasets_tibble_witchfl %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_witchfl <- dataset_final_witchfl[match(paired_tow_levels, dataset_final_witchfl$dataset), ]
+
+
+dataset_final_witchfl
+
+#plotting the RE estimate and CV and sample size 
+dataset_final_witchfl %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#table for the important information 
+dataset_final_witchfl %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+```
 
 
 ## Yellowtail Flounder 
+```{r}
+# only the stuff that actually works for yellowtail flounder  
+#filtering the datasets for just yellowtail flounder 
+datasets_tibble_yellowtailfl <- datasets_tibble %>%
+  unnest(data) %>%
+  filter(SVSPP == 105 & SPECIES_ITIS == 172909) %>%
+  group_by(dataset) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         sf_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_yellowtailfl <- datasets_tibble_yellowtailfl %>% 
+  mutate(list_of_models = rep(list(formulae),64)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME), 
+            n = n_distinct(EFFORT_ID)) %>%
+  nest(data = 2:78) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula, "mgmt_area"), 
+         season_dtc = str_detect(formula, "season"), 
+         dayNight_dtc = str_detect(formula, "dayNight"), 
+         towTime_dtc = str_detect(formula, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_yellowtailfl <- datasets_tibble_yellowtailfl$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_yellowtailfl <- mapply(fit.models, datasets_tibble_yellowtailfl$data, clean_list_of_models_yellowtailfl)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:64) {
+comparison_tables_yellowtailfl <- clean_list_of_models_yellowtailfl[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_yellowtailfl[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_yellowtailfl[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_yellowtailfl[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_yellowtailfl)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:64) {
+optimal_models_yellowtailfl <- clean_list_of_models_yellowtailfl[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_yellowtailfl[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_yellowtailfl[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_yellowtailfl[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_yellowtailfl)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_yellowtailfl <- datasets_tibble_yellowtailfl %>%
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season",
+                           "relative_efficiency ~ AVGDEPTH",                                                           #5
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP",                                       #10
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP",                                                #15
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP",
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",            #20
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",                      #25
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",                         #30
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",               #35
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",                           #40
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",                                              #45
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight",    #50
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight",                          #55
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight",                #60
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight"
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_yellowtailfl <- datasets_tibble_yellowtailfl %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_yellowtailfl <- dataset_final_yellowtailfl[match(paired_tow_levels, dataset_final_yellowtailfl$dataset), ]
+
+
+dataset_final_yellowtailfl
+
+#plotting the RE estimate and CV and sample size 
+dataset_final_yellowtailfl %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#table for the important information 
+dataset_final_yellowtailfl %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+```
 
 
 ## American Plaice 
+```{r}
+# only the stuff that actually works for american plaice 
+#filtering the datasets for just american plaice
+datasets_tibble_plaice <- datasets_tibble %>%
+  unnest(data) %>%
+  filter(SVSPP == 102 & SPECIES_ITIS == 172877) %>%
+  group_by(dataset) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         sf_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_plaice <- datasets_tibble_plaice %>% 
+  mutate(list_of_models = rep(list(formulae),61)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME), 
+            n = n_distinct(EFFORT_ID)) %>%
+  nest(data = 2:78) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula, "mgmt_area"), 
+         season_dtc = str_detect(formula, "season"), 
+         dayNight_dtc = str_detect(formula, "dayNight"), 
+         towTime_dtc = str_detect(formula, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_plaice <- datasets_tibble_plaice$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_plaice <- mapply(fit.models, datasets_tibble_plaice$data, clean_list_of_models_plaice)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:61) {
+comparison_tables_plaice <- clean_list_of_models_plaice[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_plaice[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_plaice[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_plaice[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_plaice)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:61) {
+optimal_models_plaice <- clean_list_of_models_plaice[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_plaice[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_plaice[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_plaice[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_plaice)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_plaice <- datasets_tibble_plaice %>%
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season",
+                           "relative_efficiency ~ AVGDEPTH",                                                           #5
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ AVGDEPTH",                                       #10
+                           "relative_efficiency ~ AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP",                                                #15
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season",
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP",            #20
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area",                      #25
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",                         #30
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime",               #35
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime",                           #40
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight + towTime",                                              #45
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + dayNight",    #50
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime",                          #55
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH",                #60
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH" #61
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_plaice <- datasets_tibble_plaice %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_plaice <- dataset_final_plaice[match(paired_tow_levels, dataset_final_plaice$dataset), ]
+
+
+dataset_final_plaice 
+
+#plotting the RE estimate and CV and sample size 
+dataset_final_plaice %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#table for the important information 
+dataset_final_plaice %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+```
 
 
 ## Winter Flounder 
+```{r}
+# only the stuff that actually works for winter flounder 
+#filtering the datasets for just winter flounder
+datasets_tibble_winterfl <- datasets_tibble %>%
+  unnest(data) %>%
+  filter(SVSPP == 106 & SPECIES_ITIS == 172905) %>%
+  group_by(dataset) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         sf_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_winterfl <- datasets_tibble_winterfl %>% 
+  mutate(list_of_models = rep(list(formulae),64)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME), 
+            n = n_distinct(EFFORT_ID)) %>%
+  nest(data = 2:78) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula, "mgmt_area"), 
+         season_dtc = str_detect(formula, "season"), 
+         dayNight_dtc = str_detect(formula, "dayNight"), 
+         towTime_dtc = str_detect(formula, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_winterfl <- datasets_tibble_winterfl$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_winterfl <- mapply(fit.models, datasets_tibble_winterfl$data, clean_list_of_models_winterfl)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:64) {
+comparison_tables_winterfl <- clean_list_of_models_winterfl[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_winterfl[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_winterfl[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_winterfl[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_winterfl)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:64) {
+optimal_models_winterfl <- clean_list_of_models_winterfl[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_winterfl[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_winterfl[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_winterfl[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_winterfl)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_winterfl <- datasets_tibble_winterfl %>%
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH",
+                           "relative_efficiency ~ AVGDEPTH",                                                           #5
+                           "relative_efficiency ~ AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH",                                       #10
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP",                                                #15
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season",
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season",            #20
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH",                      #25
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",                         #30
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime",               #35
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP",                           #40
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP",                                              #45
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",    #50
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight",                          #55
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + AVGDEPTH + BOTTEMP",                #60
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +dayNight"
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_winterfl <- datasets_tibble_winterfl %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_winterfl <- dataset_final_winterfl[match(paired_tow_levels, dataset_final_winterfl$dataset), ]
+
+
+dataset_final_winterfl
+
+#plotting the RE estimate and CV and sample size 
+dataset_final_winterfl %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
+
+#table for the important information 
+dataset_final_winterfl %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+```
 
 
 ## Monkfish 
+```{r}
+# only the stuff that actually works for monkfish 
+#filtering the datasets for just monkfish
+datasets_tibble_monkfish <- datasets_tibble %>%
+  unnest(data) %>%
+  filter(SVSPP == 197 & SPECIES_ITIS == 164499) %>%
+  group_by(dataset) %>%
+  distinct(EFFORT_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         sf_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_monkfish <- datasets_tibble_monkfish %>% 
+  mutate(list_of_models = rep(list(formulae),64)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(dayNight), 
+            towTime_n = n_distinct(towTime), 
+            vessel_n = n_distinct(VESSEL_NAME), 
+            n = n_distinct(EFFORT_ID)) %>%
+  nest(data = 2:78) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula, "mgmt_area"), 
+         season_dtc = str_detect(formula, "season"), 
+         dayNight_dtc = str_detect(formula, "dayNight"), 
+         towTime_dtc = str_detect(formula, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(vessel_n == 1, (str_replace(formula, "VESSEL_NAME +", "")), formula)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_monkfish <- datasets_tibble_monkfish$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_monkfish <- mapply(fit.models, datasets_tibble_monkfish$data, clean_list_of_models_monkfish)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:64) {
+comparison_tables_monkfish <- clean_list_of_models_monkfish[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_monkfish[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_monkfish[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_monkfish[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_monkfish)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:64) {
+optimal_models_monkfish <- clean_list_of_models_monkfish[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_monkfish[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_monkfish[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_monkfish[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_monkfish)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_monkfish <- datasets_tibble_monkfish %>%
+  mutate(optimal_model = c("", 
+                           "", 
+                           "", 
+                           "",
+                           "",                                                           #5
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                                       #10
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                                                #15
+                           "", 
+                           "", 
+                           "",
+                           "", 
+                           "",            #20
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                      #25
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                         #30
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",               #35
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                           #40
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                                              #45
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",    #50
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                          #55
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "",                #60
+                           "", 
+                           "", 
+                           "", 
+                           ""
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_monkfish <- datasets_tibble_monkfish %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_monkfish <- dataset_final_monkfish[match(paired_tow_levels, dataset_final_monkfish$dataset), ]
+
+
+dataset_final_monkfish
+
+#plotting the RE estimate and CV and sample size 
+dataset_final_monkfish %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#table for the important information 
+dataset_final_monkfish %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+```
 
 
 
