@@ -671,8 +671,11 @@ dataset_final_haddock %>%
   ggplot() + 
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
-  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ", 
+       title = "Haddock") + 
   coord_flip() 
+  
+  
 
 
 #table for the important information 
@@ -712,7 +715,7 @@ datasets_tibble_witchfl <- datasets_tibble %>%
 
 #creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
 datasets_tibble_witchfl <- datasets_tibble_witchfl %>% 
-  mutate(list_of_models = rep(list(formulae),64)) %>%
+  mutate(list_of_models = rep(list(formulae),59)) %>%
   unnest(data) %>%
   group_by(dataset) %>%
   mutate(mgmt_area_n = n_distinct(mgmt_area), 
@@ -747,7 +750,7 @@ models_all_witchfl <- mapply(fit.models, datasets_tibble_witchfl$data, clean_lis
 
 
 #comparing all the models for all the datasets 
-for (i in 1:64) {
+for (i in 1:59) {
 comparison_tables_witchfl <- clean_list_of_models_witchfl[[i]] %>%
   mutate(aic =  purrr::map_dbl(models_all_witchfl[[i]], AIC)) %>%
   mutate(rsq =  purrr::map_dbl(models_all_witchfl[[i]], Dsquared)) %>% 
@@ -767,7 +770,7 @@ print(comparison_tables_witchfl)
 
 
 #extract the optimal model from each table 
-for (i in 1:64) {
+for (i in 1:59) {
 optimal_models_witchfl <- clean_list_of_models_witchfl[[i]] %>%
   mutate(aic =  purrr::map_dbl(models_all_witchfl[[i]], AIC)) %>%
   mutate(rsq =  purrr::map_dbl(models_all_witchfl[[i]], Dsquared)) %>% 
@@ -784,70 +787,65 @@ print(optimal_models_witchfl)
 #adding a column to the dataframe of the optimal model formula for each dataset
 #doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
 datasets_tibble_witchfl <- datasets_tibble_witchfl %>%
-  mutate(optimal_model = c("", 
-                           "", 
-                           "", 
-                           "",
-                           "",                                                           #5
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                                       #10
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                                                #15
-                           "", 
-                           "", 
-                           "",
-                           "", 
-                           "",            #20
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                      #25
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                         #30
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",               #35
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                           #40
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                                              #45
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",    #50
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                          #55
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                #60
-                           "", 
-                           "", 
-                           "", 
-                           ""
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season",
+                           "relative_efficiency ~ AVGDEPTH",                                                           #5
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ AVGDEPTH",                                       #10
+                           "relative_efficiency ~ AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + dayNight",                                                #15
+                           "relative_efficiency ~ BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season",
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + dayNight + towTime",            #20
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime",                      #25
+                           "relative_efficiency ~ VESSEL_NAME +season + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight",                         #30
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + mgmt_area + AVGDEPTH + BOTTEMP + towTime",               #35
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH",                           #40
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +season + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight",                                              #45
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime",    #50
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + dayNight",                          #55
+                           "relative_efficiency ~ VESSEL_NAME +towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +season + towTime"
                            ))
 
 
@@ -876,11 +874,13 @@ dataset_final_witchfl %>%
   mutate(match_crit = str_sub(dataset, 13)) %>%
   mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
   mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  drop_na(dataset) %>%
   ggplot() + 
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
 #table for the important information 
@@ -888,6 +888,7 @@ dataset_final_witchfl %>%
   ungroup() %>%
   mutate(match_crit = str_sub(dataset, 13)) %>%
   mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  drop_na(dataset) %>%
   select(match_crit, n, optimal_model, mean_re, cv, se) %>%
   mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
   mutate(cv = sprintf("%0.2f", cv)) %>%
@@ -1285,11 +1286,13 @@ dataset_final_plaice %>%
   mutate(match_crit = str_sub(dataset, 13)) %>%
   mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
   mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  drop_na(dataset) %>%
   ggplot() + 
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
 #table for the important information 
@@ -1297,6 +1300,7 @@ dataset_final_plaice %>%
   ungroup() %>%
   mutate(match_crit = str_sub(dataset, 13)) %>%
   mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  drop_na(dataset) %>%
   select(match_crit, n, optimal_model, mean_re, cv, se) %>%
   mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
   mutate(cv = sprintf("%0.2f", cv)) %>%
@@ -1563,7 +1567,8 @@ clean_list_of_models_monkfish <- datasets_tibble_monkfish$list_of_models
 
 
 #fitting all the models to each dataset 
-models_all_monkfish <- mapply(fit.models, datasets_tibble_monkfish$data, clean_list_of_models_monkfish)
+# models_all_monkfish <- mapply(fit.models, datasets_tibble_monkfish$data, clean_list_of_models_monkfish)
+models_all_monkfish <- lapply(datasets_tibble_monkfish$data, fit.models_old)
 
 
 #comparing all the models for all the datasets 
@@ -1604,70 +1609,70 @@ print(optimal_models_monkfish)
 #adding a column to the dataframe of the optimal model formula for each dataset
 #doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
 datasets_tibble_monkfish <- datasets_tibble_monkfish %>%
-  mutate(optimal_model = c("", 
-                           "", 
-                           "", 
-                           "",
-                           "",                                                           #5
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                                       #10
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                                                #15
-                           "", 
-                           "", 
-                           "",
-                           "", 
-                           "",            #20
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                      #25
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                         #30
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",               #35
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                           #40
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                                              #45
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",    #50
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                          #55
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "",                #60
-                           "", 
-                           "", 
-                           "", 
-                           ""
+  mutate(optimal_model = c("relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime",
+                           "relative_efficiency ~ VESSEL_NAME +season",                                                           #5
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area",                                       #10
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area",                                                #15
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + AVGDEPTH", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime",
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + dayNight + towTime",            #20
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + AVGDEPTH + towTime",                      #25
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime",                         #30
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + dayNight + towTime",               #35
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +season", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight + towTime",                           #40
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP",                                              #45
+                           "relative_efficiency ~ VESSEL_NAME +season + mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +season + mgmt_area", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + dayNight + towTime",    #50
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +season + BOTTEMP", 
+                           "relative_efficiency ~ VESSEL_NAME +dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight + towTime",                          #55
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime",                #60
+                           "relative_efficiency ~ VESSEL_NAME +mgmt_area + towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +towTime", 
+                           "relative_efficiency ~ VESSEL_NAME +BOTTEMP + dayNight", 
+                           "relative_efficiency ~ VESSEL_NAME +AVGDEPTH + BOTTEMP + towTime"
                            ))
 
 
@@ -1700,7 +1705,8 @@ dataset_final_monkfish %>%
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
 #table for the important information 
