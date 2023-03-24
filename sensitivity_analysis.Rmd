@@ -178,10 +178,9 @@ formulae_ob <- combos_ob %>%
 
 
 #fit models (takes dataset)
-fit.models_ob <- function(x) {
-  formulae_ob$formula_ob %>% purrr::map( ~glm(.x, family = binomial(link='logit'), data=x))
+fit.models_ob <- function(x, y) {
+  y$formula_clean %>% purrr::map( ~glm(.x, family = binomial, data=x))
 }
-
 
 
 ###############################################################################
@@ -224,6 +223,32 @@ paired_tow_levels <- c("paired_tows_1mi_24hr", "paired_tows_1mi_48hr",
                        "paired_tows_8mi_72hr", "paired_tows_8mi_96hr", 
                        "paired_tows_8mi_120hr", "paired_tows_8mi_144hr", 
                        "paired_tows_8mi_168hr", "paired_tows_8mi_192hr"
+                       )
+
+paired_tow_levels_ob <- c("paired_tows_1mi_24hr", "paired_tows_1mi_48hr", 
+                       "paired_tows_1mi_72hr", "paired_tows_1mi_96hr", 
+                       "paired_tows_1mi_120hr", "paired_tows_1mi_144hr", 
+                       "paired_tows_1mi_168hr", "paired_tows_1mi_192hr", 
+    
+                       "paired_tows_2mi_24hr", "paired_tows_2mi_48hr", 
+                       "paired_tows_2mi_72hr", "paired_tows_2mi_96hr", 
+                       "paired_tows_2mi_120hr", "paired_tows_2mi_144hr", 
+                       "paired_tows_2mi_168hr", "paired_tows_2mi_192hr", 
+                       
+                       "paired_tows_3mi_24hr", "paired_tows_3mi_48hr", 
+                       "paired_tows_3mi_72hr", "paired_tows_3mi_96hr", 
+                       "paired_tows_3mi_120hr", "paired_tows_3mi_144hr", 
+                       "paired_tows_3mi_168hr", "paired_tows_3mi_192hr", 
+                       
+                       "paired_tows_4mi_24hr", "paired_tows_4mi_48hr", 
+                       "paired_tows_4mi_72hr", "paired_tows_4mi_96hr", 
+                       "paired_tows_4mi_120hr", "paired_tows_4mi_144hr", 
+                       "paired_tows_4mi_168hr", "paired_tows_4mi_192hr", 
+                       
+                       "paired_tows_5mi_24hr", "paired_tows_5mi_48hr", 
+                       "paired_tows_5mi_72hr", "paired_tows_5mi_96hr", 
+                       "paired_tows_5mi_120hr", "paired_tows_5mi_144hr", 
+                       "paired_tows_5mi_168hr", "paired_tows_5mi_192hr"
                        )
 
 ```
@@ -1730,7 +1755,8 @@ dataset_final_monkfish %>%
 ########################                            ###########################
 ###############################################################################
 
-# Running Sensitivity Analysis for Observer Data
+# Observer & NEFSC 
+## Running Sensitivity Analysis for Observer Data
 ```{r}
 #reading in the list of files, and then reading in all the datasets to a list 
 filenames_ob <- list.files(path = "data/ob_paired_data", recursive = TRUE, full.names = TRUE)
@@ -1741,15 +1767,18 @@ datasets_ob <- lapply(filenames_ob, read_csv)
 datasets_tibble_ob <- as_tibble_col(filenames_ob, column_name = "dataset") %>%
   mutate(dataset = str_sub(dataset, 21, -5))
 
-#adding the individual datasets into the datasets_tibble and cleaning up the data
+
+#running the relative efficiency calculation and filtering 
+datasets_re_ob <- lapply(datasets_ob, rel_eff_func_ob)
+
+
+#adding the individual datasets to the overall dataset 
 datasets_tibble_ob <- datasets_tibble_ob %>%
-  mutate(data = datasets_ob) %>%
-  mutate(data = purrr::map(data, rel_eff_func_ob))
+  mutate(data = datasets_re_ob)
 
 ```
 
 
-# Observer & NEFSC 
 ## Cod
 ```{r}
 datasets_tibble_ob_cod <- datasets_tibble_ob %>%
@@ -1764,13 +1793,204 @@ models_all_ob_cod <- lapply(datasets_tibble_ob_cod$data, fit.models_ob)
 
 
 ###############################################################################
-datasets_tibble_ob_cod %>%
+# only the stuff that actually works for cod 
+#filtering the datasets for just cod
+datasets_tibble_cod_ob <- datasets_tibble_ob %>%
+  unnest(data) %>%
+  filter(SVSPP == 73 & NESPP4 == 818) %>%
+  group_by(dataset) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         ob_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_cod_ob <- datasets_tibble_cod_ob %>% 
+  mutate(list_of_models = rep(list(formulae_ob),40)) %>%
   unnest(data) %>%
   group_by(dataset) %>%
-  summarize(mgmt_area_n = n_distinct(mgmt_area), 
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
             season_n = n_distinct(season), 
             dayNight_n = n_distinct(DayNight), 
-            towTime_n = n_distinct(towTime)) 
+            towTime_n = n_distinct(towTime), 
+            trawl_n = n_distinct(trawl_type), 
+            n = n_distinct(trip_haul_ID)) %>%
+  nest(data = 2:91) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula_ob, "mgmt_area"), 
+         season_dtc = str_detect(formula_ob, "season"), 
+         dayNight_dtc = str_detect(formula_ob, "DayNight"), 
+         towTime_dtc = str_detect(formula_ob, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(trawl_n == 1, (str_replace(formula_ob, "trawl_type +", "")), formula_ob)) %>%
+  mutate(formula_clean = str_replace(formula_ob, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_cod_ob <- datasets_tibble_cod_ob$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_cod_ob <- mapply(fit.models_ob, datasets_tibble_cod_ob$data, clean_list_of_models_cod_ob)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:40) {
+comparison_tables_cod_ob <- clean_list_of_models_cod_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_cod_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_cod_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_cod_ob[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_cod_ob)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:40) {
+optimal_models_cod_ob <- clean_list_of_models_cod_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_cod_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_cod_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_cod_ob[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_cod_ob)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_cod_ob <- datasets_tibble_cod_ob %>%
+  mutate(optimal_model = c("relative_efficiency ~ trawl_type + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH",
+                           "relative_efficiency ~ trawl_type + AVGDEPTH", #5
+                           "relative_efficiency ~ trawl_type + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH", #10
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + towTime", 
+                           "relative_efficiency ~ trawl_type + towTime", #15
+                           "relative_efficiency ~ trawl_type + BOTTEMP + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime",
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime", #20
+                           "relative_efficiency ~ trawl_type + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + DayNight + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + DayNight + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + DayNight + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + DayNight", #25
+                           "relative_efficiency ~ trawl_type + season + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + DayNight", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + DayNight", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + DayNight", #30
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + DayNight", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + DayNight", #35
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + DayNight + towTime", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + DayNight", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + DayNight", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + DayNight"  #40
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_cod_ob <- datasets_tibble_cod_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  unnest(data) %>%
+  group_by(dataset, trawl_type) %>%
+  mutate(mean_re_bytrawl = mean(fitted), 
+         cv_bytrawl = (sd(fitted)/mean(fitted)), 
+         se_bytrawl = sd(fitted)/(sqrt(length(fitted)))) %>%
+  relocate(trawl_type, .after = se_bytrawl) %>%
+  ungroup() %>%
+  nest(data = 2:90, 
+       fitted = fitted, 
+       re_info_bytrawl = c(mean_re_bytrawl, cv_bytrawl, se_bytrawl, trawl_type)) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_cod_ob <- dataset_final_cod_ob[match(paired_tow_levels_ob, dataset_final_cod$dataset), ]
+
+
+dataset_final_cod_ob
+
+#plotting the RE estimate and SE and sample size 
+dataset_final_cod_ob %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#plotting the RE estimate and SE and sample size by trawl type
+dataset_final_cod_ob %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  unnest(re_info_bytrawl) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re_bytrawl, color = trawl_type)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re_bytrawl - se_bytrawl, ymax = mean_re_bytrawl + se_bytrawl, color = trawl_type)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#table for the important information 
+dataset_final_cod %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
 
 ```
 
