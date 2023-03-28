@@ -1781,19 +1781,6 @@ datasets_tibble_ob <- datasets_tibble_ob %>%
 
 ## Cod
 ```{r}
-datasets_tibble_ob_cod <- datasets_tibble_ob %>%
-  unnest(data) %>%
-  filter(SVSPP == 73 & NESPP4 == 818) %>%
-  group_by(dataset) %>%
-  nest() %>%
-  ungroup()
-
-#fitting all the models to each dataset 
-models_all_ob_cod <- lapply(datasets_tibble_ob_cod$data, fit.models_ob)
-
-
-###############################################################################
-# only the stuff that actually works for cod 
 #filtering the datasets for just cod
 datasets_tibble_cod_ob <- datasets_tibble_ob %>%
   unnest(data) %>%
@@ -1831,7 +1818,7 @@ datasets_tibble_cod_ob <- datasets_tibble_cod_ob %>%
          !(dayNight_n == 1 & dayNight_dtc == TRUE), 
          !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
   mutate(formula = ifelse(trawl_n == 1, (str_replace(formula_ob, "trawl_type +", "")), formula_ob)) %>%
-  mutate(formula_clean = str_replace(formula_ob, "~  \\+", " ~ ")) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
   select(dataset, data, formula_clean, n) %>%
   group_by(dataset) %>%
   nest(list_of_models = formula_clean) %>%
@@ -1935,16 +1922,8 @@ dataset_final_cod_ob <- datasets_tibble_cod_ob %>%
   mutate(mean_re = mean(fitted), 
          cv = (sd(fitted)/mean(fitted)), 
          se = sd(fitted)/(sqrt(length(fitted)))) %>%
-  unnest(data) %>%
-  group_by(dataset, trawl_type) %>%
-  mutate(mean_re_bytrawl = mean(fitted), 
-         cv_bytrawl = (sd(fitted)/mean(fitted)), 
-         se_bytrawl = sd(fitted)/(sqrt(length(fitted)))) %>%
-  relocate(trawl_type, .after = se_bytrawl) %>%
   ungroup() %>%
-  nest(data = 2:90, 
-       fitted = fitted, 
-       re_info_bytrawl = c(mean_re_bytrawl, cv_bytrawl, se_bytrawl, trawl_type)) %>%
+  nest(fitted = fitted) %>%
   relocate(fitted, .after = results)
 
 
@@ -1967,20 +1946,33 @@ dataset_final_cod_ob %>%
 
 
 #plotting the RE estimate and SE and sample size by trawl type
-dataset_final_cod_ob %>%
+datasets_tibble_cod_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted_vals = purrr::map(model, fitted)) %>% 
+  mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
+  unnest(data) %>%
+  group_by(dataset, trawl_type) %>%
+  summarise(mean_re_bytrawl = mean(fitted), 
+         cv_bytrawl = (sd(fitted)/mean(fitted)), 
+         se_bytrawl = sd(fitted)/(sqrt(length(fitted))), 
+         n_bytrawl = n_distinct(trip_haul_ID)) %>%
   mutate(match_crit = str_sub(dataset, 13)) %>%
   mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
-  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
-  unnest(re_info_bytrawl) %>%
+  mutate(label = paste0(match_crit, " (n = ", sum(n_bytrawl), ")")) %>%
   ggplot() + 
   geom_point(aes(x = fct_inorder(label), y = mean_re_bytrawl, color = trawl_type)) + 
   geom_errorbar(aes(x = label, ymin = mean_re_bytrawl - se_bytrawl, ymax = mean_re_bytrawl + se_bytrawl, color = trawl_type)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
   coord_flip() 
 
 
+  
+
 #table for the important information 
-dataset_final_cod %>%
+dataset_final_cod_ob %>%
   ungroup() %>%
   mutate(match_crit = str_sub(dataset, 13)) %>%
   mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
@@ -1998,18 +1990,1248 @@ dataset_final_cod %>%
 
 
 ## Haddock 
+```{r}
+#filtering the datasets for just cod
+datasets_tibble_haddock_ob <- datasets_tibble_ob %>%
+  unnest(data) %>%
+  filter(SVSPP == 74 & NESPP4 == 1477) %>%
+  group_by(dataset) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         ob_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_haddock_ob <- datasets_tibble_haddock_ob %>% 
+  mutate(list_of_models = rep(list(formulae_ob),40)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(DayNight), 
+            towTime_n = n_distinct(towTime), 
+            trawl_n = n_distinct(trawl_type), 
+            n = n_distinct(trip_haul_ID)) %>%
+  nest(data = 2:91) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula_ob, "mgmt_area"), 
+         season_dtc = str_detect(formula_ob, "season"), 
+         dayNight_dtc = str_detect(formula_ob, "DayNight"), 
+         towTime_dtc = str_detect(formula_ob, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(trawl_n == 1, (str_replace(formula_ob, "trawl_type +", "")), formula_ob)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_haddock_ob <- datasets_tibble_haddock_ob$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_haddock_ob <- mapply(fit.models_ob, datasets_tibble_haddock_ob$data, clean_list_of_models_haddock_ob)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:40) {
+comparison_tables_haddock_ob <- clean_list_of_models_haddock_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_haddock_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_haddock_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_haddock_ob[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_haddock_ob)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:40) {
+optimal_models_haddock_ob <- clean_list_of_models_haddock_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_haddock_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_haddock_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_haddock_ob[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_haddock_ob)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_haddock_ob <- datasets_tibble_haddock_ob %>%
+  mutate(optimal_model = c("", 
+                           "", 
+                           "", 
+                           "",
+                           "", #5
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #10
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #15
+                           "", 
+                           "", 
+                           "",
+                           "", 
+                           "", #20
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #25
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #30
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #35
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           ""  #40
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_haddock_ob <- datasets_tibble_haddock_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  ungroup() %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_haddock_ob <- dataset_final_haddock_ob[match(paired_tow_levels_ob, dataset_final_haddock$dataset), ]
+
+
+dataset_final_haddock_ob
+
+#plotting the RE estimate and SE and sample size 
+dataset_final_haddock_ob %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#plotting the RE estimate and SE and sample size by trawl type
+datasets_tibble_haddock_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted_vals = purrr::map(model, fitted)) %>% 
+  mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
+  unnest(data) %>%
+  group_by(dataset, trawl_type) %>%
+  summarise(mean_re_bytrawl = mean(fitted), 
+         cv_bytrawl = (sd(fitted)/mean(fitted)), 
+         se_bytrawl = sd(fitted)/(sqrt(length(fitted))), 
+         n_bytrawl = n_distinct(trip_haul_ID)) %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", sum(n_bytrawl), ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re_bytrawl, color = trawl_type)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re_bytrawl - se_bytrawl, ymax = mean_re_bytrawl + se_bytrawl, color = trawl_type)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip() 
+
+
+  
+
+#table for the important information 
+dataset_final_haddock %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+```
+
 
 
 ## Witch Flounder 
+```{r}
+#filtering the datasets for just cod
+datasets_tibble_witchfl_ob <- datasets_tibble_ob %>%
+  unnest(data) %>%
+  filter(SVSPP == 107 & NESPP4 == 1220) %>%
+  group_by(dataset) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         ob_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_witchfl_ob <- datasets_tibble_witchfl_ob %>% 
+  mutate(list_of_models = rep(list(formulae_ob),40)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(DayNight), 
+            towTime_n = n_distinct(towTime), 
+            trawl_n = n_distinct(trawl_type), 
+            n = n_distinct(trip_haul_ID)) %>%
+  nest(data = 2:91) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula_ob, "mgmt_area"), 
+         season_dtc = str_detect(formula_ob, "season"), 
+         dayNight_dtc = str_detect(formula_ob, "DayNight"), 
+         towTime_dtc = str_detect(formula_ob, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(trawl_n == 1, (str_replace(formula_ob, "trawl_type +", "")), formula_ob)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_witchfl_ob <- datasets_tibble_witchfl_ob$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_witchfl_ob <- mapply(fit.models_ob, datasets_tibble_witchfl_ob$data, clean_list_of_models_witchfl_ob)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:40) {
+comparison_tables_witchfl_ob <- clean_list_of_models_witchfl_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_witchfl_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_witchfl_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_witchfl_ob[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_witchfl_ob)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:40) {
+optimal_models_witchfl_ob <- clean_list_of_models_witchfl_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_witchfl_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_witchfl_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_witchfl_ob[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_witchfl_ob)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_witchfl_ob <- datasets_tibble_witchfl_ob %>%
+  mutate(optimal_model = c("", 
+                           "", 
+                           "", 
+                           "",
+                           "", #5
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #10
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #15
+                           "", 
+                           "", 
+                           "",
+                           "", 
+                           "", #20
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #25
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #30
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #35
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           ""  #40
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_witchfl_ob <- datasets_tibble_witchfl_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  ungroup() %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_witchfl_ob <- dataset_final_witchfl_ob[match(paired_tow_levels_ob, dataset_final_witchfl$dataset), ]
+
+
+dataset_final_witchfl_ob
+
+#plotting the RE estimate and SE and sample size 
+dataset_final_witchfl_ob %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#plotting the RE estimate and SE and sample size by trawl type
+datasets_tibble_witchfl_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted_vals = purrr::map(model, fitted)) %>% 
+  mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
+  unnest(data) %>%
+  group_by(dataset, trawl_type) %>%
+  summarise(mean_re_bytrawl = mean(fitted), 
+         cv_bytrawl = (sd(fitted)/mean(fitted)), 
+         se_bytrawl = sd(fitted)/(sqrt(length(fitted))), 
+         n_bytrawl = n_distinct(trip_haul_ID)) %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", sum(n_bytrawl), ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re_bytrawl, color = trawl_type)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re_bytrawl - se_bytrawl, ymax = mean_re_bytrawl + se_bytrawl, color = trawl_type)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip() 
+
+
+  
+
+#table for the important information 
+dataset_final_witchfl_ob %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+```
+
 
 
 ## Yellowtail Flounder 
+```{r}
+#filtering the datasets for just cod
+datasets_tibble_yellowtailfl_ob <- datasets_tibble_ob %>%
+  unnest(data) %>%
+  filter(SVSPP == 105 & NESPP4 == 1230) %>%
+  group_by(dataset) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         ob_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_yellowtailfl_ob <- datasets_tibble_yellowtailfl_ob %>% 
+  mutate(list_of_models = rep(list(formulae_ob),40)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(DayNight), 
+            towTime_n = n_distinct(towTime), 
+            trawl_n = n_distinct(trawl_type), 
+            n = n_distinct(trip_haul_ID)) %>%
+  nest(data = 2:91) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula_ob, "mgmt_area"), 
+         season_dtc = str_detect(formula_ob, "season"), 
+         dayNight_dtc = str_detect(formula_ob, "DayNight"), 
+         towTime_dtc = str_detect(formula_ob, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(trawl_n == 1, (str_replace(formula_ob, "trawl_type +", "")), formula_ob)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_yellowtailfl_ob <- datasets_tibble_yellowtailfl_ob$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_yellowtailfl_ob <- mapply(fit.models_ob, datasets_tibble_yellowtailfl_ob$data, clean_list_of_models_yellowtailfl_ob)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:40) {
+comparison_tables_yellowtailfl_ob <- clean_list_of_models_yellowtailfl_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_yellowtailfl_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_yellowtailfl_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_yellowtailfl_ob[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_yellowtailfl_ob)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:40) {
+optimal_models_yellowtailfl_ob <- clean_list_of_models_yellowtailfl_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_yellowtailfl_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_yellowtailfl_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_yellowtailfl_ob[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_yellowtailfl_ob)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_yellowtailfl_ob <- datasets_tibble_yellowtailfl_ob %>%
+  mutate(optimal_model = c("", 
+                           "", 
+                           "", 
+                           "",
+                           "", #5
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #10
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #15
+                           "", 
+                           "", 
+                           "",
+                           "", 
+                           "", #20
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #25
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #30
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #35
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           ""  #40
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_yellowtailfl_ob <- datasets_tibble_yellowtailfl_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  ungroup() %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_yellowtailfl_ob <- dataset_final_yellowtailfl_ob[match(paired_tow_levels_ob, dataset_final_yellowtailfl$dataset), ]
+
+
+dataset_final_yellowtailfl_ob
+
+#plotting the RE estimate and SE and sample size 
+dataset_final_yellowtailfl_ob %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#plotting the RE estimate and SE and sample size by trawl type
+datasets_tibble_yellowtailfl_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted_vals = purrr::map(model, fitted)) %>% 
+  mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
+  unnest(data) %>%
+  group_by(dataset, trawl_type) %>%
+  summarise(mean_re_bytrawl = mean(fitted), 
+         cv_bytrawl = (sd(fitted)/mean(fitted)), 
+         se_bytrawl = sd(fitted)/(sqrt(length(fitted))), 
+         n_bytrawl = n_distinct(trip_haul_ID)) %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", sum(n_bytrawl), ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re_bytrawl, color = trawl_type)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re_bytrawl - se_bytrawl, ymax = mean_re_bytrawl + se_bytrawl, color = trawl_type)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip() 
+
+
+  
+
+#table for the important information 
+dataset_final_yellowtailfl_ob %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+```
 
 
 ## American Plaice 
+```{r}
+#filtering the datasets for just cod
+datasets_tibble_plaice_ob <- datasets_tibble_ob %>%
+  unnest(data) %>%
+  filter(SVSPP == 102 & NESPP4 == 1240) %>%
+  group_by(dataset) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         ob_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_plaice_ob <- datasets_tibble_plaice_ob %>% 
+  mutate(list_of_models = rep(list(formulae_ob),40)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(DayNight), 
+            towTime_n = n_distinct(towTime), 
+            trawl_n = n_distinct(trawl_type), 
+            n = n_distinct(trip_haul_ID)) %>%
+  nest(data = 2:91) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula_ob, "mgmt_area"), 
+         season_dtc = str_detect(formula_ob, "season"), 
+         dayNight_dtc = str_detect(formula_ob, "DayNight"), 
+         towTime_dtc = str_detect(formula_ob, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(trawl_n == 1, (str_replace(formula_ob, "trawl_type +", "")), formula_ob)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_plaice_ob <- datasets_tibble_plaice_ob$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_plaice_ob <- mapply(fit.models_ob, datasets_tibble_plaice_ob$data, clean_list_of_models_plaice_ob)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:40) {
+comparison_tables_plaice_ob <- clean_list_of_models_plaice_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_plaice_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_plaice_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_plaice_ob[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_plaice_ob)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:40) {
+optimal_models_plaice_ob <- clean_list_of_models_plaice_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_plaice_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_plaice_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_plaice_ob[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_plaice_ob)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_plaice_ob <- datasets_tibble_plaice_ob %>%
+  mutate(optimal_model = c("", 
+                           "", 
+                           "", 
+                           "",
+                           "", #5
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #10
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #15
+                           "", 
+                           "", 
+                           "",
+                           "", 
+                           "", #20
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #25
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #30
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #35
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           ""  #40
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_plaice_ob <- datasets_tibble_plaice_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  ungroup() %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_plaice_ob <- dataset_final_plaice_ob[match(paired_tow_levels_ob, dataset_final_plaice$dataset), ]
+
+
+dataset_final_plaice_ob
+
+#plotting the RE estimate and SE and sample size 
+dataset_final_plaice_ob %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#plotting the RE estimate and SE and sample size by trawl type
+datasets_tibble_plaice_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted_vals = purrr::map(model, fitted)) %>% 
+  mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
+  unnest(data) %>%
+  group_by(dataset, trawl_type) %>%
+  summarise(mean_re_bytrawl = mean(fitted), 
+         cv_bytrawl = (sd(fitted)/mean(fitted)), 
+         se_bytrawl = sd(fitted)/(sqrt(length(fitted))), 
+         n_bytrawl = n_distinct(trip_haul_ID)) %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", sum(n_bytrawl), ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re_bytrawl, color = trawl_type)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re_bytrawl - se_bytrawl, ymax = mean_re_bytrawl + se_bytrawl, color = trawl_type)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip() 
+
+
+  
+
+#table for the important information 
+dataset_final_plaice_ob %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+```
 
 
 ## Winter Flounder 
+```{r}
+#filtering the datasets for just cod
+datasets_tibble_winterfl_ob <- datasets_tibble_ob %>%
+  unnest(data) %>%
+  filter(SVSPP == 106 & NESPP4 == 1200) %>%
+  group_by(dataset) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         ob_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_winterfl_ob <- datasets_tibble_winterfl_ob %>% 
+  mutate(list_of_models = rep(list(formulae_ob),40)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(DayNight), 
+            towTime_n = n_distinct(towTime), 
+            trawl_n = n_distinct(trawl_type), 
+            n = n_distinct(trip_haul_ID)) %>%
+  nest(data = 2:91) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula_ob, "mgmt_area"), 
+         season_dtc = str_detect(formula_ob, "season"), 
+         dayNight_dtc = str_detect(formula_ob, "DayNight"), 
+         towTime_dtc = str_detect(formula_ob, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(trawl_n == 1, (str_replace(formula_ob, "trawl_type +", "")), formula_ob)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_winterfl_ob <- datasets_tibble_winterfl_ob$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_winterfl_ob <- mapply(fit.models_ob, datasets_tibble_winterfl_ob$data, clean_list_of_models_winterfl_ob)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:40) {
+comparison_tables_winterfl_ob <- clean_list_of_models_winterfl_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_winterfl_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_winterfl_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_winterfl_ob[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_winterfl_ob)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:40) {
+optimal_models_winterfl_ob <- clean_list_of_models_winterfl_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_winterfl_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_winterfl_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_winterfl_ob[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_winterfl_ob)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_winterfl_ob <- datasets_tibble_winterfl_ob %>%
+  mutate(optimal_model = c("", 
+                           "", 
+                           "", 
+                           "",
+                           "", #5
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #10
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #15
+                           "", 
+                           "", 
+                           "",
+                           "", 
+                           "", #20
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #25
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #30
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #35
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           ""  #40
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_winterfl_ob <- datasets_tibble_winterfl_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  ungroup() %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_winterfl_ob <- dataset_final_winterfl_ob[match(paired_tow_levels_ob, dataset_final_winterfl$dataset), ]
+
+
+dataset_final_winterfl_ob
+
+#plotting the RE estimate and SE and sample size 
+dataset_final_winterfl_ob %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#plotting the RE estimate and SE and sample size by trawl type
+datasets_tibble_winterfl_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted_vals = purrr::map(model, fitted)) %>% 
+  mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
+  unnest(data) %>%
+  group_by(dataset, trawl_type) %>%
+  summarise(mean_re_bytrawl = mean(fitted), 
+         cv_bytrawl = (sd(fitted)/mean(fitted)), 
+         se_bytrawl = sd(fitted)/(sqrt(length(fitted))), 
+         n_bytrawl = n_distinct(trip_haul_ID)) %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", sum(n_bytrawl), ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re_bytrawl, color = trawl_type)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re_bytrawl - se_bytrawl, ymax = mean_re_bytrawl + se_bytrawl, color = trawl_type)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip() 
+
+
+  
+
+#table for the important information 
+dataset_final_winterfl_ob %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+```
 
 
 ## Monkfish 
+```{r}
+#filtering the datasets for just cod
+datasets_tibble_monkfish_ob <- datasets_tibble_ob %>%
+  unnest(data) %>%
+  filter(SVSPP == 197 & NESPP4 == 124) %>%
+  group_by(dataset) %>%
+  distinct(trip_haul_ID, .keep_all = TRUE) %>%
+  ungroup() %>%
+  filter(nefsc_species_cpua_LB < 10000, 
+         ob_species_cpua < 10000) %>%
+  group_by(dataset) %>%
+  nest() %>%
+  ungroup()
+
+
+#creating a list of models, and removing models for which there are only one level of the categorical variables and then cleaning up the list of models 
+datasets_tibble_monkfish_ob <- datasets_tibble_monkfish_ob %>% 
+  mutate(list_of_models = rep(list(formulae_ob),40)) %>%
+  unnest(data) %>%
+  group_by(dataset) %>%
+  mutate(mgmt_area_n = n_distinct(mgmt_area), 
+            season_n = n_distinct(season), 
+            dayNight_n = n_distinct(DayNight), 
+            towTime_n = n_distinct(towTime), 
+            trawl_n = n_distinct(trawl_type), 
+            n = n_distinct(trip_haul_ID)) %>%
+  nest(data = 2:91) %>%
+  ungroup() %>%
+  unnest(list_of_models) %>%  
+  mutate(mgmt_area_dtc = str_detect(formula_ob, "mgmt_area"), 
+         season_dtc = str_detect(formula_ob, "season"), 
+         dayNight_dtc = str_detect(formula_ob, "DayNight"), 
+         towTime_dtc = str_detect(formula_ob, "towTime")) %>%
+  filter(!(mgmt_area_n == 1 & mgmt_area_dtc == TRUE), 
+         !(season_n == 1 & season_dtc == TRUE), 
+         !(dayNight_n == 1 & dayNight_dtc == TRUE), 
+         !(towTime_n == 1 & towTime_dtc == TRUE)) %>%
+  mutate(formula = ifelse(trawl_n == 1, (str_replace(formula_ob, "trawl_type +", "")), formula_ob)) %>%
+  mutate(formula_clean = str_replace(formula, "~  \\+", " ~ ")) %>%
+  select(dataset, data, formula_clean, n) %>%
+  group_by(dataset) %>%
+  nest(list_of_models = formula_clean) %>%
+  ungroup()
+
+clean_list_of_models_monkfish_ob <- datasets_tibble_monkfish_ob$list_of_models
+
+
+#fitting all the models to each dataset 
+models_all_monkfish_ob <- mapply(fit.models_ob, datasets_tibble_monkfish_ob$data, clean_list_of_models_monkfish_ob)
+
+
+#comparing all the models for all the datasets 
+for (i in 1:40) {
+comparison_tables_monkfish_ob <- clean_list_of_models_monkfish_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_monkfish_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_monkfish_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_monkfish_ob[[i]])]) %>%
+  relocate(rsq, .after = deltaAIC) %>%
+  mutate(rsq = sprintf("%0.2f", rsq)) %>%
+  mutate(aic = sprintf("%1.0f", aic)) %>%
+  mutate(deltaAIC = sprintf("%1.0f", deltaAIC)) %>%
+  kbl(col.names = (c("Model", "AIC", "deltaAIC","Deviance Explained"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+print(comparison_tables_monkfish_ob)
+
+}
+
+
+#extract the optimal model from each table 
+for (i in 1:40) {
+optimal_models_monkfish_ob <- clean_list_of_models_monkfish_ob[[i]] %>%
+  mutate(aic =  purrr::map_dbl(models_all_monkfish_ob[[i]], AIC)) %>%
+  mutate(rsq =  purrr::map_dbl(models_all_monkfish_ob[[i]], Dsquared)) %>% 
+  arrange(desc(aic)) %>%
+  mutate(deltaAIC = aic - aic[length(models_all_monkfish_ob[[i]])]) %>%
+  filter(deltaAIC <= 2) %>%
+  arrange(desc(rsq))
+
+print(optimal_models_monkfish_ob)
+
+}
+
+
+#adding a column to the dataframe of the optimal model formula for each dataset
+#doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
+datasets_tibble_monkfish_ob <- datasets_tibble_monkfish_ob %>%
+  mutate(optimal_model = c("", 
+                           "", 
+                           "", 
+                           "",
+                           "", #5
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #10
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #15
+                           "", 
+                           "", 
+                           "",
+                           "", 
+                           "", #20
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #25
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #30
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           "", #35
+                           "", 
+                           "", 
+                           "", 
+                           "", 
+                           ""  #40
+                           ))
+
+
+#run the optimal model for each dataset from the data_tibble 
+dataset_final_monkfish_ob <- datasets_tibble_monkfish_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted = purrr::map(model, fitted)) %>%
+  unnest(fitted) %>%
+  group_by(dataset) %>%
+  mutate(mean_re = mean(fitted), 
+         cv = (sd(fitted)/mean(fitted)), 
+         se = sd(fitted)/(sqrt(length(fitted)))) %>%
+  ungroup() %>%
+  nest(fitted = fitted) %>%
+  relocate(fitted, .after = results)
+
+
+#reordering the dataset for plots and to better reflect the purpose 
+dataset_final_monkfish_ob <- dataset_final_monkfish_ob[match(paired_tow_levels_ob, dataset_final_monkfish$dataset), ]
+
+
+dataset_final_monkfish_ob
+
+#plotting the RE estimate and SE and sample size 
+dataset_final_monkfish_ob %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", n, ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  coord_flip() 
+
+
+#plotting the RE estimate and SE and sample size by trawl type
+datasets_tibble_monkfish_ob %>%
+  mutate(model = purrr::map2(optimal_model, data, ~glm(.x, family = binomial, data = .y))) %>%
+  mutate(results = purrr::map(model, broom::tidy)) %>%
+  mutate(fitted_vals = purrr::map(model, fitted)) %>% 
+  mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
+  unnest(data) %>%
+  group_by(dataset, trawl_type) %>%
+  summarise(mean_re_bytrawl = mean(fitted), 
+         cv_bytrawl = (sd(fitted)/mean(fitted)), 
+         se_bytrawl = sd(fitted)/(sqrt(length(fitted))), 
+         n_bytrawl = n_distinct(trip_haul_ID)) %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  mutate(label = paste0(match_crit, " (n = ", sum(n_bytrawl), ")")) %>%
+  ggplot() + 
+  geom_point(aes(x = fct_inorder(label), y = mean_re_bytrawl, color = trawl_type)) + 
+  geom_errorbar(aes(x = label, ymin = mean_re_bytrawl - se_bytrawl, ymax = mean_re_bytrawl + se_bytrawl, color = trawl_type)) + 
+  labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
+  scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
+                              "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
+  coord_flip() 
+
+
+  
+
+#table for the important information 
+dataset_final_monkfish_ob %>%
+  ungroup() %>%
+  mutate(match_crit = str_sub(dataset, 13)) %>%
+  mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
+  select(match_crit, n, optimal_model, mean_re, cv, se) %>%
+  mutate(mean_re = sprintf("%0.2f", mean_re)) %>%
+  mutate(cv = sprintf("%0.2f", cv)) %>%
+  mutate(se = sprintf("%0.2f", se)) %>%
+  kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
+  kable_classic("striped", full_width = FALSE) %>%
+  kable_styling()
+
+```
+
+
+
