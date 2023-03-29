@@ -2079,46 +2079,46 @@ print(optimal_models_haddock_ob)
 #adding a column to the dataframe of the optimal model formula for each dataset
 #doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
 datasets_tibble_haddock_ob <- datasets_tibble_haddock_ob %>%
-  mutate(optimal_model = c("", 
-                           "", 
-                           "", 
-                           "",
-                           "", #5
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #10
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #15
-                           "", 
-                           "", 
-                           "",
-                           "", 
-                           "", #20
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #25
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #30
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #35
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           ""  #40
+  mutate(optimal_model = c("relative_efficiency ~ trawl_type + season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + AVGDEPTH + BOTTEMP",
+                           "relative_efficiency ~ BOTTEMP", #5
+                           "relative_efficiency ~ trawl_type + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + BOTTEMP + DayNight + towTime", #10
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + towTime", #15
+                           "relative_efficiency ~ trawl_type + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime",
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + towTime", #20
+                           "relative_efficiency ~ trawl_type + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + towTime", #25
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime", #30
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + BOTTEMP + DayNight + towTime", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + towTime", #35
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + DayNight + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + DayNight + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + BOTTEMP + DayNight + towTime"  #40
                            ))
 
 
