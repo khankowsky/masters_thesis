@@ -225,30 +225,30 @@ paired_tow_levels <- c("paired_tows_1mi_24hr", "paired_tows_1mi_48hr",
                        "paired_tows_8mi_168hr", "paired_tows_8mi_192hr"
                        )
 
-paired_tow_levels_ob <- c("paired_tows_1mi_24hr", "paired_tows_1mi_48hr", 
-                       "paired_tows_1mi_72hr", "paired_tows_1mi_96hr", 
-                       "paired_tows_1mi_120hr", "paired_tows_1mi_144hr", 
-                       "paired_tows_1mi_168hr", "paired_tows_1mi_192hr", 
+paired_tow_levels_ob <- c("paired_tows_1mi_24hr_ob", "paired_tows_1mi_48hr_ob", 
+                       "paired_tows_1mi_72hr_ob", "paired_tows_1mi_96hr_ob", 
+                       "paired_tows_1mi_120hr_ob", "paired_tows_1mi_144hr_ob", 
+                       "paired_tows_1mi_168hr_ob", "paired_tows_1mi_192hr_ob", 
     
-                       "paired_tows_2mi_24hr", "paired_tows_2mi_48hr", 
-                       "paired_tows_2mi_72hr", "paired_tows_2mi_96hr", 
-                       "paired_tows_2mi_120hr", "paired_tows_2mi_144hr", 
-                       "paired_tows_2mi_168hr", "paired_tows_2mi_192hr", 
+                       "paired_tows_2mi_24hr_ob", "paired_tows_2mi_48hr_ob", 
+                       "paired_tows_2mi_72hr_ob", "paired_tows_2mi_96hr_ob", 
+                       "paired_tows_2mi_120hr_ob", "paired_tows_2mi_144hr_ob", 
+                       "paired_tows_2mi_168hr_ob", "paired_tows_2mi_192hr_ob", 
                        
-                       "paired_tows_3mi_24hr", "paired_tows_3mi_48hr", 
-                       "paired_tows_3mi_72hr", "paired_tows_3mi_96hr", 
-                       "paired_tows_3mi_120hr", "paired_tows_3mi_144hr", 
-                       "paired_tows_3mi_168hr", "paired_tows_3mi_192hr", 
+                       "paired_tows_3mi_24hr_ob", "paired_tows_3mi_48hr_ob", 
+                       "paired_tows_3mi_72hr_ob", "paired_tows_3mi_96hr_ob", 
+                       "paired_tows_3mi_120hr_ob", "paired_tows_3mi_144hr_ob", 
+                       "paired_tows_3mi_168hr_ob", "paired_tows_3mi_192hr_ob", 
                        
-                       "paired_tows_4mi_24hr", "paired_tows_4mi_48hr", 
-                       "paired_tows_4mi_72hr", "paired_tows_4mi_96hr", 
-                       "paired_tows_4mi_120hr", "paired_tows_4mi_144hr", 
-                       "paired_tows_4mi_168hr", "paired_tows_4mi_192hr", 
+                       "paired_tows_4mi_24hr_ob", "paired_tows_4mi_48hr_ob", 
+                       "paired_tows_4mi_72hr_ob", "paired_tows_4mi_96hr_ob", 
+                       "paired_tows_4mi_120hr_ob", "paired_tows_4mi_144hr_ob", 
+                       "paired_tows_4mi_168hr_ob", "paired_tows_4mi_192hr_ob", 
                        
-                       "paired_tows_5mi_24hr", "paired_tows_5mi_48hr", 
-                       "paired_tows_5mi_72hr", "paired_tows_5mi_96hr", 
-                       "paired_tows_5mi_120hr", "paired_tows_5mi_144hr", 
-                       "paired_tows_5mi_168hr", "paired_tows_5mi_192hr"
+                       "paired_tows_5mi_24hr_ob", "paired_tows_5mi_48hr_ob", 
+                       "paired_tows_5mi_72hr_ob", "paired_tows_5mi_96hr_ob", 
+                       "paired_tows_5mi_120hr_ob", "paired_tows_5mi_144hr_ob", 
+                       "paired_tows_5mi_168hr_ob", "paired_tows_5mi_192hr_ob"
                        )
 
 ```
@@ -1928,7 +1928,7 @@ dataset_final_cod_ob <- datasets_tibble_cod_ob %>%
 
 
 #reordering the dataset for plots and to better reflect the purpose 
-dataset_final_cod_ob <- dataset_final_cod_ob[match(paired_tow_levels_ob, dataset_final_cod$dataset), ]
+dataset_final_cod_ob <- dataset_final_cod_ob[match(paired_tow_levels_ob, dataset_final_cod_ob$dataset), ]
 
 
 dataset_final_cod_ob
@@ -2138,7 +2138,7 @@ dataset_final_haddock_ob <- datasets_tibble_haddock_ob %>%
 
 
 #reordering the dataset for plots and to better reflect the purpose 
-dataset_final_haddock_ob <- dataset_final_haddock_ob[match(paired_tow_levels_ob, dataset_final_haddock$dataset), ]
+dataset_final_haddock_ob <- dataset_final_haddock_ob[match(paired_tow_levels_ob, dataset_final_haddock_ob$dataset), ]
 
 
 dataset_final_haddock_ob
@@ -2287,46 +2287,46 @@ print(optimal_models_witchfl_ob)
 #adding a column to the dataframe of the optimal model formula for each dataset
 #doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
 datasets_tibble_witchfl_ob <- datasets_tibble_witchfl_ob %>%
-  mutate(optimal_model = c("", 
-                           "", 
-                           "", 
-                           "",
-                           "", #5
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #10
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #15
-                           "", 
-                           "", 
-                           "",
-                           "", 
-                           "", #20
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #25
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #30
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #35
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           ""  #40
+  mutate(optimal_model = c("relative_efficiency ~ trawl_type + mgmt_area + AVGDEPTH + BOTTEMP + DayNight", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + DayNight",
+                           "relative_efficiency ~ AVGDEPTH", #5
+                           "relative_efficiency ~ trawl_type + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + BOTTEMP", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area", #10
+                           "relative_efficiency ~ trawl_type + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + BOTTEMP", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + BOTTEMP", #15
+                           "relative_efficiency ~ trawl_type + mgmt_area + BOTTEMP", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + towTime",
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + towTime", #20
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", #25
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", #30
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area + AVGDEPTH + BOTTEMP + towTime", #35
+                           "relative_efficiency ~ trawl_type + season + mgmt_area + AVGDEPTH + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP + towTime"  #40
                            ))
 
 
@@ -2346,7 +2346,7 @@ dataset_final_witchfl_ob <- datasets_tibble_witchfl_ob %>%
 
 
 #reordering the dataset for plots and to better reflect the purpose 
-dataset_final_witchfl_ob <- dataset_final_witchfl_ob[match(paired_tow_levels_ob, dataset_final_witchfl$dataset), ]
+dataset_final_witchfl_ob <- dataset_final_witchfl_ob[match(paired_tow_levels_ob, dataset_final_witchfl_ob$dataset), ]
 
 
 dataset_final_witchfl_ob
@@ -2495,46 +2495,46 @@ print(optimal_models_yellowtailfl_ob)
 #adding a column to the dataframe of the optimal model formula for each dataset
 #doing this by hand because I wanted to inspect the optimal model(selection criteria: parsimony, deltaAIC < 2, highest r2)
 datasets_tibble_yellowtailfl_ob <- datasets_tibble_yellowtailfl_ob %>%
-  mutate(optimal_model = c("", 
-                           "", 
-                           "", 
-                           "",
-                           "", #5
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #10
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #15
-                           "", 
-                           "", 
-                           "",
-                           "", 
-                           "", #20
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #25
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #30
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           "", #35
-                           "", 
-                           "", 
-                           "", 
-                           "", 
-                           ""  #40
+  mutate(optimal_model = c("relative_efficiency ~ season", 
+                           "relative_efficiency ~ season", 
+                           "relative_efficiency ~ trawl_type + season", 
+                           "relative_efficiency ~ trawl_type + season",
+                           "relative_efficiency ~ season", #5
+                           "relative_efficiency ~ season", 
+                           "relative_efficiency ~ season", 
+                           "relative_efficiency ~ season", 
+                           "relative_efficiency ~ trawl_type + season", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", #10
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season", 
+                           "relative_efficiency ~ trawl_type + season", 
+                           "relative_efficiency ~ trawl_type + towTime", #15
+                           "relative_efficiency ~ trawl_type + season", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + BOTTEMP", 
+                           "relative_efficiency ~ trawl_type + DayNight",
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", 
+                           "relative_efficiency ~ trawl_type + AVGDEPTH + towTime", #20
+                           "relative_efficiency ~ trawl_type + towTime", 
+                           "relative_efficiency ~ trawl_type + towTime", 
+                           "relative_efficiency ~ trawl_type + towTime", 
+                           "relative_efficiency ~ trawl_type + season", 
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP", #25
+                           "relative_efficiency ~ trawl_type + season + towTime", 
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + towTime", 
+                           "relative_efficiency ~ trawl_type + towTime", #30
+                           "relative_efficiency ~ trawl_type + season + AVGDEPTH", 
+                           "relative_efficiency ~ trawl_type + season + towTime", 
+                           "relative_efficiency ~ trawl_type + season + DayNight", 
+                           "relative_efficiency ~ trawl_type + season + towTime", 
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP + towTime", #35
+                           "relative_efficiency ~ trawl_type + season + BOTTEMP + towTime", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + season + mgmt_area", 
+                           "relative_efficiency ~ trawl_type + season", 
+                           "relative_efficiency ~ trawl_type + season + towTime"  #40
                            ))
 
 
@@ -2554,7 +2554,7 @@ dataset_final_yellowtailfl_ob <- datasets_tibble_yellowtailfl_ob %>%
 
 
 #reordering the dataset for plots and to better reflect the purpose 
-dataset_final_yellowtailfl_ob <- dataset_final_yellowtailfl_ob[match(paired_tow_levels_ob, dataset_final_yellowtailfl$dataset), ]
+dataset_final_yellowtailfl_ob <- dataset_final_yellowtailfl_ob[match(paired_tow_levels_ob, dataset_final_yellowtailfl_ob$dataset), ]
 
 
 dataset_final_yellowtailfl_ob
