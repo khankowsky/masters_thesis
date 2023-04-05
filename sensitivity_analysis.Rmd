@@ -162,7 +162,7 @@ rel_eff_func_ob <- function(x) {
   )) %>%
   mutate(trawl_type = as.factor(trawl_type)) %>%
   drop_na(trawl_type) %>%
-  drop_na(AVGDEPTH, BOTTEMP, DayNight, towTime) %>%
+  drop_na(AVGDEPTH, BOTTEMP, DayNight, towTime, season, mgmt_area) %>%
   distinct()
 }
 
@@ -1967,7 +1967,8 @@ datasets_tibble_cod_ob %>%
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
   scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
   
@@ -2178,7 +2179,8 @@ datasets_tibble_haddock_ob %>%
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
   scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
   
@@ -2388,7 +2390,8 @@ datasets_tibble_witchfl_ob %>%
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
   scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
   
@@ -2598,7 +2601,8 @@ datasets_tibble_yellowtailfl_ob %>%
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
   scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
   
@@ -2807,7 +2811,8 @@ datasets_tibble_plaice_ob %>%
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
   scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
   
@@ -2824,6 +2829,7 @@ dataset_final_plaice_ob %>%
   kbl(col.names = (c("Matching Criteria", "Sample Size", "Optimal Model","Relative Efficiency Estimate", "CV", "Standard Error"))) %>%
   kable_classic("striped", full_width = FALSE) %>%
   kable_styling()
+
 ```
 
 
@@ -3016,7 +3022,8 @@ datasets_tibble_winterfl_ob %>%
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
   scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
   
@@ -3222,7 +3229,8 @@ datasets_tibble_monkfish_ob %>%
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
   scale_color_discrete(labels=c("1" = "Groundfish Trawls", "2" = "Flatfish Trawls",
                               "3" = "Separator Trawls", "4" = "Eliminator Trawls")) + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
   
