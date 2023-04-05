@@ -1942,7 +1942,8 @@ dataset_final_cod_ob %>%
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
 #plotting the RE estimate and SE and sample size by trawl type
@@ -2152,7 +2153,8 @@ dataset_final_haddock_ob %>%
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
 
 
 #plotting the RE estimate and SE and sample size by trawl type
@@ -2182,7 +2184,7 @@ datasets_tibble_haddock_ob %>%
   
 
 #table for the important information 
-dataset_final_haddock %>%
+dataset_final_haddock_ob %>%
   ungroup() %>%
   mutate(match_crit = str_sub(dataset, 13)) %>%
   mutate(match_crit = str_replace(match_crit, "_", " & ")) %>%
@@ -2360,7 +2362,9 @@ dataset_final_witchfl_ob %>%
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
+
 
 
 #plotting the RE estimate and SE and sample size by trawl type
@@ -2568,7 +2572,9 @@ dataset_final_yellowtailfl_ob %>%
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
+
 
 
 #plotting the RE estimate and SE and sample size by trawl type
@@ -2775,7 +2781,9 @@ dataset_final_plaice_ob %>%
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
+
 
 
 #plotting the RE estimate and SE and sample size by trawl type
@@ -2982,7 +2990,9 @@ dataset_final_winterfl_ob %>%
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
+
 
 
 #plotting the RE estimate and SE and sample size by trawl type
@@ -3186,7 +3196,9 @@ dataset_final_monkfish_ob %>%
   geom_point(aes(x = fct_inorder(label), y = mean_re)) + 
   geom_errorbar(aes(x = label, ymin = mean_re - se, ymax = mean_re + se)) + 
   labs(x = "Matching Criteria", y = "Estimated Relative Efficiency ") + 
-  coord_flip() 
+  coord_flip() + 
+  theme(text = element_text(size = 15))
+
 
 
 #plotting the RE estimate and SE and sample size by trawl type
