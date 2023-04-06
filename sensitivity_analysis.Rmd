@@ -1953,6 +1953,7 @@ datasets_tibble_cod_ob %>%
   mutate(fitted_vals = purrr::map(model, fitted)) %>% 
   mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
   unnest(data) %>%
+  mutate(dataset = factor(dataset, levels = paired_tow_levels_ob)) %>%
   group_by(dataset, trawl_type) %>%
   summarise(mean_re_bytrawl = mean(fitted), 
          cv_bytrawl = (sd(fitted)/mean(fitted)), 
@@ -2165,6 +2166,7 @@ datasets_tibble_haddock_ob %>%
   mutate(fitted_vals = purrr::map(model, fitted)) %>% 
   mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
   unnest(data) %>%
+  mutate(dataset = factor(dataset, levels = paired_tow_levels_ob)) %>%
   group_by(dataset, trawl_type) %>%
   summarise(mean_re_bytrawl = mean(fitted), 
          cv_bytrawl = (sd(fitted)/mean(fitted)), 
@@ -2376,6 +2378,7 @@ datasets_tibble_witchfl_ob %>%
   mutate(fitted_vals = purrr::map(model, fitted)) %>% 
   mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
   unnest(data) %>%
+  mutate(dataset = factor(dataset, levels = paired_tow_levels_ob)) %>%
   group_by(dataset, trawl_type) %>%
   summarise(mean_re_bytrawl = mean(fitted), 
          cv_bytrawl = (sd(fitted)/mean(fitted)), 
@@ -2587,6 +2590,7 @@ datasets_tibble_yellowtailfl_ob %>%
   mutate(fitted_vals = purrr::map(model, fitted)) %>% 
   mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
   unnest(data) %>%
+  mutate(dataset = factor(dataset, levels = paired_tow_levels_ob)) %>%
   group_by(dataset, trawl_type) %>%
   summarise(mean_re_bytrawl = mean(fitted), 
          cv_bytrawl = (sd(fitted)/mean(fitted)), 
@@ -2797,6 +2801,7 @@ datasets_tibble_plaice_ob %>%
   mutate(fitted_vals = purrr::map(model, fitted)) %>% 
   mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
   unnest(data) %>%
+  mutate(dataset = factor(dataset, levels = paired_tow_levels_ob)) %>%
   group_by(dataset, trawl_type) %>%
   summarise(mean_re_bytrawl = mean(fitted), 
          cv_bytrawl = (sd(fitted)/mean(fitted)), 
@@ -3008,6 +3013,7 @@ datasets_tibble_winterfl_ob %>%
   mutate(fitted_vals = purrr::map(model, fitted)) %>% 
   mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
   unnest(data) %>%
+  mutate(dataset = factor(dataset, levels = paired_tow_levels_ob)) %>%
   group_by(dataset, trawl_type) %>%
   summarise(mean_re_bytrawl = mean(fitted), 
          cv_bytrawl = (sd(fitted)/mean(fitted)), 
@@ -3215,6 +3221,7 @@ datasets_tibble_monkfish_ob %>%
   mutate(fitted_vals = purrr::map(model, fitted)) %>% 
   mutate(data = map2(data, fitted_vals, ~mutate(.x, fitted = .y))) %>%
   unnest(data) %>%
+  mutate(dataset = factor(dataset, levels = paired_tow_levels_ob)) %>%
   group_by(dataset, trawl_type) %>%
   summarise(mean_re_bytrawl = mean(fitted), 
          cv_bytrawl = (sd(fitted)/mean(fitted)), 
